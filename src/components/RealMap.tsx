@@ -42,23 +42,6 @@ function pinToLatLng(x: number, y: number): LatLngTuple {
   return [lat, lng]
 }
 
-// 位置情報の許可を一度求めたかどうか（断られた人に毎回ダイアログを出さないため）
-const ASKED_KEY = 'takara-nazo:geo-asked'
-function askedBefore() {
-  try {
-    return localStorage.getItem(ASKED_KEY) === '1'
-  } catch {
-    return false
-  }
-}
-function markAsked() {
-  try {
-    localStorage.setItem(ASKED_KEY, '1')
-  } catch {
-    // 保存できなくても動作には影響しない
-  }
-}
-
 const PIN_COLOR: Record<MapPin['state'], string> = {
   locked: '#cdbb9c',
   located: '#DCE8F7',
@@ -100,8 +83,8 @@ function TreasureMarker({ pin, onSelect }: { pin: MapPin; onSelect: (id: string)
   )
 }
 
-// 自分の現在地（GPS）。地図を初めて開いたときに位置情報の利用を求め、以後は動きに合わせて青い点を更新する。
-// 許可済みなら開いた時点で表示し、断られた後は現在地ボタンを押したときだけ改めて試す
+// 自分の現在地（GPS）。許可済みなら地図を開いた時点で表示し、まだ許可も拒否もしていなければ、
+// 地図を開くたびに位置情報の利用を求める。以後は動きに合わせて青い点を更新する
 type LocateStatus = 'off' | 'waiting' | 'on' | 'denied' | 'error'
 
 function MyLocation() {
@@ -164,22 +147,17 @@ function MyLocation() {
   )
 
   useEffect(() => {
-    // 許可済みなら最初から表示。まだ聞いていなければ、ここで許可を求める（初回だけ）
-    const askFirstTime = () => {
-      if (askedBefore()) return
-      markAsked()
-      start(false, true)
-    }
+    // 許可済み・未回答なら取得を始める（未回答ならブラウザが許可を求める）。拒否済みなら何もしない
+    const startQuietly = () => start(false, true)
     if (navigator.permissions?.query) {
       navigator.permissions
         .query({ name: 'geolocation' })
         .then((r) => {
-          if (r.state === 'granted') start(false, true)
-          else if (r.state === 'prompt') askFirstTime()
+          if (r.state !== 'denied') startQuietly()
         })
-        .catch(askFirstTime)
+        .catch(startQuietly)
     } else {
-      askFirstTime()
+      startQuietly()
     }
     return () => {
       if (watchId.current !== null) navigator.geolocation.clearWatch(watchId.current)
@@ -194,10 +172,7 @@ function MyLocation() {
 
   const onClick = () => {
     if (pos && status === 'on') showOnMap(pos.lat, pos.lng)
-    else {
-      markAsked()
-      start(true)
-    }
+    else start(true)
   }
 
   return (
