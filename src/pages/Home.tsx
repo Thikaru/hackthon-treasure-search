@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom'
 import AreaMap, { type MapPin } from '../components/AreaMap'
 import { StatusChip } from '../components/Common'
 import { ChestIcon, HelpIcon } from '../components/Icons'
-import { acquiredCount, currentGuidepost, progressOf, useGame, type Treasure } from '../lib/game'
+import { currentGuidepost, progressOf, useGame, type Treasure } from '../lib/game'
 import { GuidepostRow } from './Guideposts'
 
 // 地図に出すのは QR を読んだお宝（宝箱発見・獲得）だけ。場所はヒントの画像・説明で探す
@@ -11,15 +11,12 @@ const onMap = (st: string) => st === 'found' || st === 'acquired'
 
 export default function Home() {
   const { me, content } = useGame()
-  const { treasures, areas, settings } = content
+  const { treasures, areas } = content
   const firstFound = treasures.find((t) => progressOf(me, t.id).state === 'found')
   const firstOpen = treasures.find((t) => progressOf(me, t.id).state !== 'acquired')
   const [areaId, setAreaId] = useState<string>(firstFound?.area_id ?? firstOpen?.area_id ?? areas[0]?.id ?? '')
   const [picked, setPicked] = useState<string | null>(null)
 
-  const got = acquiredCount(me)
-  const total = treasures.length
-  const cleared = got >= settings.clearCount
   const area = areas.find((a) => a.id === areaId)
 
   const inArea = treasures.filter((t) => t.area_id === areaId)
@@ -81,21 +78,6 @@ export default function Home() {
           <HelpIcon size={22} />
         </Link>
       </header>
-
-      <Link to={cleared ? '/certificate' : '/treasures'} className={'progress-strip' + (cleared ? ' cleared' : '')}>
-        <span className="progress-count">
-          <b>{got}</b>/ {total} 個
-        </span>
-        <span className="progress-body">
-          <span className="bar" role="img" aria-label={`${total}個中${got}個獲得、クリアは${settings.clearCount}個`}>
-            <span className="bar-fill" style={{ width: `${total ? (got / total) * 100 : 0}%` }} />
-            <span className="bar-goal" style={{ left: `${total ? (settings.clearCount / total) * 100 : 0}%` }} />
-          </span>
-          <span className="progress-note">
-            {cleared ? 'クリア！受付で証明を見せよう' : `クリアまであと ${Math.max(0, settings.clearCount - got)} 個`}
-          </span>
-        </span>
-      </Link>
 
       <div className="segmented" role="group" aria-label="表示するエリア">
         {areas.map((a) => (
