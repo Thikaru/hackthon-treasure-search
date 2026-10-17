@@ -42,6 +42,23 @@ function pinToLatLng(x: number, y: number): LatLngTuple {
   return [lat, lng]
 }
 
+// 位置情報の許可を一度求めたかどうか（断られた人に毎回ダイアログを出さないため）
+const ASKED_KEY = 'takara-nazo:geo-asked'
+function askedBefore() {
+  try {
+    return localStorage.getItem(ASKED_KEY) === '1'
+  } catch {
+    return false
+  }
+}
+function markAsked() {
+  try {
+    localStorage.setItem(ASKED_KEY, '1')
+  } catch {
+    // 保存できなくても動作には影響しない
+  }
+}
+
 const PIN_COLOR: Record<MapPin['state'], string> = {
   locked: '#cdbb9c',
   located: '#DCE8F7',
@@ -83,8 +100,8 @@ function TreasureMarker({ pin, onSelect }: { pin: MapPin; onSelect: (id: string)
   )
 }
 
-// 自分の現在地（GPS）。ボタンを押すと位置情報の利用を求め、以後は動きに合わせて青い点を更新する。
-// すでに許可済みなら、地図を開いた時点で表示する
+// 自分の現在地（GPS）。地図を初めて開いたときに位置情報の利用を求め、以後は動きに合わせて青い点を更新する。
+// 許可済みなら開いた時点で表示し、断られた後は現在地ボタンを押したときだけ改めて試す
 type LocateStatus = 'off' | 'waiting' | 'on' | 'denied' | 'error'
 
 function MyLocation() {
@@ -94,6 +111,8 @@ function MyLocation() {
   const [note, setNote] = useState<string | null>(null)
   const watchId = useRef<number | null>(null)
   const centerNext = useRef(false)
+  // 地図を開いたときの自動取得では、断られてもメッセージを出さない
+  const quiet = useRef(false)
   const btnRef = useRef<HTMLButtonElement>(null)
 
   const showOnMap = useCallback(
@@ -109,10 +128,11 @@ function MyLocation() {
   )
 
   const start = useCallback(
-    (center: boolean) => {
+    (center: boolean, silent = false) => {
+      quiet.current = silent
       if (!('geolocation' in navigator)) {
         setStatus('error')
-        setNote('この端末では現在地を使えません')
+        if (!silent) setNote('この端末では現在地を使えません')
         return
       }
       centerNext.current = center
@@ -133,7 +153,9 @@ function MyLocation() {
           watchId.current = null
           const denied = e.code === e.PERMISSION_DENIED
           setStatus(denied ? 'denied' : 'error')
-          setNote(denied ? '位置情報の利用が許可されていません（端末の設定から許可できます）' : '現在地を取得できませんでした')
+          if (!quiet.current) {
+            setNote(denied ? '位置情報の利用が許可されていません（端末の設定から許可できます）' : '現在地を取得できませんでした')
+          }
         },
         { enableHighAccuracy: true, maximumAge: 10000, timeout: 20000 },
       )
@@ -142,13 +164,23 @@ function MyLocation() {
   )
 
   useEffect(() => {
-    // 許可済みなら最初から表示（許可を求めるダイアログはボタンを押したときだけ出す）
-    navigator.permissions
-      ?.query({ name: 'geolocation' })
-      .then((r) => {
-        if (r.state === 'granted') start(false)
-      })
-      .catch(() => undefined)
+    // 許可済みなら最初から表示。まだ聞いていなければ、ここで許可を求める（初回だけ）
+    const askFirstTime = () => {
+      if (askedBefore()) return
+      markAsked()
+      start(false, true)
+    }
+    if (navigator.permissions?.query) {
+      navigator.permissions
+        .query({ name: 'geolocation' })
+        .then((r) => {
+          if (r.state === 'granted') start(false, true)
+          else if (r.state === 'prompt') askFirstTime()
+        })
+        .catch(askFirstTime)
+    } else {
+      askFirstTime()
+    }
     return () => {
       if (watchId.current !== null) navigator.geolocation.clearWatch(watchId.current)
       watchId.current = null
@@ -162,7 +194,10 @@ function MyLocation() {
 
   const onClick = () => {
     if (pos && status === 'on') showOnMap(pos.lat, pos.lng)
-    else start(true)
+    else {
+      markAsked()
+      start(true)
+    }
   }
 
   return (
