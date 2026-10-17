@@ -1,7 +1,10 @@
+import { useState } from 'react'
 import { Link, Navigate, useParams, useSearchParams } from 'react-router-dom'
 import { ChestArt, TreasureArt, treasureKind } from '../components/Art'
 import { Sparkles } from '../components/Common'
+import { CameraIcon, PhotoCapture } from '../components/Memories'
 import UnityStage from '../components/UnityStage'
+import { usePhotos } from '../lib/photos'
 import { acquiredCount, areaCounts, progressOf, useGame } from '../lib/game'
 import { useTimeOfDay } from '../lib/useTimeOfDay'
 
@@ -11,6 +14,9 @@ export default function Acquired() {
   const [q] = useSearchParams()
   const { me, content } = useGame()
   const tod = useTimeOfDay()
+  const photos = usePhotos()
+  const [ask, setAsk] = useState(true)
+  const [shoot, setShoot] = useState(false)
   const t = content.treasures.find((x) => x.id === id)
   if (!t) return <Navigate to="/home" replace />
   if (progressOf(me, t.id).state !== 'acquired') return <Navigate to={`/puzzle/${t.id}`} replace />
@@ -74,8 +80,32 @@ export default function Acquired() {
           <Link to="/treasures" className="btn btn-paper">
             お宝の飾り棚を見る
           </Link>
+          <button type="button" className="btn btn-text" onClick={() => setShoot(true)}>
+            <CameraIcon />
+            {photos[t.id] ? '思い出の写真を撮り直す' : 'この場所の写真を撮る'}
+          </button>
         </div>
       </section>
+
+      {/* 獲得した直後：この場所の思い出を残すか聞く（撮らなくても進める） */}
+      {fresh && ask && !photos[t.id] && (
+        <div className="ask-sheet paper" role="dialog" aria-label="思い出の写真">
+          <span className="paper-kicker">
+            No.{t.no} {t.name}
+          </span>
+          <h2>この場所の思い出を残しますか？</h2>
+          <p>撮った写真は地図のこの場所に貼られます。</p>
+          <button type="button" className="btn btn-primary" onClick={() => setShoot(true)}>
+            <CameraIcon />
+            写真を撮る
+          </button>
+          <button type="button" className="btn btn-paper" onClick={() => setAsk(false)}>
+            今は撮らない
+          </button>
+          <small>あとからでも、地図のお宝から撮れます</small>
+        </div>
+      )}
+      <PhotoCapture treasure={t} open={shoot} onClose={() => setShoot(false)} />
     </div>
   )
 }

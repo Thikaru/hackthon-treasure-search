@@ -1,5 +1,6 @@
 // ゲームの状態（コンテンツ＋自分の進捗）を Supabase から読み込んで配るコンテキスト
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react'
+import { clearPhotos } from './photos'
 import { supabase } from './supabase'
 import * as demo from './demoState'
 
@@ -301,6 +302,7 @@ function LiveProvider({ children }: { children: ReactNode }) {
         await supabase.auth.signOut()
         setMe(EMPTY)
         setTestProgress({})
+        await clearPhotos()
         try {
           localStorage.removeItem(TEST_KEY)
         } catch {

@@ -3,16 +3,24 @@ import { Link } from 'react-router-dom'
 import AreaMap, { type MapPin } from '../components/AreaMap'
 import { StatusChip } from '../components/Common'
 import { AwardIcon, HelpIcon } from '../components/Icons'
+import { CameraIcon, PhotoCapture, PhotoLightbox } from '../components/Memories'
+import { timeLabel, usePhotos } from '../lib/photos'
 import { acquiredCount, currentGuidepost, progressOf, useGame, type Treasure } from '../lib/game'
 import { useTimeOfDay } from '../lib/useTimeOfDay'
 import { GuidepostRow } from './Guideposts'
 
 // 地図に出すのは QR を読んだお宝（宝箱発見・獲得）だけ。場所はヒントの画像・説明で探す
+// ヘッダーのエリア切り替えに出すのは「渋川」「王子ヶ岳」だけ（たまの湯は出さない）
+const HIDDEN_TABS = new Set(['spotB'])
 const onMap = (st: string) => st === 'found' || st === 'acquired'
 
 export default function Home() {
   const { me, content } = useGame()
-  const { treasures, areas, settings } = content
+  const { treasures, settings } = content
+  const areas = content.areas.filter((a) => !HIDDEN_TABS.has(a.id))
+  const photos = usePhotos()
+  const [lightbox, setLightbox] = useState<number | null>(null)
+  const [capture, setCapture] = useState<Treasure | null>(null)
   const tod = useTimeOfDay()
   const got = acquiredCount(me)
   const nick = me.player?.nickname ?? ''
@@ -32,7 +40,11 @@ export default function Home() {
       y: t.pin_y,
       state: progressOf(me, t.id).state,
       selected: t.id === picked,
+      photo: progressOf(me, t.id).state === 'acquired' ? photos[t.id]?.url : undefined,
+      time: photos[t.id] ? timeLabel(photos[t.id].takenAt) : undefined,
     }))
+  // 写真のある場所（タップで大きく見る。左右で順にめくれる）
+  const photoList = inArea.filter((t) => progressOf(me, t.id).state === 'acquired' && photos[t.id]).map((t) => ({ t, photo: photos[t.id] }))
   const selected = picked ? inArea.find((t) => t.id === picked && onMap(progressOf(me, t.id).state)) : undefined
   const current = currentGuidepost(me, content, areaId)
 
@@ -84,6 +96,11 @@ export default function Home() {
           pins={pins}
           tod={tod}
           onSelect={(id) => {
+            const i = photoList.findIndex((p) => p.t.id === id)
+            if (i >= 0) {
+              setLightbox(i)
+              return
+            }
             setPicked(id)
             setOpen(true)
           }}
@@ -162,7 +179,7 @@ export default function Home() {
                 onAnimationEnd={() => setEntering(false)}
               >
                 {shownPin ? (
-                  <SheetFor t={shownPin} onClose={() => setPicked(null)} />
+                  <SheetFor t={shownPin} onClose={() => setPicked(null)} onPhoto={() => setCapture(shownPin)} />
                 ) : shownGuidepost ? (
                   <GuidepostRow t={shownGuidepost} />
                 ) : shownKey.startsWith('all:') && current ? (
@@ -181,6 +198,19 @@ export default function Home() {
           </div>
         </div>
       </section>
+      {lightbox !== null && (
+        <PhotoLightbox
+          list={photoList}
+          index={Math.min(lightbox, photoList.length - 1)}
+          onIndex={setLightbox}
+          onClose={() => setLightbox(null)}
+          onRetake={(t) => {
+            setLightbox(null)
+            setCapture(t)
+          }}
+        />
+      )}
+      {capture && <PhotoCapture treasure={capture} open onClose={() => setCapture(null)} />}
     </div>
   )
 }
@@ -203,7 +233,7 @@ function QrIcon() {
   )
 }
 
-function SheetFor({ t, onClose }: { t: Treasure; onClose: () => void }) {
+function SheetFor({ t, onClose, onPhoto }: { t: Treasure; onClose: () => void; onPhoto: () => void }) {
   const { me, content } = useGame()
   const st = progressOf(me, t.id).state
   const area = content.areas.find((a) => a.id === t.area_id)
@@ -227,6 +257,10 @@ function SheetFor({ t, onClose }: { t: Treasure; onClose: () => void }) {
       {st === 'acquired' && (
         <>
           <p className="sheet-text">{t.description}</p>
+          <button type="button" className="btn btn-primary" onClick={onPhoto}>
+            <CameraIcon />
+            この場所の写真を撮る
+          </button>
           <Link to={`/got/${t.id}`} className="btn btn-outline">
             お宝を見る
           </Link>

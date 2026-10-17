@@ -12,6 +12,9 @@ export interface MapPin {
   y: number
   state: TreasureState
   selected: boolean
+  /** 思い出の写真（撮っていれば）と、その時刻 */
+  photo?: string
+  time?: string
 }
 
 interface Props {
@@ -44,9 +47,21 @@ function Pin({ pin, onSelect }: { pin: MapPin; onSelect: (id: string) => void })
       onKeyDown={onKey}
       className="map-pin"
     >
+      {pin.photo ? (
+        <g transform="rotate(-4)">
+          <rect x={-24} y={-62} width={48} height={60} rx={2} fill="#fff" stroke="rgba(0,0,0,.18)" />
+          <image href={pin.photo} x={-20} y={-58} width={40} height={40} preserveAspectRatio="xMidYMid slice" />
+          <text y={-8} textAnchor="middle" fontSize={8} fontWeight={800} fill="#3a2a12" fontFamily={FONT}>{pin.time}</text>
+          <circle cx={-22} cy={-62} r={9} fill="#1f4fb8" stroke="#fff" strokeWidth={2} />
+          <text x={-22} y={-59} textAnchor="middle" fontSize={8} fontWeight={800} fill="#fff" fontFamily={FONT}>{pin.no}</text>
+        </g>
+      ) : (
+        <>
       {opened && <circle cy={-6} r={26} fill="#ffd36b" opacity={0.35} />}
       {!opened && <circle cy={-6} r={22} fill="none" stroke="#ff6a3a" strokeWidth={2.5} opacity={0.8} />}
       <g transform="translate(-27 -46)" dangerouslySetInnerHTML={{ __html: mapChestSvg(pin.no, opened) }} />
+        </>
+      )}
     </g>
   )
 }

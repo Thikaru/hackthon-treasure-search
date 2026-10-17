@@ -105,14 +105,24 @@ function PinButton({ pin, onSelect, style }: { pin: MapPin; onSelect: (id: strin
   return (
     <button
       type="button"
-      className={'gpin' + (opened ? ' gpin-open' : ' gpin-found') + (pin.selected ? ' on' : '')}
+      className={'gpin' + (pin.photo ? ' gpin-photo' : opened ? ' gpin-open' : ' gpin-found') + (pin.selected ? ' on' : '')}
       style={style}
       aria-label={`No.${pin.no}${opened ? '（獲得）' : '（宝箱発見）'}`}
       aria-pressed={pin.selected}
       onClick={() => onSelect(pin.id)}
     >
-      {opened ? <span className="gpin-halo" /> : <span className="gpin-ring" />}
-      <span dangerouslySetInnerHTML={{ __html: mapChestSvg(pin.no, opened) }} />
+      {pin.photo ? (
+        <span className="gpol">
+          <span className="gpol-no">{pin.no}</span>
+          <img src={pin.photo} alt="" />
+          <b>{pin.time}</b>
+        </span>
+      ) : (
+        <>
+          {opened ? <span className="gpin-halo" /> : <span className="gpin-ring" />}
+          <span dangerouslySetInnerHTML={{ __html: mapChestSvg(pin.no, opened) }} />
+        </>
+      )}
     </button>
   )
 }
@@ -558,7 +568,7 @@ function JsApiMap({ pins, onSelect, tod, apiKey }: Props & { apiKey: string }) {
   const [api, setApi] = useState<GMaps | null>(null)
   const [failed, setFailed] = useState(false)
   const me = useMyLocation()
-  const pinKey = useMemo(() => JSON.stringify(pins.map((p) => [p.id, p.state, p.selected])), [pins])
+  const pinKey = useMemo(() => JSON.stringify(pins.map((p) => [p.id, p.state, p.selected, p.photo])), [pins])
 
   useEffect(() => {
     loadApi(apiKey).then(setApi, () => setFailed(true))
@@ -594,7 +604,10 @@ function JsApiMap({ pins, onSelect, tod, apiKey }: Props & { apiKey: string }) {
       const opened = pin.state === 'acquired'
       div.className = 'gpin' + (opened ? ' gpin-open' : ' gpin-found') + (pin.selected ? ' on' : '')
       div.setAttribute('aria-label', `No.${pin.no}`)
-      div.innerHTML = (opened ? '<span class="gpin-halo"></span>' : '<span class="gpin-ring"></span>') + `<span>${mapChestSvg(pin.no, opened)}</span>`
+      if (pin.photo) {
+        div.className = 'gpin gpin-photo' + (pin.selected ? ' on' : '')
+        div.innerHTML = `<span class="gpol"><span class="gpol-no">${pin.no}</span><img src="${pin.photo}" alt=""><b>${pin.time ?? ''}</b></span>`
+      } else div.innerHTML = (opened ? '<span class="gpin-halo"></span>' : '<span class="gpin-ring"></span>') + `<span>${mapChestSvg(pin.no, opened)}</span>`
       div.addEventListener('click', (e) => {
         e.stopPropagation()
         onSelect(pin.id)
