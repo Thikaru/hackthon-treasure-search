@@ -51,7 +51,7 @@ export default function TreasuresAdmin() {
 }
 
 const MODES: { value: GuidepostMode; label: string; desc: string }[] = [
-  { value: 'sequential', label: '1つずつ表示（初期設定）', desc: '各エリアで、前の道標を解くと次の道標が現れます。順番に進めたいときに。' },
+  { value: 'sequential', label: '1つずつ表示（初期設定）', desc: '各エリアで、前の道標のお宝を獲得すると次の道標が現れます。順番に進めたいときに。' },
   { value: 'all', label: '全問表示', desc: '最初からすべての道標が見え、どれからでも挑戦できます。' },
 ]
 

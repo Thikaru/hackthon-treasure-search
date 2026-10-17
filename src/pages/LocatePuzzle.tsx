@@ -27,7 +27,7 @@ export default function LocatePuzzle() {
             </span>
             <div>
               <h2>この宝の道標はまだ眠っています</h2>
-              <p>前の道標を解くと現れます</p>
+              <p>前の道標のお宝を獲得すると現れます</p>
             </div>
           </section>
           <Link to="/guideposts" className="btn btn-primary">

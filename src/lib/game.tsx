@@ -274,16 +274,21 @@ export function areaCounts(me: MyState, content: Content, areaId: AreaId) {
 
 /**
  * そのエリアで今見えている宝の道標。
- * 全問表示モードなら全部。1つずつモードなら、クリア済み（道標クリア以降）＋並び順で最初の未解決1問だけ。
+ * 全問表示モードなら全部。1つずつモードなら、お宝を獲得済みの道標＋並び順で最初の未獲得1問だけ。
  */
 export function visibleGuideposts(me: MyState, content: Content, areaId: AreaId) {
   const list = content.treasures.filter((t) => t.area_id === areaId)
   if (content.settings.guidepostMode === 'all') return { visible: list, hiddenCount: 0 }
-  const firstLocked = list.findIndex((t) => progressOf(me, t.id).state === 'locked')
-  if (firstLocked < 0) return { visible: list, hiddenCount: 0 }
-  // 並び順で最初の未解決より後ろにある未解決は隠す（QRで先に見つけたものは表示する）
-  const visible = list.filter((t, i) => i <= firstLocked || progressOf(me, t.id).state !== 'locked')
+  const firstOpen = list.findIndex((t) => progressOf(me, t.id).state !== 'acquired')
+  if (firstOpen < 0) return { visible: list, hiddenCount: 0 }
+  // 並び順で最初の未獲得より後ろにある未解決は隠す（すでに解いた・QRで先に見つけたものは表示する）
+  const visible = list.filter((t, i) => i <= firstOpen || progressOf(me, t.id).state !== 'locked')
   return { visible, hiddenCount: list.length - visible.length }
+}
+
+/** エリア内でいま挑戦中の道標（並び順で最初の未獲得のもの）。すべて獲得済みなら undefined */
+export function currentGuidepost(me: MyState, content: Content, areaId: AreaId) {
+  return content.treasures.find((t) => t.area_id === areaId && progressOf(me, t.id).state !== 'acquired')
 }
 
 export function isGuidepostVisible(me: MyState, content: Content, t: Treasure) {

@@ -17,8 +17,8 @@ on conflict (key) do nothing;
 
 insert into public.areas(id, name, short_name, description, needs_car, sort) values
   ('sand',  '砂浜エリア', '砂浜',      '海水浴場の砂浜に5つのお宝', false, 1),
-  ('spotA', '観光名所A',  '観光名所A', '[観光名所Aの説明]',        false, 2),
-  ('spotB', '観光名所B',  '観光名所B', '[観光名所Bの説明]',        true,  3)
+  ('spotA', '王子ヶ岳',   '王子ヶ岳',  '[王子ヶ岳の説明]',          false, 2),
+  ('spotB', 'たまの湯',   'たまの湯',  '[たまの湯の説明]',          true,  3)
 on conflict (id) do update set name = excluded.name, short_name = excluded.short_name,
   description = excluded.description, needs_car = excluded.needs_car, sort = excluded.sort;
 

@@ -358,27 +358,9 @@ select.input { padding: 0 10px; height: 46px; font-size: 14px; }
   flex-shrink: 0;
 }
 .home-header h1 { font-family: var(--display); font-size: 20px; font-weight: 700; color: var(--deep); }
-.progress-strip {
-  margin: 0 20px;
-  background: #fff;
-  border: 1px solid var(--line);
-  border-radius: 16px;
-  padding: 12px 16px;
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  text-decoration: none;
-  color: var(--ink);
-  flex-shrink: 0;
-}
-.progress-strip.cleared { border: 1.5px solid var(--buoy); }
-.progress-count { display: flex; align-items: baseline; gap: 3px; font-size: 13px; font-weight: 700; color: var(--muted); }
-.progress-count b { font-family: var(--display); font-size: 28px; font-weight: 900; color: var(--deep); line-height: 1; }
-.progress-body { flex: 1; display: flex; flex-direction: column; gap: 6px; }
 .progress-note { font-size: 12px; font-weight: 700; color: var(--buoy-text); }
 .bar { height: 8px; border-radius: 4px; background: var(--track); position: relative; display: block; overflow: visible; }
 .bar-fill { display: block; height: 8px; border-radius: 4px; background: var(--cobalt); transition: width 0.4s; }
-.bar-goal { position: absolute; top: -3px; width: 2px; height: 14px; background: var(--buoy); }
 .segmented {
   margin: 12px 20px 10px;
   height: 40px;
@@ -910,16 +892,12 @@ select.input { padding: 0 10px; height: 46px; font-size: 14px; }
 input.narrow { max-width: 360px; height: 46px; font-size: 14px; }
 
 /* ---------- 修正1：宝の道標・鍵のかかった宝箱 ---------- */
-.sheet-title { font-size: 15px; font-weight: 700; color: var(--deep); }
-.accent-text { color: var(--buoy-text); font-weight: 700; }
 .gp-scroll {
   display: flex;
   flex-direction: column;
   gap: 8px;
   max-height: 230px;
   overflow-y: auto;
-  margin: 0 -4px;
-  padding: 0 4px 4px;
 }
 .gp-row {
   display: flex;
@@ -978,6 +956,33 @@ input.narrow { max-width: 360px; height: 46px; font-size: 14px; }
 }
 .home-actions { display: flex; gap: 8px; }
 .home-actions .btn { min-height: 46px; }
+.sheet-grip {
+  align-self: center;
+  background: none;
+  border: none;
+  padding: 8px 40px;
+  margin: -8px 0 -6px;
+  cursor: grab;
+  touch-action: none;
+  display: flex;
+}
+.sheet-grip:active { cursor: grabbing; }
+.sheet-grip .sheet-handle { transition: background 0.2s; }
+.sheet-grip:hover .sheet-handle,
+.sheet-grip:focus-visible .sheet-handle { background: var(--muted); }
+.sheet-fold { display: grid; grid-template-rows: 1fr; transition: grid-template-rows 0.28s ease; }
+.sheet.collapsed .sheet-fold { grid-template-rows: 0fr; }
+.sheet-fold-inner { min-height: 0; overflow: hidden; display: flex; flex-direction: column; gap: 10px; padding: 2px; margin: -2px; }
+.sheet-clip { overflow: hidden; }
+.sheet-panel { display: flex; flex-direction: column; gap: 10px; }
+.sheet-panel.leaving { animation: sheet-out 0.2s ease-in forwards; }
+.sheet-panel.entering { animation: sheet-in 0.28s ease-out; }
+@keyframes sheet-out {
+  to { transform: translateY(100%); opacity: 0; }
+}
+@keyframes sheet-in {
+  from { transform: translateY(100%); opacity: 0; }
+}
 .gp-row.gp-hidden { background: var(--sand-bg); border-style: dashed; border-color: var(--input); }
 .gp-hidden .gp-no { background: #fff; color: var(--muted2); }
 .mode-option {

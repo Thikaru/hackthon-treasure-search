@@ -202,7 +202,7 @@ begin
 end $$;
 
 -- 宝の道標が今その参加者に見えているか（guidepost_mode = 'all' なら常に見える。
--- 'sequential'（初期値）なら、同じエリアで並び順が前の道標をすべてクリアしている場合だけ見える）
+-- 'sequential'（初期値）なら、同じエリアで並び順が前の道標のお宝をすべて獲得している場合だけ見える）
 create or replace function private.guidepost_open(p_uid uuid, p_treasure text) returns boolean
 language sql stable security definer set search_path = public, private, extensions as $$
   select coalesce((select value from public.settings where key = 'guidepost_mode'), 'sequential') = 'all'
@@ -211,7 +211,7 @@ language sql stable security definer set search_path = public, private, extensio
       from public.treasures t
       join public.treasures prev on prev.area_id = t.area_id and prev.active and prev.sort < t.sort
       left join public.player_treasures pt on pt.treasure_id = prev.id and pt.player_id = p_uid
-      where t.id = p_treasure and coalesce(pt.state, 'locked') = 'locked')
+      where t.id = p_treasure and coalesce(pt.state, 'locked') <> 'acquired')
 $$;
 
 create or replace function public.submit_answer(p_treasure text, p_kind text, p_answer text) returns jsonb

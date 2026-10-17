@@ -1,10 +1,10 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState, type PointerEvent } from 'react'
 import { Link } from 'react-router-dom'
 import AreaMap, { type MapPin } from '../components/AreaMap'
 import { StatusChip } from '../components/Common'
 import { ChestIcon, HelpIcon } from '../components/Icons'
-import { acquiredCount, progressOf, useGame, visibleGuideposts, type Treasure } from '../lib/game'
-import { GuidepostRow, HiddenGuideposts } from './Guideposts'
+import { currentGuidepost, progressOf, useGame, type Treasure } from '../lib/game'
+import { GuidepostRow } from './Guideposts'
 
 // 地図に出すのは QR を読んだお宝（宝箱発見・獲得）だけ。場所はヒントの画像・説明で探す
 const onMap = (st: string) => st === 'found' || st === 'acquired'
@@ -17,9 +17,6 @@ export default function Home() {
   const [areaId, setAreaId] = useState<string>(firstFound?.area_id ?? firstOpen?.area_id ?? areas[0]?.id ?? '')
   const [picked, setPicked] = useState<string | null>(null)
 
-  const got = acquiredCount(me)
-  const total = treasures.length
-  const cleared = got >= settings.clearCount
   const area = areas.find((a) => a.id === areaId)
 
   const inArea = treasures.filter((t) => t.area_id === areaId)
@@ -34,8 +31,46 @@ export default function Home() {
       selected: t.id === picked,
     }))
   const selected = picked ? inArea.find((t) => t.id === picked && onMap(progressOf(me, t.id).state)) : undefined
-  const waiting = inArea.filter((t) => progressOf(me, t.id).state === 'found').length
-  const guide = visibleGuideposts(me, content, areaId)
+  const current = currentGuidepost(me, content, areaId)
+
+  // シート：ハンドルで上げ下げでき、表示内容が変わるときは前の内容が下がってから次の内容が下から出てくる
+  const [open, setOpen] = useState(true)
+  // 全問表示モードでは、未獲得の道標をまとめて出す（どれからでも挑戦できるように）
+  const allMode = settings.guidepostMode === 'all'
+  const sheetKey = selected ? `pin:${selected.id}` : allMode ? `all:${areaId}` : `gp:${current?.id ?? 'done'}`
+  const [shownKey, setShownKey] = useState(sheetKey)
+  const [entering, setEntering] = useState(false)
+  const animate = open && !window.matchMedia('(prefers-reduced-motion: reduce)').matches
+  const leaving = sheetKey !== shownKey && animate
+  useEffect(() => {
+    if (sheetKey === shownKey) return
+    // 前の内容が下がり切ってから差し替える（シートが下がっているときはすぐ差し替える）
+    const timer = window.setTimeout(
+      () => {
+        setShownKey(sheetKey)
+        setEntering(true)
+      },
+      animate ? 200 : 0,
+    )
+    return () => window.clearTimeout(timer)
+  }, [sheetKey, shownKey, animate])
+
+  const shownPin = shownKey.startsWith('pin:') ? treasures.find((t) => `pin:${t.id}` === shownKey) : undefined
+  const shownGuidepost = shownKey.startsWith('gp:') ? treasures.find((t) => `gp:${t.id}` === shownKey) : undefined
+
+  const dragStart = useRef<number | null>(null)
+  const onGripDown = (e: PointerEvent<HTMLButtonElement>) => {
+    dragStart.current = e.clientY
+    e.currentTarget.setPointerCapture(e.pointerId)
+  }
+  const onGripUp = (e: PointerEvent<HTMLButtonElement>) => {
+    if (dragStart.current === null) return
+    const dy = e.clientY - dragStart.current
+    dragStart.current = null
+    if (dy > 24) setOpen(false)
+    else if (dy < -24) setOpen(true)
+    else setOpen((o) => !o)
+  }
 
   return (
     <div className="screen home">
@@ -45,21 +80,6 @@ export default function Home() {
           <HelpIcon size={22} />
         </Link>
       </header>
-
-      <Link to={cleared ? '/certificate' : '/treasures'} className={'progress-strip' + (cleared ? ' cleared' : '')}>
-        <span className="progress-count">
-          <b>{got}</b>/ {total} 個
-        </span>
-        <span className="progress-body">
-          <span className="bar" role="img" aria-label={`${total}個中${got}個獲得、クリアは${settings.clearCount}個`}>
-            <span className="bar-fill" style={{ width: `${total ? (got / total) * 100 : 0}%` }} />
-            <span className="bar-goal" style={{ left: `${total ? (settings.clearCount / total) * 100 : 0}%` }} />
-          </span>
-          <span className="progress-note">
-            {cleared ? 'クリア！受付で証明を見せよう' : `クリアまであと ${Math.max(0, settings.clearCount - got)} 個`}
-          </span>
-        </span>
-      </Link>
 
       <div className="segmented" role="group" aria-label="表示するエリア">
         {areas.map((a) => (
@@ -79,7 +99,15 @@ export default function Home() {
       </div>
 
       <div className="map-wrap">
-        <AreaMap areaId={areaId} areaName={area?.name ?? ''} pins={pins} onSelect={setPicked} />
+        <AreaMap
+          areaId={areaId}
+          areaName={area?.name ?? ''}
+          pins={pins}
+          onSelect={(id) => {
+            setPicked(id)
+            setOpen(true)
+          }}
+        />
         <div className="map-legend">
           <span>
             <i className="dot dot-found" />
@@ -93,37 +121,59 @@ export default function Home() {
         {area?.needs_car && <span className="map-badge">車での移動がおすすめ</span>}
       </div>
 
-      <section className="sheet" aria-live="polite">
-        <span className="sheet-handle" aria-hidden="true" />
-        <div className="home-actions">
-          <Link to="/scan" className="btn btn-primary grow">
-            <QrIcon />
-            QRを読み込む
-          </Link>
-          <Link to="/treasures" className="btn btn-outline">
-            <ChestIcon size={20} />
-            お宝
-          </Link>
-        </div>
-        {selected ? (
-          <SheetFor t={selected} onClose={() => setPicked(null)} />
-        ) : (
-          <>
-            <div className="between">
-              <h2 className="sheet-title">宝の道標（{area?.short_name}）</h2>
-              <Link to="/guideposts" className="small bold">
-                すべての道標を見る
+      <section className={'sheet' + (open ? '' : ' collapsed')} aria-live="polite">
+        <button
+          type="button"
+          className="sheet-grip"
+          aria-expanded={open}
+          aria-label={open ? 'パネルを下げる' : 'パネルを上げる'}
+          onPointerDown={onGripDown}
+          onPointerUp={onGripUp}
+          onPointerCancel={() => (dragStart.current = null)}
+          onClick={(e) => {
+            // キーボード操作（ポインター以外）のときだけここで開閉する
+            if (e.detail === 0) setOpen((o) => !o)
+          }}
+        >
+          <span className="sheet-handle" />
+        </button>
+        <div className="sheet-fold" inert={!open}>
+          <div className="sheet-fold-inner">
+            <div className="home-actions">
+              <Link to="/scan" className="btn btn-primary grow">
+                <QrIcon />
+                QRを読み込む
+              </Link>
+              <Link to="/treasures" className="btn btn-outline">
+                <ChestIcon size={20} />
+                お宝
               </Link>
             </div>
-            {waiting > 0 && <p className="sheet-text accent-text">地図の宝箱をタップすると、鍵の謎にどこからでも回答できます。</p>}
-            <div className="gp-scroll">
-              {guide.visible.map((t) => (
-                <GuidepostRow key={t.id} t={t} />
-              ))}
-              <HiddenGuideposts count={guide.hiddenCount} />
+            <div className="sheet-clip">
+              <div
+                key={shownKey}
+                className={'sheet-panel' + (leaving ? ' leaving' : entering ? ' entering' : '')}
+                onAnimationEnd={() => setEntering(false)}
+              >
+                {shownPin ? (
+                  <SheetFor t={shownPin} onClose={() => setPicked(null)} />
+                ) : shownGuidepost ? (
+                  <GuidepostRow t={shownGuidepost} />
+                ) : shownKey.startsWith('all:') && current ? (
+                  <div className="gp-scroll">
+                    {inArea
+                      .filter((t) => progressOf(me, t.id).state !== 'acquired')
+                      .map((t) => (
+                        <GuidepostRow key={t.id} t={t} />
+                      ))}
+                  </div>
+                ) : (
+                  <p className="sheet-text">このエリアの道標はすべてクリアしました！</p>
+                )}
+              </div>
             </div>
-          </>
-        )}
+          </div>
+        </div>
       </section>
     </div>
   )

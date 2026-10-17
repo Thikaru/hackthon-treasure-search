@@ -39,13 +39,13 @@ export function HiddenGuideposts({ count }: { count: number }) {
       </span>
       <span className="gp-body">
         <span className="gp-q">ほかに {count} 問の宝の道標が眠っています</span>
-        <span className="small muted">上の道標を解くと、次の道標が現れます</span>
+        <span className="small muted">上の道標のお宝を獲得すると、次の道標が現れます</span>
       </span>
     </div>
   )
 }
 
-// 宝の道標の一覧。全問表示モードでは全問、1つずつモードでは解いた分＋次の1問を表示
+// 宝の道標の一覧。全問表示モードでは全問、1つずつモードでは獲得済みの分＋次の1問を表示
 export default function Guideposts() {
   const { me, content } = useGame()
   const [filter, setFilter] = useState<string>('all')
@@ -59,7 +59,7 @@ export default function Guideposts() {
       <div className="page stack-14">
         <p className="small muted lh">
           道標の謎を解くと、お宝の場所のヒントが届きます。
-          {sequential ? '道標は1つずつ現れます。解くと次の道標が現れます。' : 'どの道標からでも挑戦できます。'}
+          {sequential ? '道標は1つずつ現れます。お宝を獲得すると次の道標が現れます。' : 'どの道標からでも挑戦できます。'}
         </p>
         <div className="chips" role="group" aria-label="エリアで絞り込み">
           <button type="button" aria-pressed={filter === 'all'} className={filter === 'all' ? 'on' : ''} onClick={() => setFilter('all')}>
