@@ -1,4 +1,4 @@
-// 開発時だけ使うデモデータ（npm run dev で開き、URL に ?demo=1 / ?demo=clear を付ける）。
+// 開発時だけ使うデモデータ（npm run dev で開き、URL に ?demo=1 / ?demo=clear / ?demo=pins（宝を全部地図に出す）を付ける）。
 // 本番の Supabase に試験用の参加者を作らずに、全画面の見た目を確かめるためのもの。
 // 本番ビルドでは import.meta.env.DEV が false になり、読み込まれない。
 import type { Area, Content, PlaceHint, Player, Treasure, TreasureProgress, TreasureState } from './game'
@@ -38,7 +38,9 @@ export const demoPlayer: Player = { player_no: 128, nickname: 'うみねこ', tr
 
 export function demoProgress(kind: string): Record<string, TreasureProgress> {
   const states: Record<string, TreasureState> =
-    kind === 'clear'
+    kind === 'pins'
+      ? { t01: 'acquired', t02: 'found', t03: 'found', t04: 'acquired', t05: 'found', t06: 'acquired', t07: 'found', t08: 'found' }
+      : kind === 'clear'
       ? { t01: 'acquired', t02: 'acquired', t03: 'acquired', t04: 'acquired', t05: 'acquired', t06: 'acquired', t07: 'found' }
       : { t01: 'acquired', t02: 'found', t03: 'locked', t04: 'located', t05: 'acquired', t06: 'acquired', t07: 'found' }
   return Object.fromEntries(

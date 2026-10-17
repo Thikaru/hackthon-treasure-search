@@ -12,19 +12,40 @@ const API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY as string | undefined
 
 // 渋川海岸（岡山県玉野市）。ピンの座標は従来の地図と同じ割り当て方にそろえる
 const BOUNDS = { south: 34.448, west: 133.895, north: 34.462, east: 133.912 }
-const BEACH: LatLng = { lat: 34.4537, lng: 133.9018 }
+const BEACH: LatLng = { lat: 34.4552, lng: 133.903 }
 
 interface LatLng {
   lat: number
   lng: number
 }
 
-/** イラスト地図用の座標(0-390 / 110-460)を、渋川の緯度経度へ単純に対応付ける（RealMap と同じ） */
-export function pinToLatLng(x: number, y: number): LatLng {
-  return {
-    lng: BOUNDS.west + (x / 390) * (BOUNDS.east - BOUNDS.west),
-    lat: BOUNDS.north - ((y - 110) / 350) * (BOUNDS.north - BOUNDS.south),
-  }
+// 渋川海岸の砂浜の真ん中を通る線（北西 → 南東）。Google マップの地図の色から砂浜の部分を読み取って作った
+const BEACH_LINE: LatLng[] = [
+  { lat: 34.456759, lng: 133.90011 },
+  { lat: 34.456503, lng: 133.900736 },
+  { lat: 34.456186, lng: 133.9013 },
+  { lat: 34.455879, lng: 133.901874 },
+  { lat: 34.455579, lng: 133.902456 },
+  { lat: 34.455251, lng: 133.90301 },
+  { lat: 34.454879, lng: 133.903519 },
+  { lat: 34.454533, lng: 133.904054 },
+  { lat: 34.454116, lng: 133.904517 },
+  { lat: 34.453727, lng: 133.90501 },
+  { lat: 34.453242, lng: 133.905405 },
+]
+
+/**
+ * 宝箱ピンの位置。データの pin_x（もとのイラスト地図の横位置 0-390）を、砂浜の線の上の位置に割り当てる。
+ * こうすると、どの宝も必ず砂浜の上に立ち、海の上には来ない（pin_x の並び順＝浜の北西からの並び順）。
+ * 実際の設置場所の緯度経度をデータに持たせたら、そちらに置き換える。
+ */
+export function pinToLatLng(x: number, _y?: number): LatLng {
+  const t = Math.min(1, Math.max(0, x / 390)) * (BEACH_LINE.length - 1)
+  const i = Math.min(BEACH_LINE.length - 2, Math.floor(t))
+  const f = t - i
+  const a = BEACH_LINE[i]
+  const b = BEACH_LINE[i + 1]
+  return { lat: a.lat + (b.lat - a.lat) * f, lng: a.lng + (b.lng - a.lng) * f }
 }
 
 // Web メルカトル（Google マップの投影）。zoom z で世界全体が 256·2^z ピクセル
