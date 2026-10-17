@@ -1,5 +1,5 @@
-import { useEffect, useMemo } from 'react'
-import { MapContainer, Marker, TileLayer, Tooltip, useMap } from 'react-leaflet'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { Circle, CircleMarker, MapContainer, Marker, TileLayer, Tooltip, useMap } from 'react-leaflet'
 import L, { type LatLngBoundsExpression, type LatLngTuple } from 'leaflet'
 import type { MapPin } from './AreaMap'
 
@@ -83,6 +83,124 @@ function TreasureMarker({ pin, onSelect }: { pin: MapPin; onSelect: (id: string)
   )
 }
 
+// 自分の現在地（GPS）。ボタンを押すと位置情報の利用を求め、以後は動きに合わせて青い点を更新する。
+// すでに許可済みなら、地図を開いた時点で表示する
+type LocateStatus = 'off' | 'waiting' | 'on' | 'denied' | 'error'
+
+function MyLocation() {
+  const map = useMap()
+  const [pos, setPos] = useState<{ lat: number; lng: number; acc: number } | null>(null)
+  const [status, setStatus] = useState<LocateStatus>('off')
+  const [note, setNote] = useState<string | null>(null)
+  const watchId = useRef<number | null>(null)
+  const centerNext = useRef(false)
+  const btnRef = useRef<HTMLButtonElement>(null)
+
+  const showOnMap = useCallback(
+    (lat: number, lng: number) => {
+      if (L.latLngBounds(SHIBUKAWA_BOUNDS as LatLngTuple[]).contains([lat, lng])) {
+        setNote(null)
+        map.flyTo([lat, lng], Math.max(map.getZoom(), 17), { duration: 0.6 })
+      } else {
+        setNote('現在地は渋川の地図の範囲外です')
+      }
+    },
+    [map],
+  )
+
+  const start = useCallback(
+    (center: boolean) => {
+      if (!('geolocation' in navigator)) {
+        setStatus('error')
+        setNote('この端末では現在地を使えません')
+        return
+      }
+      centerNext.current = center
+      if (watchId.current !== null) return
+      setStatus('waiting')
+      watchId.current = navigator.geolocation.watchPosition(
+        (p) => {
+          const { latitude: lat, longitude: lng, accuracy: acc } = p.coords
+          setPos({ lat, lng, acc })
+          setStatus('on')
+          if (centerNext.current) {
+            centerNext.current = false
+            showOnMap(lat, lng)
+          }
+        },
+        (e) => {
+          if (watchId.current !== null) navigator.geolocation.clearWatch(watchId.current)
+          watchId.current = null
+          const denied = e.code === e.PERMISSION_DENIED
+          setStatus(denied ? 'denied' : 'error')
+          setNote(denied ? '位置情報の利用が許可されていません（端末の設定から許可できます）' : '現在地を取得できませんでした')
+        },
+        { enableHighAccuracy: true, maximumAge: 10000, timeout: 20000 },
+      )
+    },
+    [showOnMap],
+  )
+
+  useEffect(() => {
+    // 許可済みなら最初から表示（許可を求めるダイアログはボタンを押したときだけ出す）
+    navigator.permissions
+      ?.query({ name: 'geolocation' })
+      .then((r) => {
+        if (r.state === 'granted') start(false)
+      })
+      .catch(() => undefined)
+    return () => {
+      if (watchId.current !== null) navigator.geolocation.clearWatch(watchId.current)
+      watchId.current = null
+    }
+  }, [start])
+
+  useEffect(() => {
+    // ボタン操作で地図がドラッグ・ズームされないようにする
+    if (btnRef.current) L.DomEvent.disableClickPropagation(btnRef.current)
+  }, [])
+
+  const onClick = () => {
+    if (pos && status === 'on') showOnMap(pos.lat, pos.lng)
+    else start(true)
+  }
+
+  return (
+    <>
+      {pos && (
+        <>
+          <Circle center={[pos.lat, pos.lng]} radius={pos.acc} pathOptions={{ color: '#2F6FE4', weight: 1, fillOpacity: 0.12 }} interactive={false} />
+          <CircleMarker
+            center={[pos.lat, pos.lng]}
+            radius={8}
+            pathOptions={{ color: '#FFFFFF', weight: 3, fillColor: '#2F6FE4', fillOpacity: 1 }}
+            interactive={false}
+          />
+        </>
+      )}
+      <button
+        ref={btnRef}
+        type="button"
+        className={'locate-btn' + (status === 'on' ? ' on' : '') + (status === 'waiting' ? ' waiting' : '')}
+        aria-label="現在地を表示"
+        aria-pressed={status === 'on'}
+        onClick={onClick}
+      >
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
+          <circle cx="12" cy="12" r="4" fill={status === 'on' ? 'currentColor' : 'none'} />
+          <circle cx="12" cy="12" r="8" />
+          <path d="M12 1v3M12 20v3M1 12h3M20 12h3" />
+        </svg>
+      </button>
+      {note && (
+        <p className="locate-note" role="status">
+          {note}
+        </p>
+      )}
+    </>
+  )
+}
+
 interface Props {
   pins: MapPin[]
   onSelect: (id: string) => void
@@ -105,6 +223,7 @@ export default function RealMap({ pins, onSelect }: Props) {
         bounds={SHIBUKAWA_BOUNDS}
       />
       <FitShibukawaBounds />
+      <MyLocation />
       {pins.map((p) => (
         <TreasureMarker key={p.id} pin={p} onSelect={onSelect} />
       ))}
