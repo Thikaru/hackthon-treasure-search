@@ -15,7 +15,8 @@ export default function Found() {
   const t = content.treasures.find((x) => x.id === id)
   if (!t) return <Navigate to="/home" replace />
   const p = progressOf(me, t.id)
-  if (p.state === 'acquired') return <Navigate to={`/got/${t.id}`} replace />
+  // 正解直後は進捗の更新が先に届くため、ここから獲得演出つきの画面へ移る
+  if (p.state === 'acquired') return <Navigate to={`/got/${t.id}?new=1`} replace />
   if (p.state !== 'found') return <Navigate to={`/puzzle/${t.id}`} replace />
   const area = content.areas.find((a) => a.id === t.area_id)
 
