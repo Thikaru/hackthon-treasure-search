@@ -16,9 +16,8 @@ export default function Home() {
   const tod = useTimeOfDay()
   const got = acquiredCount(me)
   const nick = me.player?.nickname ?? ''
-  const firstFound = treasures.find((t) => progressOf(me, t.id).state === 'found')
-  const firstOpen = treasures.find((t) => progressOf(me, t.id).state !== 'acquired')
-  const [areaId, setAreaId] = useState<string>(firstFound?.area_id ?? firstOpen?.area_id ?? areas[0]?.id ?? '')
+  // 開いたとき（再読み込み・ほかの画面から戻ったときも）は、いつもいちばん左のエリア（渋川）から
+  const [areaId, setAreaId] = useState<string>(areas[0]?.id ?? '')
   const [picked, setPicked] = useState<string | null>(null)
 
   const area = areas.find((a) => a.id === areaId)
