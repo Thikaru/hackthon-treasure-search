@@ -39,9 +39,7 @@
    1. `supabase/schema.sql`（テーブル・RLS・関数）
    2. `supabase/seed.sql`（エリア・お宝・問題文・設定）
    3. `supabase/secrets.example.sql` を参考に、**正解・QRトークン・運営PIN**を投入（この値はリポジトリに入れない）
-4. GitHub の **Settings → Secrets and variables → Actions → Variables** に次を登録
-   - `VITE_SUPABASE_URL`（Project URL）
-   - `VITE_SUPABASE_ANON_KEY`（anon / publishable key。公開してよい鍵）
+4. `.env.production` に Project URL と publishable key（公開してよい鍵）を記入
 5. **Settings → Pages → Source** を「GitHub Actions」にして `main` にpush
 
 ### ローカル開発
