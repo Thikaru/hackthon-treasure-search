@@ -892,6 +892,13 @@ select.input { padding: 0 10px; height: 46px; font-size: 14px; }
 input.narrow { max-width: 360px; height: 46px; font-size: 14px; }
 
 /* ---------- 修正1：宝の道標・鍵のかかった宝箱 ---------- */
+.gp-scroll {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: 230px;
+  overflow-y: auto;
+}
 .gp-row {
   display: flex;
   gap: 12px;
@@ -924,8 +931,6 @@ input.narrow { max-width: 360px; height: 46px; font-size: 14px; }
 .gp-q { font-size: 14px; line-height: 1.6; }
 .gp-meta { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
 .gp-next { color: var(--buoy-text); font-weight: 700; }
-.gp-row.gp-hidden { background: var(--track); border-style: dashed; }
-.gp-hidden .gp-no { background: var(--muted, #9aa3b5); }
 .hint-image { width: 100%; max-height: 260px; object-fit: cover; border-radius: 12px; border: 1px solid var(--line); background: var(--track); }
 .found-kicker { font-size: 12px; font-weight: 700; color: var(--sand-light); letter-spacing: 0.08em; }
 .chest-btn {
@@ -978,3 +983,17 @@ input.narrow { max-width: 360px; height: 46px; font-size: 14px; }
 @keyframes sheet-in {
   from { transform: translateY(100%); opacity: 0; }
 }
+.gp-row.gp-hidden { background: var(--sand-bg); border-style: dashed; border-color: var(--input); }
+.gp-hidden .gp-no { background: #fff; color: var(--muted2); }
+.mode-option {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  padding: 12px 14px;
+  border: 1.5px solid var(--line);
+  border-radius: 12px;
+  cursor: pointer;
+}
+.mode-option.on { border-color: var(--cobalt); background: var(--cobalt-bg); }
+.mode-option input { width: 20px; height: 20px; margin-top: 2px; accent-color: var(--cobalt); flex-shrink: 0; }
+.form-msg.ok-tone { color: var(--deep); }

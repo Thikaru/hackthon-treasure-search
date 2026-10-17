@@ -11,7 +11,7 @@ const onMap = (st: string) => st === 'found' || st === 'acquired'
 
 export default function Home() {
   const { me, content } = useGame()
-  const { treasures, areas } = content
+  const { treasures, areas, settings } = content
   const firstFound = treasures.find((t) => progressOf(me, t.id).state === 'found')
   const firstOpen = treasures.find((t) => progressOf(me, t.id).state !== 'acquired')
   const [areaId, setAreaId] = useState<string>(firstFound?.area_id ?? firstOpen?.area_id ?? areas[0]?.id ?? '')
@@ -35,7 +35,9 @@ export default function Home() {
 
   // シート：ハンドルで上げ下げでき、表示内容が変わるときは前の内容が下がってから次の内容が下から出てくる
   const [open, setOpen] = useState(true)
-  const sheetKey = selected ? `pin:${selected.id}` : `gp:${current?.id ?? 'done'}`
+  // 全問表示モードでは、未獲得の道標をまとめて出す（どれからでも挑戦できるように）
+  const allMode = settings.guidepostMode === 'all'
+  const sheetKey = selected ? `pin:${selected.id}` : allMode ? `all:${areaId}` : `gp:${current?.id ?? 'done'}`
   const [shownKey, setShownKey] = useState(sheetKey)
   const [entering, setEntering] = useState(false)
   const animate = open && !window.matchMedia('(prefers-reduced-motion: reduce)').matches
@@ -157,6 +159,14 @@ export default function Home() {
                   <SheetFor t={shownPin} onClose={() => setPicked(null)} />
                 ) : shownGuidepost ? (
                   <GuidepostRow t={shownGuidepost} />
+                ) : shownKey.startsWith('all:') && current ? (
+                  <div className="gp-scroll">
+                    {inArea
+                      .filter((t) => progressOf(me, t.id).state !== 'acquired')
+                      .map((t) => (
+                        <GuidepostRow key={t.id} t={t} />
+                      ))}
+                  </div>
                 ) : (
                   <p className="sheet-text">このエリアの道標はすべてクリアしました！</p>
                 )}

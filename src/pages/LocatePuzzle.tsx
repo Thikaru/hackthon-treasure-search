@@ -3,17 +3,40 @@ import { BackHeader, StatusChip } from '../components/Common'
 import { CheckIcon, LockIcon } from '../components/Icons'
 import PuzzleForm from '../components/PuzzleForm'
 import { PlaceHintCard } from '../components/TreasureArt'
-import { isGuidepostOpen, progressOf, useGame } from '../lib/game'
+import { isGuidepostVisible, progressOf, useGame } from '../lib/game'
 
 // 宝の道標：解くと、お宝の場所のヒント（画像・説明）が見られる
 export default function LocatePuzzle() {
   const { id = '' } = useParams()
   const { me, content } = useGame()
   const t = content.treasures.find((x) => x.id === id)
-  if (!t || !isGuidepostOpen(me, content, t)) return <Navigate to="/guideposts" replace />
+  if (!t) return <Navigate to="/guideposts" replace />
   const p = progressOf(me, t.id)
   const solved = p.state !== 'locked'
   const area = content.areas.find((a) => a.id === t.area_id)
+
+  // 1つずつ表示モードで、まだ現れていない道標
+  if (!solved && !isGuidepostVisible(me, content, t)) {
+    return (
+      <div className="screen">
+        <BackHeader title="宝の道標" sub={`${area?.name ?? ''}・No.${t.no}`} to="/guideposts" />
+        <div className="page stack-16">
+          <section className="locked-box">
+            <span className="locked-icon">
+              <LockIcon size={22} />
+            </span>
+            <div>
+              <h2>この宝の道標はまだ眠っています</h2>
+              <p>前の道標のお宝を獲得すると現れます</p>
+            </div>
+          </section>
+          <Link to="/guideposts" className="btn btn-primary">
+            宝の道標の一覧へ
+          </Link>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="screen">

@@ -30,7 +30,11 @@ export interface Treasure {
   sort: number
 }
 
+/** 宝の道標の表示方法：sequential＝1つずつ（初期値）／all＝全問 */
+export type GuidepostMode = 'sequential' | 'all'
+
 export interface Settings {
+  guidepostMode: GuidepostMode
   title: string
   subtitle: string
   clearCount: number
@@ -89,6 +93,7 @@ interface GameCtx {
 const Ctx = createContext<GameCtx | null>(null)
 
 const DEFAULT_SETTINGS: Settings = {
+  guidepostMode: 'sequential',
   title: '浜辺の宝さがし',
   subtitle: '宝探し × 謎解き',
   clearCount: 6,
@@ -111,6 +116,7 @@ async function loadContent(): Promise<Content> {
     areas: a.data as Area[],
     treasures: t.data as Treasure[],
     settings: {
+      guidepostMode: map.guidepost_mode === 'all' ? 'all' : 'sequential',
       title: map.title ?? DEFAULT_SETTINGS.title,
       subtitle: map.subtitle ?? DEFAULT_SETTINGS.subtitle,
       clearCount: Number(map.clear_count ?? DEFAULT_SETTINGS.clearCount),
@@ -267,19 +273,26 @@ export function areaCounts(me: MyState, content: Content, areaId: AreaId) {
 }
 
 /**
- * 宝の道標はエリアごとに1問ずつ解放される。
- * 同じエリアで前の道標のお宝をすべて獲得していれば表示できる（すでに挑戦中・解決済みのものは常に表示）
+ * そのエリアで今見えている宝の道標。
+ * 全問表示モードなら全部。1つずつモードなら、お宝を獲得済みの道標＋並び順で最初の未獲得1問だけ。
  */
-export function isGuidepostOpen(me: MyState, content: Content, t: Treasure) {
-  if (progressOf(me, t.id).state !== 'locked') return true
-  const list = content.treasures.filter((x) => x.area_id === t.area_id)
-  const idx = list.findIndex((x) => x.id === t.id)
-  return list.slice(0, idx).every((x) => progressOf(me, x.id).state === 'acquired')
+export function visibleGuideposts(me: MyState, content: Content, areaId: AreaId) {
+  const list = content.treasures.filter((t) => t.area_id === areaId)
+  if (content.settings.guidepostMode === 'all') return { visible: list, hiddenCount: 0 }
+  const firstOpen = list.findIndex((t) => progressOf(me, t.id).state !== 'acquired')
+  if (firstOpen < 0) return { visible: list, hiddenCount: 0 }
+  // 並び順で最初の未獲得より後ろにある未解決は隠す（すでに解いた・QRで先に見つけたものは表示する）
+  const visible = list.filter((t, i) => i <= firstOpen || progressOf(me, t.id).state !== 'locked')
+  return { visible, hiddenCount: list.length - visible.length }
 }
 
-/** エリア内でいま挑戦中の道標（最初の未獲得のもの）。すべて獲得済みなら undefined */
+/** エリア内でいま挑戦中の道標（並び順で最初の未獲得のもの）。すべて獲得済みなら undefined */
 export function currentGuidepost(me: MyState, content: Content, areaId: AreaId) {
   return content.treasures.find((t) => t.area_id === areaId && progressOf(me, t.id).state !== 'acquired')
+}
+
+export function isGuidepostVisible(me: MyState, content: Content, t: Treasure) {
+  return visibleGuideposts(me, content, t.area_id).visible.some((x) => x.id === t.id)
 }
 
 // QRを読んだが未登録だったときに、登録後に戻るためのメモ
