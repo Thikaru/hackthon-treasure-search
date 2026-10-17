@@ -158,11 +158,11 @@ async function ensureSession() {
 const DEMO = import.meta.env.DEV ? new URLSearchParams(window.location.hash.split('?')[1] ?? '').get('demo') ?? new URLSearchParams(window.location.search).get('demo') : null
 
 function DemoProvider({ kind, children }: { kind: string; children: ReactNode }) {
-  const [me, setMe] = useState<MyState>(() => ({ player: demo.demoPlayer, progress: demo.demoProgress(kind), placeHints: demo.demoHints, redeemed: false }))
+  const [me, setMe] = useState<MyState>(() => ({ player: demo.demoPlayer, progress: demo.demoProgress(kind), placeHints: demo.demoHints, redeemed: kind === 'redeemed' }))
   const set = (id: string, patch: Partial<TreasureProgress>) =>
     setMe((m) => ({ ...m, progress: { ...m.progress, [id]: { ...(m.progress[id] ?? { treasure_id: id, state: 'locked', locate_hints: 0, acquire_hints: 0 }), ...patch } } }))
   const value: GameCtx = {
-    content: demo.demoContent,
+    content: kind === 'seq' ? { ...demo.demoContent, settings: { ...demo.demoContent.settings, guidepostMode: 'sequential' } } : demo.demoContent,
     me,
     refresh: async () => undefined,
     register: async () => undefined,
