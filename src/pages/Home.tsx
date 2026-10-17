@@ -2,7 +2,7 @@ import { useEffect, useRef, useState, type PointerEvent } from 'react'
 import { Link } from 'react-router-dom'
 import AreaMap, { type MapPin } from '../components/AreaMap'
 import { StatusChip } from '../components/Common'
-import { ChestIcon, HelpIcon } from '../components/Icons'
+import { AwardIcon, HelpIcon } from '../components/Icons'
 import { currentGuidepost, progressOf, useGame, type Treasure } from '../lib/game'
 import { GuidepostRow } from './Guideposts'
 
@@ -76,9 +76,15 @@ export default function Home() {
     <div className="screen home">
       <header className="home-header">
         <h1>{me.player?.nickname} さん</h1>
-        <Link to="/help" className="icon-btn" aria-label="遊び方・ヘルプ">
-          <HelpIcon size={22} />
-        </Link>
+        <div className="home-header-actions">
+          <Link to="/certificate" className="cert-btn">
+            <AwardIcon size={18} />
+            クリア証明
+          </Link>
+          <Link to="/help" className="icon-btn" aria-label="遊び方・ヘルプ">
+            <HelpIcon size={22} />
+          </Link>
+        </div>
       </header>
 
       <div className="segmented" role="group" aria-label="表示するエリア">
@@ -143,10 +149,6 @@ export default function Home() {
               <Link to="/scan" className="btn btn-primary grow">
                 <QrIcon />
                 QRを読み込む
-              </Link>
-              <Link to="/treasures" className="btn btn-outline">
-                <ChestIcon size={20} />
-                お宝
               </Link>
             </div>
             <div className="sheet-clip">

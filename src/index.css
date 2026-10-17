@@ -357,7 +357,22 @@ select.input { padding: 0 10px; height: 46px; font-size: 14px; }
   padding: 0 12px 0 20px;
   flex-shrink: 0;
 }
-.home-header h1 { font-family: var(--display); font-size: 20px; font-weight: 700; color: var(--deep); }
+.home-header-actions { display: flex; align-items: center; gap: 4px; }
+.cert-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 36px;
+  padding: 0 12px;
+  border-radius: 18px;
+  border: 1.5px solid var(--deep);
+  color: var(--deep);
+  font-size: 13px;
+  font-weight: 700;
+  text-decoration: none;
+  white-space: nowrap;
+}
+.home-header h1 { font-family: var(--display); font-size: 20px; font-weight: 700; color: var(--deep); min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .progress-note { font-size: 12px; font-weight: 700; color: var(--buoy-text); }
 .bar { height: 8px; border-radius: 4px; background: var(--track); position: relative; display: block; overflow: visible; }
 .bar-fill { display: block; height: 8px; border-radius: 4px; background: var(--cobalt); transition: width 0.4s; }

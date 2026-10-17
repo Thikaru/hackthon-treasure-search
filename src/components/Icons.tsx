@@ -23,6 +23,12 @@ export const ChestIcon = (p: P) => (
     <path d="M3 13h18M12 11v4M5 9V7a3 3 0 0 1 3-3h8a3 3 0 0 1 3 3v2" />
   </svg>
 )
+export const AwardIcon = (p: P) => (
+  <svg {...base(p)}>
+    <circle cx="12" cy="9" r="6" />
+    <path d="M8.5 13.9 7 22l5-3 5 3-1.5-8.1" />
+  </svg>
+)
 export const BackIcon = (p: P) => (
   <svg {...base(p)}>
     <path d="M15 5l-7 7 7 7" />
