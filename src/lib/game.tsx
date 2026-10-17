@@ -81,6 +81,8 @@ interface GameCtx {
   content: Content
   me: MyState
   refresh: () => Promise<void>
+  /** お宝・エリア・設定を読み直す（運営画面で謎を編集した後など） */
+  reloadContent: () => Promise<void>
   register: (nickname: string) => Promise<void>
   submitAnswer: (treasureId: string, kind: PuzzleKind, answer: string) => Promise<boolean>
   useHintFor: (treasureId: string, kind: PuzzleKind) => Promise<void>
@@ -181,6 +183,9 @@ export function GameProvider({ children }: { children: ReactNode }) {
   const api = useMemo<Omit<GameCtx, 'content' | 'me'>>(
     () => ({
       refresh,
+      async reloadContent() {
+        setContent(await loadContent())
+      },
       async register(nickname) {
         await ensureSession()
         const { error: e } = await supabase.rpc('register_player', { p_nickname: nickname })

@@ -1115,3 +1115,26 @@ input.narrow { max-width: 360px; height: 46px; font-size: 14px; }
 .mode-option.on { border-color: var(--cobalt); background: var(--cobalt-bg); }
 .mode-option input { width: 20px; height: 20px; margin-top: 2px; accent-color: var(--cobalt); flex-shrink: 0; }
 .form-msg.ok-tone { color: var(--deep); }
+
+/* ---------- 運営：謎の編集 ---------- */
+.admin-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; }
+.admin-notice { background: var(--sky-bg); color: var(--deep); border-radius: 12px; padding: 12px 16px; font-size: 14px; line-height: 1.6; }
+.answer-line { display: block; margin-top: 6px; font-size: 12px; color: var(--deep); font-weight: 700; }
+.answer-line.warn, .small.warn, p.warn { color: var(--buoy-text); }
+.row-off td { color: var(--muted2); }
+.textarea { height: auto; min-height: 64px; padding: 10px 14px; line-height: 1.6; resize: vertical; }
+.input-short { width: 120px; }
+.field { flex: 0 1 auto; }
+.check-field { align-self: flex-end; min-height: 52px; font-size: 14px; }
+.req { margin-left: 6px; font-size: 11px; font-weight: 700; color: var(--buoy-text); background: var(--buoy-bg); border-radius: 6px; padding: 1px 6px; }
+.admin-preview { max-width: 360px; }
+.sticky-col { position: sticky; top: 16px; }
+.form-errors { margin: 0; padding-left: 18px; color: var(--buoy-text); font-size: 13px; line-height: 1.7; }
+.diff-box { background: var(--sand-bg); border-radius: 10px; padding: 10px 12px; line-height: 1.6; }
+.diff-before { color: var(--muted); text-decoration: line-through; }
+.diff-after { color: var(--deep); font-weight: 700; }
+.test-result { display: flex; flex-direction: column; gap: 4px; font-weight: 700; border-radius: 10px; padding: 10px 12px; }
+.test-result.ok { background: var(--sky-bg); color: var(--deep); }
+.test-result.ng { background: var(--buoy-bg); color: var(--buoy-text); }
+@media (max-width: 720px) { .sticky-col { position: static; } }
+.admin-card .segmented { margin: 0; }

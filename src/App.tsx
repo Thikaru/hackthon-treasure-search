@@ -6,6 +6,7 @@ import History from './admin/History'
 import Players from './admin/Players'
 import QrPrint from './admin/QrPrint'
 import Redeem from './admin/Redeem'
+import TreasureEdit from './admin/TreasureEdit'
 import TreasuresAdmin from './admin/TreasuresAdmin'
 import { useGame } from './lib/game'
 import Acquired from './pages/Acquired'
@@ -38,6 +39,8 @@ export default function App() {
         <Route path="history" element={<History />} />
         <Route path="players" element={<Players />} />
         <Route path="treasures" element={<TreasuresAdmin />} />
+        <Route path="treasures/new" element={<TreasureEdit />} />
+        <Route path="treasures/:id" element={<TreasureEdit />} />
         <Route path="qr" element={<QrPrint />} />
       </Route>
       <Route path="*" element={<PlayerRoutes />} />

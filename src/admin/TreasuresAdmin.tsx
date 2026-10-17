@@ -1,53 +1,105 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import { Link, useLocation } from 'react-router-dom'
 import { useGame, type GuidepostMode } from '../lib/game'
 import { errorMessage } from '../lib/supabase'
 import { staff } from './staff'
+import type { StaffTreasure } from './TreasureEdit'
 
 export default function TreasuresAdmin() {
   const { content } = useGame()
   const { settings } = content
+  const location = useLocation()
+  const saved = (location.state as { saved?: string } | null)?.saved ?? ''
+  const [list, setList] = useState<StaffTreasure[] | null>(null)
+  const [err, setErr] = useState('')
+  const [showAnswers, setShowAnswers] = useState(false)
+
+  useEffect(() => {
+    staff<StaffTreasure[]>('staff_treasures')
+      .then(setList)
+      .catch((e) => setErr(errorMessage(e)))
+  }, [])
+
+  const activeCount = list?.filter((t) => t.active).length ?? content.treasures.length
+  const area = (id: string) => content.areas.find((a) => a.id === id)?.short_name ?? id
+
   return (
     <div className="stack-24">
-      <h1 className="h1">お宝・謎</h1>
+      <div className="admin-head">
+        <h1 className="h1">お宝・謎</h1>
+        <Link to="/admin/treasures/new" className="btn btn-deep">
+          ＋ 新しい謎を追加
+        </Link>
+      </div>
       <p className="muted lh">
-        クリア条件：{settings.clearCount} / {content.treasures.length} 個　景品：{settings.prizeName || '（未設定）'}
+        クリア条件：{settings.clearCount} / {activeCount} 個　景品：{settings.prizeName || '（未設定）'}
         <br />
-        内容の編集は Supabase の Table Editor で行います。問題文・ヒント・地図の位置は <code>public.treasures</code>、
-        正解・場所ヒント（説明 <code>place_hint</code>・画像URL <code>place_image_url</code>）・QRトークンは <code>private.treasure_secrets</code>、クリア条件や景品名は <code>public.settings</code> です。
+        「編集」から、問題文・正解・ヒント・場所のヒントを変更できます。正解は参加者の画面には送られません。
       </p>
+      {saved && (
+        <p className="admin-notice" role="status">
+          {saved}
+        </p>
+      )}
       <GuidepostModeSetting initial={settings.guidepostMode} />
-      <section className="admin-card">
-        <div className="table-wrap">
-          <table className="table">
-            <thead>
-              <tr>
-                <th>No</th>
-                <th>お宝</th>
-                <th>エリア</th>
-                <th>宝の道標</th>
-                <th>宝箱の謎</th>
-                <th>ヒント数</th>
-              </tr>
-            </thead>
-            <tbody>
-              {content.treasures.map((t) => (
-                <tr key={t.id}>
-                  <td>{t.no}</td>
-                  <td className="bold">{t.name}</td>
-                  <td>{content.areas.find((a) => a.id === t.area_id)?.short_name}</td>
-                  <td className="wrap-cell">{t.locate_question}</td>
-                  <td className="wrap-cell">{t.acquire_question}</td>
-                  <td>
-                    {t.locate_hints.length} / {t.acquire_hints.length}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+      <section className="admin-card stack-12">
+        <div className="admin-head">
+          <h2 className="card-title">謎の一覧</h2>
+          <label className="row-8 small">
+            <input type="checkbox" checked={showAnswers} onChange={(e) => setShowAnswers(e.target.checked)} />
+            正解を表示する
+          </label>
         </div>
+        {err && <p className="form-msg">{err}</p>}
+        {!list && !err && <p className="muted small">読み込み中…</p>}
+        {list && (
+          <div className="table-wrap">
+            <table className="table">
+              <thead>
+                <tr>
+                  <th>No</th>
+                  <th>お宝</th>
+                  <th>エリア</th>
+                  <th>宝の道標</th>
+                  <th>鍵のかかった宝箱の謎</th>
+                  <th>状態</th>
+                  <th />
+                </tr>
+              </thead>
+              <tbody>
+                {list.map((t) => (
+                  <tr key={t.id} className={t.active ? '' : 'row-off'}>
+                    <td>{t.no}</td>
+                    <td className="bold">{t.name}</td>
+                    <td>{area(t.area_id)}</td>
+                    <td className="wrap-cell">
+                      {t.locate_question}
+                      <Answers list={t.locate_answers} show={showAnswers} />
+                    </td>
+                    <td className="wrap-cell">
+                      {t.acquire_question}
+                      <Answers list={t.acquire_answers} show={showAnswers} />
+                    </td>
+                    <td>{t.active ? <span className="chip chip-located">表示中</span> : <span className="chip chip-locked">非表示</span>}</td>
+                    <td>
+                      <Link to={`/admin/treasures/${t.id}`} className="btn btn-outline small-btn">
+                        編集
+                      </Link>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
       </section>
     </div>
   )
+}
+
+function Answers({ list, show }: { list: string[]; show: boolean }) {
+  if (list.length === 0) return <span className="answer-line warn">正解が未登録です</span>
+  return <span className="answer-line">正解：{show ? list.join(' ／ ') : `●●●（${list.length}件）`}</span>
 }
 
 const MODES: { value: GuidepostMode; label: string; desc: string }[] = [
