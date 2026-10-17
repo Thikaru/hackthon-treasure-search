@@ -11,6 +11,10 @@ insert into public.settings(key, value) values
   ('certificate_ttl_sec', '60')
 on conflict (key) do update set value = excluded.value;
 
+-- 宝の道標の表示方法（運営画面で切り替える値なので、既にあれば上書きしない）
+insert into public.settings(key, value) values ('guidepost_mode', 'sequential')
+on conflict (key) do nothing;
+
 insert into public.areas(id, name, short_name, description, needs_car, sort) values
   ('sand',  '砂浜エリア', '砂浜',      '海水浴場の砂浜に5つのお宝', false, 1),
   ('spotA', '観光名所A',  '観光名所A', '[観光名所Aの説明]',        false, 2),

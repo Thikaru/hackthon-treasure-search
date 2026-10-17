@@ -3,8 +3,8 @@ import { Link } from 'react-router-dom'
 import AreaMap, { type MapPin } from '../components/AreaMap'
 import { StatusChip } from '../components/Common'
 import { ChestIcon, HelpIcon } from '../components/Icons'
-import { acquiredCount, progressOf, useGame, type Treasure } from '../lib/game'
-import { GuidepostRow } from './Guideposts'
+import { acquiredCount, progressOf, useGame, visibleGuideposts, type Treasure } from '../lib/game'
+import { GuidepostRow, HiddenGuideposts } from './Guideposts'
 
 // 地図に出すのは QR を読んだお宝（宝箱発見・獲得）だけ。場所はヒントの画像・説明で探す
 const onMap = (st: string) => st === 'found' || st === 'acquired'
@@ -35,6 +35,7 @@ export default function Home() {
     }))
   const selected = picked ? inArea.find((t) => t.id === picked && onMap(progressOf(me, t.id).state)) : undefined
   const waiting = inArea.filter((t) => progressOf(me, t.id).state === 'found').length
+  const guide = visibleGuideposts(me, content, areaId)
 
   return (
     <div className="screen home">
@@ -116,9 +117,10 @@ export default function Home() {
             </div>
             {waiting > 0 && <p className="sheet-text accent-text">地図の宝箱をタップすると、鍵の謎にどこからでも回答できます。</p>}
             <div className="gp-scroll">
-              {inArea.map((t) => (
+              {guide.visible.map((t) => (
                 <GuidepostRow key={t.id} t={t} />
               ))}
+              <HiddenGuideposts count={guide.hiddenCount} />
             </div>
           </>
         )}

@@ -978,3 +978,17 @@ input.narrow { max-width: 360px; height: 46px; font-size: 14px; }
 }
 .home-actions { display: flex; gap: 8px; }
 .home-actions .btn { min-height: 46px; }
+.gp-row.gp-hidden { background: var(--sand-bg); border-style: dashed; border-color: var(--input); }
+.gp-hidden .gp-no { background: #fff; color: var(--muted2); }
+.mode-option {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  padding: 12px 14px;
+  border: 1.5px solid var(--line);
+  border-radius: 12px;
+  cursor: pointer;
+}
+.mode-option.on { border-color: var(--cobalt); background: var(--cobalt-bg); }
+.mode-option input { width: 20px; height: 20px; margin-top: 2px; accent-color: var(--cobalt); flex-shrink: 0; }
+.form-msg.ok-tone { color: var(--deep); }

@@ -30,7 +30,11 @@ export interface Treasure {
   sort: number
 }
 
+/** 宝の道標の表示方法：sequential＝1つずつ（初期値）／all＝全問 */
+export type GuidepostMode = 'sequential' | 'all'
+
 export interface Settings {
+  guidepostMode: GuidepostMode
   title: string
   subtitle: string
   clearCount: number
@@ -89,6 +93,7 @@ interface GameCtx {
 const Ctx = createContext<GameCtx | null>(null)
 
 const DEFAULT_SETTINGS: Settings = {
+  guidepostMode: 'sequential',
   title: '浜辺の宝さがし',
   subtitle: '宝探し × 謎解き',
   clearCount: 6,
@@ -111,6 +116,7 @@ async function loadContent(): Promise<Content> {
     areas: a.data as Area[],
     treasures: t.data as Treasure[],
     settings: {
+      guidepostMode: map.guidepost_mode === 'all' ? 'all' : 'sequential',
       title: map.title ?? DEFAULT_SETTINGS.title,
       subtitle: map.subtitle ?? DEFAULT_SETTINGS.subtitle,
       clearCount: Number(map.clear_count ?? DEFAULT_SETTINGS.clearCount),
@@ -264,6 +270,24 @@ export function acquiredCount(me: MyState) {
 export function areaCounts(me: MyState, content: Content, areaId: AreaId) {
   const list = content.treasures.filter((t) => t.area_id === areaId)
   return { got: list.filter((t) => progressOf(me, t.id).state === 'acquired').length, total: list.length }
+}
+
+/**
+ * そのエリアで今見えている宝の道標。
+ * 全問表示モードなら全部。1つずつモードなら、クリア済み（道標クリア以降）＋並び順で最初の未解決1問だけ。
+ */
+export function visibleGuideposts(me: MyState, content: Content, areaId: AreaId) {
+  const list = content.treasures.filter((t) => t.area_id === areaId)
+  if (content.settings.guidepostMode === 'all') return { visible: list, hiddenCount: 0 }
+  const firstLocked = list.findIndex((t) => progressOf(me, t.id).state === 'locked')
+  if (firstLocked < 0) return { visible: list, hiddenCount: 0 }
+  // 並び順で最初の未解決より後ろにある未解決は隠す（QRで先に見つけたものは表示する）
+  const visible = list.filter((t, i) => i <= firstLocked || progressOf(me, t.id).state !== 'locked')
+  return { visible, hiddenCount: list.length - visible.length }
+}
+
+export function isGuidepostVisible(me: MyState, content: Content, t: Treasure) {
+  return visibleGuideposts(me, content, t.area_id).visible.some((x) => x.id === t.id)
 }
 
 // QRを読んだが未登録だったときに、登録後に戻るためのメモ
