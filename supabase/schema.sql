@@ -39,6 +39,10 @@ create table if not exists public.treasures (
   active boolean not null default true
 );
 
+-- お宝の位置（緯度・経度）。実地図のエリアで使う。空なら pin_x / pin_y から割り出す
+alter table public.treasures add column if not exists pin_lat double precision;
+alter table public.treasures add column if not exists pin_lng double precision;
+
 -- ---------- 参加者データ ----------
 
 create table if not exists public.players (
@@ -497,6 +501,8 @@ declare
   v_sort int;
   v_x int := least(greatest(coalesce((p_t->>'pin_x')::int, 200), 0), 390);
   v_y int := least(greatest(coalesce((p_t->>'pin_y')::int, 300), 110), 460);
+  v_lat double precision := nullif(p_t->>'pin_lat', '')::double precision;
+  v_lng double precision := nullif(p_t->>'pin_lng', '')::double precision;
 begin
   perform private.check_pin(p_pin);
 
@@ -505,7 +511,9 @@ begin
      or v_lq = '' or v_aq = ''
      or cardinality(v_la) = 0 or cardinality(v_aa) = 0
      or (v_img is not null and v_img !~* '^https?://')
-     or (v_id is not null and v_id !~ '^[a-z0-9_-]{1,20}$') then
+     or (v_id is not null and v_id !~ '^[a-z0-9_-]{1,20}$')
+     or ((v_lat is null) <> (v_lng is null))
+     or (v_lat is not null and (v_lat not between -90 and 90 or v_lng not between -180 and 180)) then
     raise exception 'invalid_input';
   end if;
 
@@ -521,13 +529,14 @@ begin
                      (select sort from public.treasures where id = v_id),
                      (select coalesce(max(sort), 0) + 1 from public.treasures));
 
-  insert into public.treasures(id, no, area_id, name, description, pin_x, pin_y,
+  insert into public.treasures(id, no, area_id, name, description, pin_x, pin_y, pin_lat, pin_lng,
                                locate_question, locate_hints, acquire_question, acquire_hints, sort, active)
-  values (v_id, v_no, v_area, v_name, btrim(coalesce(p_t->>'description', '')), v_x, v_y,
+  values (v_id, v_no, v_area, v_name, btrim(coalesce(p_t->>'description', '')), v_x, v_y, v_lat, v_lng,
           v_lq, private.text_list(p_t->'locate_hints'), v_aq, private.text_list(p_t->'acquire_hints'),
           v_sort, coalesce((p_t->>'active')::boolean, true))
   on conflict (id) do update set no = excluded.no, area_id = excluded.area_id, name = excluded.name,
     description = excluded.description, pin_x = excluded.pin_x, pin_y = excluded.pin_y,
+    pin_lat = excluded.pin_lat, pin_lng = excluded.pin_lng,
     locate_question = excluded.locate_question, locate_hints = excluded.locate_hints,
     acquire_question = excluded.acquire_question, acquire_hints = excluded.acquire_hints,
     sort = excluded.sort, active = excluded.active;

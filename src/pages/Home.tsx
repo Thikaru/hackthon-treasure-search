@@ -27,6 +27,8 @@ export default function Home() {
       no: t.no,
       x: t.pin_x,
       y: t.pin_y,
+      lat: t.pin_lat,
+      lng: t.pin_lng,
       state: progressOf(me, t.id).state,
       selected: t.id === picked,
     }))

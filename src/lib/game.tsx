@@ -23,6 +23,9 @@ export interface Treasure {
   description: string
   pin_x: number
   pin_y: number
+  /** 実地図のエリアでの位置（緯度・経度）。空なら pin_x / pin_y から割り出す */
+  pin_lat?: number | null
+  pin_lng?: number | null
   locate_question: string
   locate_hints: string[]
   acquire_question: string

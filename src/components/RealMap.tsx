@@ -4,16 +4,16 @@ import L, { type LatLngBoundsExpression, type LatLngTuple } from 'leaflet'
 import type { MapPin } from './AreaMap'
 
 // 渋川海岸（岡山県玉野市渋川、渋川海水浴場）周辺のみを表示・移動できるように範囲を固定
-const SHIBUKAWA_CENTER: LatLngTuple = [34.4548, 133.9036]
-const SHIBUKAWA_BOUNDS: LatLngBoundsExpression = [
+export const SHIBUKAWA_CENTER: LatLngTuple = [34.4548, 133.9036]
+export const SHIBUKAWA_BOUNDS: LatLngBoundsExpression = [
   [34.448, 133.895], // 南西
   [34.462, 133.912], // 北東
 ]
-const MAX_ZOOM = 19
+export const MAX_ZOOM = 19
 
 // 画面サイズに応じて「渋川の範囲がちょうど画面いっぱいに収まる」ズームを最小値にする
 // （これより引くと渋川の外側の空白が見えてしまうため）
-function FitShibukawaBounds() {
+export function FitShibukawaBounds() {
   const map = useMap()
   useEffect(() => {
     const apply = () => {
@@ -35,11 +35,24 @@ function FitShibukawaBounds() {
 }
 
 // 既存のイラスト地図上の座標(0-390 / 110-460)を、渋川の緯度経度へ単純に対応付ける
-function pinToLatLng(x: number, y: number): LatLngTuple {
+export function pinToLatLng(x: number, y: number): LatLngTuple {
   const [[sLat, wLng], [nLat, eLng]] = SHIBUKAWA_BOUNDS as [LatLngTuple, LatLngTuple]
   const lng = wLng + (x / 390) * (eLng - wLng)
   const lat = nLat - (y - 110) / 350 * (nLat - sLat)
   return [lat, lng]
+}
+
+/** pinToLatLng の逆。緯度・経度から、イラスト地図の座標（範囲内に収める）を割り出す */
+export function latLngToPin(lat: number, lng: number): { x: number; y: number } {
+  const [[sLat, wLng], [nLat, eLng]] = SHIBUKAWA_BOUNDS as [LatLngTuple, LatLngTuple]
+  const x = Math.round(((lng - wLng) / (eLng - wLng)) * 390)
+  const y = Math.round(110 + ((nLat - lat) / (nLat - sLat)) * 350)
+  return { x: Math.min(390, Math.max(0, x)), y: Math.min(460, Math.max(110, y)) }
+}
+
+/** ピンの位置。緯度・経度が登録されていればそれを使う */
+export function pinPosition(pin: Pick<MapPin, 'x' | 'y' | 'lat' | 'lng'>): LatLngTuple {
+  return pin.lat != null && pin.lng != null ? [pin.lat, pin.lng] : pinToLatLng(pin.x, pin.y)
 }
 
 const PIN_COLOR: Record<MapPin['state'], string> = {
@@ -50,7 +63,7 @@ const PIN_COLOR: Record<MapPin['state'], string> = {
 }
 
 // 元のイラストマップと同じ涙型ピンの見た目を、地図上でも目立つように divIcon で再現
-function treasureIcon(pin: MapPin) {
+export function treasureIcon(pin: MapPin) {
   const big = pin.selected
   const fill = PIN_COLOR[pin.state]
   const stroke = pin.state === 'located' ? '#22406E' : '#FFFFFF'
@@ -72,7 +85,7 @@ function treasureIcon(pin: MapPin) {
 }
 
 function TreasureMarker({ pin, onSelect }: { pin: MapPin; onSelect: (id: string) => void }) {
-  const pos = pinToLatLng(pin.x, pin.y)
+  const pos = pinPosition(pin)
   const icon = useMemo(() => treasureIcon(pin), [pin])
   return (
     <Marker position={pos} icon={icon} eventHandlers={{ click: () => onSelect(pin.id) }} zIndexOffset={pin.selected ? 1000 : 0}>

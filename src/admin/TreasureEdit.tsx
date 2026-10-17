@@ -2,6 +2,7 @@ import { useEffect, useState, type FormEvent, type ReactNode } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { useGame, type Treasure } from '../lib/game'
 import { errorMessage } from '../lib/supabase'
+import PinPicker, { type PinValue } from './PinPicker'
 import { staff } from './staff'
 
 /** 運営用RPC staff_treasures が返す1件（公開項目＋正解・場所ヒント） */
@@ -28,8 +29,9 @@ interface Form {
   acquire_question: string
   acquire_answers: string
   acquire_hints: string
-  pin_x: string
-  pin_y: string
+  pin: PinValue
+  /** 新規で、まだ地図に置いていない */
+  pinUnset: boolean
 }
 
 const lines = (s: string) =>
@@ -52,8 +54,8 @@ const toForm = (t: StaffTreasure): Form => ({
   acquire_question: t.acquire_question,
   acquire_answers: t.acquire_answers.join('\n'),
   acquire_hints: t.acquire_hints.join('\n'),
-  pin_x: String(t.pin_x),
-  pin_y: String(t.pin_y),
+  pin: { x: t.pin_x, y: t.pin_y, lat: t.pin_lat ?? null, lng: t.pin_lng ?? null },
+  pinUnset: false,
 })
 
 const EMPTY_FORM = (areaId: string): Form => ({
@@ -70,8 +72,8 @@ const EMPTY_FORM = (areaId: string): Form => ({
   acquire_question: '',
   acquire_answers: '',
   acquire_hints: '',
-  pin_x: '200',
-  pin_y: '300',
+  pin: { x: 200, y: 300, lat: null, lng: null },
+  pinUnset: true,
 })
 
 function validate(f: Form): string[] {
@@ -84,6 +86,7 @@ function validate(f: Form): string[] {
   if (lines(f.acquire_answers).length === 0) e.push('鍵のかかった宝箱の謎の正解を1つ以上入れてください')
   if (f.place_image_url.trim() && !/^https?:\/\//i.test(f.place_image_url.trim())) e.push('画像URLは https:// から始まるURLにしてください')
   if (f.sort.trim() && !/^\d+$/.test(f.sort.trim())) e.push('並び順は数字で入れてください')
+  if (f.pinUnset) e.push('地図でお宝の場所を置いてください')
   return e
 }
 
@@ -158,8 +161,10 @@ export default function TreasureEdit() {
           acquire_question: form.acquire_question.trim(),
           acquire_answers: lines(form.acquire_answers),
           acquire_hints: lines(form.acquire_hints),
-          pin_x: Number(form.pin_x) || 0,
-          pin_y: Number(form.pin_y) || 0,
+          pin_x: form.pin.x,
+          pin_y: form.pin.y,
+          pin_lat: form.pin.lat,
+          pin_lng: form.pin.lng,
         },
       })
       await reloadContent().catch(() => undefined)
@@ -255,16 +260,20 @@ export default function TreasureEdit() {
           </section>
 
           <section className="admin-card stack-12">
-            <h2 className="card-title">地図のピン位置</h2>
-            <p className="small muted">QRを読んだ後、地図に宝箱が出る位置です（横 0〜390、縦 110〜460）。</p>
-            <div className="row-12 wrap">
-              <Field label="横（x）">
-                <input className="input input-short" inputMode="numeric" value={form.pin_x} onChange={(e) => set('pin_x', e.target.value)} />
-              </Field>
-              <Field label="縦（y）">
-                <input className="input input-short" inputMode="numeric" value={form.pin_y} onChange={(e) => set('pin_y', e.target.value)} />
-              </Field>
-            </div>
+            <h2 className="card-title">地図の場所</h2>
+            <p className="small muted">QRを読んだ後、参加者の地図に宝箱が出る場所です。薄いピンは同じエリアのほかのお宝です。</p>
+            <PinPicker
+              key={form.area_id}
+              areaId={form.area_id}
+              areaName={content.areas.find((a) => a.id === form.area_id)?.name ?? ''}
+              no={orig?.no ?? ''}
+              value={form.pin}
+              unset={form.pinUnset}
+              others={content.treasures
+                .filter((t) => t.area_id === form.area_id && t.id !== orig?.id)
+                .map((t) => ({ id: t.id, no: t.no, x: t.pin_x, y: t.pin_y, lat: t.pin_lat, lng: t.pin_lng, state: 'locked' as const, selected: false }))}
+              onChange={(v) => setForm({ ...form, pin: v, pinUnset: false })}
+            />
           </section>
         </div>
 

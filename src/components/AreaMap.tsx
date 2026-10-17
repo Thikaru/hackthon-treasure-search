@@ -8,6 +8,9 @@ export interface MapPin {
   no: string
   x: number
   y: number
+  /** 実地図での位置。あればこちらを優先 */
+  lat?: number | null
+  lng?: number | null
   state: TreasureState
   selected: boolean
 }
@@ -21,7 +24,7 @@ interface Props {
 
 const FONT = 'Noto Sans JP, sans-serif'
 
-function Pin({ pin, onSelect }: { pin: MapPin; onSelect: (id: string) => void }) {
+export function Pin({ pin, onSelect }: { pin: MapPin; onSelect: (id: string) => void }) {
   const big = pin.selected
   const fill = pin.state === 'acquired' ? '#1F4FB8' : pin.state === 'found' ? '#D9472B' : '#DCE8F7'
   const stroke = pin.state === 'located' ? '#22406E' : '#FFFFFF'
@@ -60,7 +63,7 @@ function Pin({ pin, onSelect }: { pin: MapPin; onSelect: (id: string) => void })
 }
 
 // 観光名所は実際の地形がまだ無いため、差し替え前提の簡易マップ
-function SpotBase({ label }: { label: string }) {
+export function SpotBase({ label }: { label: string }) {
   return (
     <>
       <rect x="0" y="0" width="390" height="470" fill="#CFDDBB" />
