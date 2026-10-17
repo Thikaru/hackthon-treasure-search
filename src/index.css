@@ -1145,3 +1145,4 @@ input.narrow { max-width: 360px; height: 46px; font-size: 14px; }
 .picker-svg svg { position: absolute; inset: 0; width: 100%; height: 100%; cursor: crosshair; touch-action: none; }
 .picker-svg svg:focus-visible { outline: 3px solid rgba(31, 79, 184, 0.4); outline-offset: -3px; }
 .picker-foot { align-items: center; }
+.gmap-row { align-items: stretch; } .gmap-row .input { flex: 1; height: 44px; font-size: 14px; } .gmap-row .btn { min-height: 44px; white-space: nowrap; }
