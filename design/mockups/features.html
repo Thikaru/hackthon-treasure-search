@@ -431,6 +431,49 @@ body.export .wrap { max-width: none; } body.export .hero, body.export .notes { d
 .opt b { font: 800 14px var(--body); display: block; }
 .opt small { font-size: 11.5px; line-height: 1.6; color: var(--gmuted); display: block; margin-top: 2px; }
 .note-img { position: absolute; bottom: 4px; right: 8px; font: 700 9px var(--body); color: rgba(255,255,255,.7); z-index: 9; }
+
+.nopin { position: absolute; z-index: 4; transform: translate(-50%, -78%) scale(.82); text-align: center; filter: drop-shadow(0 4px 6px rgba(0,0,0,.3)); }
+.nopin b { position: absolute; left: 50%; bottom: -6px; transform: translateX(-50%); font: 800 9px var(--body); color: #3a2a12; background: rgba(255,255,255,.9); padding: 0 5px; border-radius: 6px; white-space: nowrap; }
+.pol .ph { width: 40px; height: 40px; }
+.pol { padding: 3px 3px 12px; }
+.pol b { font-size: 8px; }
+.lb { position: absolute; left: 22px; right: 22px; top: 92px; z-index: 21; }
+.lb-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
+.lb-x { width: 38px; height: 38px; border-radius: 50%; display: grid; place-items: center; color: #fff; background: rgba(255,255,255,.18); }
+.lb .polbig { transform: rotate(-1.5deg); }
+.lb-nav { display: flex; align-items: center; justify-content: space-between; margin-top: 18px; color: #fff; }
+.lb-arrow { width: 40px; height: 40px; border-radius: 50%; display: grid; place-items: center; font: 900 26px var(--display); background: rgba(255,255,255,.16); }
+.lb-dots { display: flex; gap: 6px; } .lb-dots i { width: 7px; height: 7px; border-radius: 50%; background: rgba(255,255,255,.4); } .lb-dots i.on { width: 20px; border-radius: 4px; background: var(--gold); }
+.lb-btns { display: flex; gap: 10px; margin-top: 14px; } .lb-btns .btn { height: 48px; font-size: 14px; }
+.lb-btns .btn-glass { color: #fff; }
+.tl-item .thumb.none { position: relative; flex-direction: column; gap: 0; }
+.tl-item .thumb.none em { position: absolute; bottom: 2px; left: 0; right: 0; text-align: center; font: 700 8px var(--body); font-style: normal; color: #8a6a3a; }
+.trophy { position: absolute; top: 52px; left: 14px; right: 14px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+.trophy span { display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 10px 4px 8px; border-radius: 12px; background: rgba(255,255,255,.5); box-shadow: inset 0 0 0 1px rgba(80,50,20,.12); }
+.trophy small { font: 700 9.5px var(--body); color: #5a4020; }
+.nophoto { position: absolute; left: 14px; right: 14px; top: 300px; display: flex; gap: 12px; align-items: center; padding: 14px; border-radius: 12px; border: 2px dashed rgba(140,100,40,.45); color: #6a4a20; }
+.nophoto span { font: 800 13px var(--body); } .nophoto small { display: block; font: 600 11px var(--body); opacity: .75; margin-top: 2px; }
+.confetti { position: absolute; inset: 0; pointer-events: none; z-index: 1; }
+.confetti i { position: absolute; width: 8px; height: 4px; border-radius: 1px; opacity: .9; }
+.cg { position: absolute; top: 58px; left: 16px; right: 16px; text-align: center; z-index: 2; color: #fff; }
+.cg-k { font: 800 12px var(--body); letter-spacing: .38em; text-shadow: 0 2px 8px rgba(0,0,0,.4); }
+.cg-h { font: 900 40px var(--display); margin-top: 2px; background: linear-gradient(180deg, #fff 0%, #fff 50%, #ffe7a6 52%, #f2c14e 100%); -webkit-background-clip: text; background-clip: text; color: transparent; filter: drop-shadow(0 3px 0 rgba(10,26,48,.3)) drop-shadow(0 8px 16px rgba(10,26,48,.45)); }
+.cg-s { font: 700 13px var(--body); text-shadow: 0 1px 6px rgba(0,0,0,.5); }
+.cg-time { margin: 12px auto 0; width: max-content; padding: 8px 22px 10px; border-radius: 18px; background: rgba(255,255,255,.18); border: 1px solid rgba(255,255,255,.45); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); display: flex; flex-direction: column; }
+.cg-time small { font: 800 10.5px var(--body); letter-spacing: .3em; opacity: .9; }
+.cg-time b { font: 900 44px var(--display); font-variant-numeric: tabular-nums; letter-spacing: .03em; line-height: 1.1; text-shadow: 0 2px 10px rgba(0,0,0,.35); }
+.cg-time span { font: 700 10.5px var(--body); opacity: .9; }
+.cg-row { display: flex; justify-content: center; gap: 4px; margin-top: 10px; filter: drop-shadow(0 0 8px rgba(255,210,120,.6)); }
+.cg-cert { position: relative; overflow: hidden; margin-top: 12px; display: flex; gap: 12px; align-items: center; text-align: left; padding: 12px 14px; border-radius: 10px; color: #3a2a12; background: radial-gradient(120% 70% at 50% 0%, rgba(255,255,255,.7), transparent 60%), linear-gradient(180deg, #fbf3df, #f0e0bc); box-shadow: 0 16px 34px rgba(0,0,0,.4); }
+.cg-cert::before { content: ''; position: absolute; inset: 5px; border: 1.5px solid #c49a4a; border-radius: 6px; pointer-events: none; }
+.cg-cert-t { display: flex; flex-direction: column; }
+.cg-cert-t span { font: 700 9px var(--body); letter-spacing: .25em; color: #8a6a3a; }
+.cg-cert-t b { font-family: var(--paperfont); font-weight: 800; font-size: 22px; letter-spacing: .3em; }
+.cg-cert-t em { font-family: var(--paperfont); font-weight: 800; font-style: normal; font-size: 14px; }
+.cg-cert-t small { font: 700 9.5px var(--body); color: #8a6a3a; }
+.cg-clock { font: 900 16px var(--display); font-style: normal; font-variant-numeric: tabular-nums; margin-top: 4px; display: flex; align-items: center; gap: 6px; }
+.cg-clock s { width: 8px; height: 8px; border-radius: 50%; background: #d9472b; }
+.cg-note { font: 700 11px var(--body); margin-top: 8px; text-shadow: 0 1px 4px rgba(0,0,0,.5); }
 </style>
 </head>
 <body>
@@ -771,8 +814,19 @@ function routeSvg(toXY, w, h, night) {
   const d = pts.map((p, i) => (i ? 'L' : 'M') + p[0].toFixed(1) + ' ' + p[1].toFixed(1)).join(' ')
   return `<svg class="route" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}"><path d="${d}" fill="none" stroke="${night ? 'rgba(10,20,40,.7)' : '#fff'}" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/><path d="${d}" fill="none" stroke="#e8a21a" stroke-width="4" stroke-dasharray="6 5" stroke-linecap="round" stroke-linejoin="round"/></svg>`
 }
-function pols(toXY, size = 54, rot = true) {
-  return SPOTS.map((s, i) => { const [x, y] = toXY(s.ll); return `<div class="pol" style="left:${x}px;top:${y - 6}px;--r:${rot ? (i % 2 ? 5 : -5) : 0}deg"><span class="no">${s.no}</span><div class="ph" style="${s.ph};width:${size}px;height:${size}px"></div><b>${s.time}</b></div>` }).join('')
+// 写真を撮った／撮らなかった：all＝全部撮った、some＝一部撮らなかった、none＝1枚も撮らなかった
+let MODE = 'all'
+const MISSING_SOME = ['01', '04']
+const photoOf = (s) => (MODE === 'none' || (MODE === 'some' && MISSING_SOME.includes(s.no)) ? null : s.ph)
+const photoCount = () => SPOTS.filter((s) => photoOf(s)).length
+/** 地図の上の思い出：写真があればポラロイド、なければ小さな宝箱ピン（時刻つき） */
+function pols(toXY, size = 40, rot = true) {
+  return SPOTS.map((s, i) => {
+    const [x, y] = toXY(s.ll)
+    const ph = photoOf(s)
+    if (!ph) return `<div class="nopin" style="left:${x}px;top:${y}px">${mapChest(s.no, true)}<b>${s.time}</b></div>`
+    return `<div class="pol" style="left:${x}px;top:${y - 4}px;--r:${rot ? (i % 2 ? 5 : -5) : 0}deg"><span class="no">${s.no}</span><div class="ph" style="${ph};width:${size}px;height:${size}px"></div><b>${s.time}</b></div>`
+  }).join('')
 }
 const ico = {
   timer: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2M9 2h6"/></svg>',
@@ -949,14 +1003,86 @@ const GROUPS = [
   ['③ クリア証明・メモリアルブック', [['cert', 'クリア証明（クリアタイム付き）', '下に「メモリアルブック」と「記念写真」の入口'], ['certcam', '記念写真カメラ', '「達成・タイム」の札を入れて撮れる'], ['cover', 'ブック：表紙', '名前・日付・クリアタイム・歩いた距離'], ['mappage', 'ブック：冒険の地図', 'GPS の道のり（点線）と、謎の場所に思い出の写真'], ['timeline', 'ブック：お宝の記録', '見つけた順・時刻・前のお宝からの時間・写真'], ['last', 'ブック：記念写真', '最後のページ。画像で保存・共有できる']]],
 ]
 
+
+// ---------- 追加：写真タップで拡大・写真なしのとき・クリアの瞬間 ----------
+function lightbox(i) {
+  const s = SPOTS[i]
+  return `<div class="dim" style="background:rgba(4,8,18,.62);backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);z-index:20"></div>
+    <div class="lb">
+      <div class="lb-top"><span class="chip">${s.no}　${s.name}</span><span class="lb-x">${icon.close}</span></div>
+      <div class="polbig"><span class="tape"></span><div class="ph" style="${s.ph}"></div><div class="cap">${s.name}<small>No.${s.no}・${s.time}</small></div></div>
+      <div class="lb-nav"><span class="lb-arrow">‹</span><span class="lb-dots">${SPOTS.map((_, k) => `<i class="${k === i ? 'on' : ''}"></i>`).join('')}</span><span class="lb-arrow">›</span></div>
+      <div class="lb-btns"><button class="btn btn-glass glass">${ico.cam}撮り直す</button><button class="btn btn-primary">お宝を見る</button></div>
+    </div>`
+}
+const withMode = (mode, f) => (t) => { MODE = mode; const h = f(t); MODE = 'all'; return h }
+const homeKicker = () => photoCount() === 0 ? `${ico.cam}まだ写真はありません・あと 3 個でクリア` : `${ico.cam}思い出 ${photoCount()} 枚・あと 3 個でクリア`
+FS.homeM = (t) => FS.home(t).replace(/<div class="kicker">.*?<\/div>/, `<div class="kicker">${homeKicker()}</div>`).replace('地図の写真をタップすると、その場所で撮った思い出が開きます。', photoCount() === 0 ? 'お宝を見つけた場所で撮った写真が、ここに貼られます。宝箱ピンをタップすると、あとからでも撮れます。' : '写真をタップすると大きく見られます。宝箱ピンの場所は、あとからでも撮れます。')
+FS.homeTap = (t) => FS.home(t) + lightbox(2)
+FS.mapTap = (t) => FS.mappage(t) + lightbox(2)
+FS.mappageM = (t) => FS.mappage(t).replace('<small>思い出</small><b>5枚</b>', `<small>思い出</small><b>${photoCount()}枚</b>`)
+// お宝の記録（写真のない所は宝箱の絵）
+FS.timelineM = (t) => {
+  const order = [2, 1, 0, 3, 4]
+  const laps = ['+1:13:02', '+0:21:40', '+0:18:11', '+0:34:05', '+0:15:20']
+  const qs = ['「なみ」を逆から読むと？', '「すな」と「はま」…', '浜に並ぶボート…', '1週間は何日？', '「うみ」の反対は？']
+  const kinds = ['compass', 'key', 'stone', 'bottle', 'scale']
+  const items = order.map((i, k) => { const s = SPOTS[i]; const ph = photoOf(s)
+    return `<div class="tl-item"><span class="dot">${s.no}</span>${ph ? `<span class="thumb"><div style="${ph}"></div></span>` : `<span class="thumb none">${treasureIcon('tl' + i, kinds[i], 40)}<em>写真なし</em></span>`}<span><h3>${s.name}</h3><p>${s.time}・${qs[k]}</p><span class="lap">${laps[k]}</span></span></div>` }).join('')
+  return FS.timeline(t).replace(/<div class="tl">[\s\S]*?<\/div>\s*<\/div>\s*<div class="pager">/, `<div class="tl"><div class="tl-item"><span class="dot" style="background:#2a8a4a">S</span><span><h3>スタート</h3><p>10:18・パークセンター（受付）</p></span></div>${items}</div></div><div class="pager">`)
+}
+// 最後のページ：記念写真がないときは、集めたお宝を並べる
+FS.lastNone = (t) => `
+    <div class="bg blur"></div><div class="scrim heavy"></div>${sparkles(16, 2)}
+    ${statusbar(t, t.key === 'day')}
+    <div class="topbar"><div class="back glass">${icon.close}</div><span class="chip">メモリアルブック</span><div style="width:40px"></div></div>
+    <div class="page2 paper">
+      <div class="ph-title"><b>集めたお宝</b><small>12:59 クリア</small></div>
+      <div class="trophy">${['compass', 'key', 'stone', 'bottle', 'scale', 'map'].map((k, i) => `<span>${treasureIcon('lt' + i, k, 62)}<small>${['貝殻の羅針盤', '流木の鍵', '潮騒の石碑', '星砂の小瓶', '人魚のうろこ', '灯台の古地図'][i]}</small></span>`).join('')}</div>
+      <div class="nophoto">${ico.cam}<span>記念写真はまだありません<small>いまから撮って、このページに入れられます</small></span></div>
+      <div class="stats"><div><small>お宝</small><b>6 / 8</b></div><div><small>使ったヒント</small><b>3 枚</b></div><div><small>歩いた距離</small><b>4.2km</b></div></div>
+    </div>
+    <div class="pager"><i></i><i></i><i></i><i class="on"></i></div>
+    <div class="book-actions"><button class="btn btn-glass glass">${ico.cam}記念写真を撮る</button><button class="btn btn-primary">${ico.save}画像で保存</button></div>`
+// クリアの瞬間：おめでとう＋クリアタイム＋達成状
+FS.congrats = (t) => `
+    <div class="bg blur"></div><div class="scrim heavy"></div><div class="burst" style="top:210px"></div><div class="beams" style="top:210px"></div>${sparkles(28, 13)}
+    <div class="confetti">${Array.from({ length: 34 }, (_, i) => `<i style="left:${(i * 37) % 100}%;top:${(i * 53) % 46}%;background:${['#ff6a3a', '#ffd36b', '#3f7fd9', '#ffffff', '#7ad3a0'][i % 5]};transform:rotate(${(i * 47) % 180}deg)"></i>`).join('')}</div>
+    ${statusbar(t, false)}
+    <div class="cg">
+      <p class="cg-k">CONGRATULATIONS</p>
+      <h1 class="cg-h">おめでとう！</h1>
+      <p class="cg-s">渋川の挑戦状をクリアしました</p>
+      <div class="cg-time"><small>クリアタイム</small><b>2:41:08</b><span>10:18 スタート → 12:59 ゴール</span></div>
+      <div class="cg-row">${['compass', 'key', 'stone', 'bottle', 'scale', 'map'].map((k, i) => `<span>${treasureIcon('cg' + i, k, 40)}</span>`).join('')}</div>
+      <div class="cg-cert">
+        <div class="qr-box" style="padding:6px">${fakeQR(11, 92)}</div>
+        <div class="cg-cert-t"><span>渋川からの挑戦状</span><b>達成状</b><em>うみねこ 殿</em><small>参加者 No.0128・お宝 6 / 8</small><i class="cg-clock"><s></s>${t.clock}:42</i></div>
+        <div class="shine"></div>
+      </div>
+      <p class="cg-note">パークセンター（受付）でこの画面を見せると、景品と交換できます</p>
+    </div>
+    <div class="cert-actions"><button class="btn btn-book">${ico.book}メモリアルブックを開く</button><button class="btn btn-glass glass" style="height:46px">${ico.cam}記念写真を撮る</button></div>`
+
 const DAY = THEMES[0], NIGHT = THEMES[2]
 const sec = (title, items, t) => `<section class="section"><div class="section-head"><h2>${title}</h2><span>${t.name}</span></div><div class="rail">${items.map(([k, name, desc]) => `<figure class="shot" style="margin:0"><div class="phone"><div class="screen t-${t.key}">${FS[k](t)}</div></div><figcaption><b>${name}</b>${desc}</figcaption></figure>`).join('')}</div></section>`
-const nightItems = [['home', 'ホーム（夜）', ''], ['cert', 'クリア証明（夜）', ''], ['cover', 'ブック：表紙（夜）', ''], ['mappage', 'ブック：冒険の地図（夜）', ''], ['last', 'ブック：記念写真（夜）', '']]
+const NEW = [
+  ['④ 地図の写真（小さく・タップで大きく）', [['home', 'ホーム：写真を少し小さく', '写真は前より小さく。タップすると大きく見られる'], ['homeTap', 'ホーム：写真をタップ', '大きなポラロイドで表示。左右で次の場所へ・撮り直しも'], ['mappage', 'ブック：冒険の地図', 'ブックの地図の写真も小さく'], ['mapTap', 'ブック：写真をタップ', 'ブックの中でも同じように大きく見られる']]],
+  ['⑤ 写真を一部撮らなかったとき（01・04 は撮らなかった）', [['homeSome', 'ホーム', '撮らなかった場所は小さな宝箱ピン（タップするとあとから撮れる）'], ['mapSome', 'ブック：冒険の地図', '撮らなかった場所は宝箱ピンと時刻だけ'], ['tlSome', 'ブック：お宝の記録', '写真のない所は、お宝の絵と「写真なし」'], ['last', 'ブック：記念写真', '記念写真を撮っていれば、最後のページはいつもどおり']]],
+  ['⑥ 写真を1枚も撮らなかったとき', [['homeNone', 'ホーム', '全部が宝箱ピン。撮れることだけ案内する'], ['mapNone', 'ブック：冒険の地図', '道のりと宝箱ピンだけでも地図として成り立つ'], ['tlNone', 'ブック：お宝の記録', '全部お宝の絵。時刻とかかった時間は残る'], ['lastNone', 'ブック：最後のページ', '記念写真もないときは、集めたお宝を並べる。ここからも撮れる']]],
+  ['⑦ クリアの瞬間（おめでとう＋クリアタイム＋達成状）', [['congrats', 'クリア画面（昼）', '最後のお宝を獲得したら出る。受付で見せる達成状（QR）もこの1画面に']]],
+]
+FS.homeSome = withMode('some', FS.homeM); FS.homeNone = withMode('none', FS.homeM)
+FS.mapSome = withMode('some', FS.mappageM); FS.mapNone = withMode('none', FS.mappageM)
+FS.tlSome = withMode('some', FS.timelineM); FS.tlNone = withMode('none', FS.timelineM)
 const only = new URLSearchParams(location.search).get('only')
 if (only) document.body.classList.add('export')
-const blocks = GROUPS.map(([title, items]) => sec(title, items, DAY))
-blocks.push(sec('夜の見た目', nightItems, NIGHT))
-document.getElementById('sections').innerHTML = only ? blocks[+only] : blocks.join('')
+const blocks = NEW.map(([title, items]) => sec(title, items, DAY))
+const fig = (k, name, t) => `<figure class="shot" style="margin:0"><div class="phone"><div class="screen t-${t.key}">${FS[k](t)}</div></div><figcaption><b>${name}</b></figcaption></figure>`
+blocks.push(`<section class="section"><div class="section-head"><h2>⑦ クリアの瞬間（夕方・夜）</h2></div><div class="rail">${fig('congrats', 'クリア画面（夕方）', THEMES[1])}${fig('congrats', 'クリア画面（夜）', NIGHT)}</div></section>`)
+const OLD = GROUPS.map(([title, items]) => sec(title, items, DAY))
+const all = [...blocks, ...OLD]
+document.getElementById('sections').innerHTML = only ? all[+only] : all.join('')
 </script>
 </body>
 </html>
