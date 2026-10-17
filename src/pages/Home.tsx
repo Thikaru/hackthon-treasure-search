@@ -91,9 +91,6 @@ export default function Home() {
       </div>
 
       <header className="home-top">
-        <span className="avatar" aria-hidden="true">
-          {[...nick][0] ?? '？'}
-        </span>
         <div className="home-who glass">
           <h1>{nick} さん</h1>
           <div className="progress-dots" aria-label={`お宝 ${got} / ${settings.clearCount} 個`}>
