@@ -1,5 +1,5 @@
-import { useEffect, useState } from 'react'
-import { CircleMarker, MapContainer, Marker, TileLayer, Tooltip, useMap, useMapEvents } from 'react-leaflet'
+import { useEffect, useMemo, useState } from 'react'
+import { MapContainer, Marker, TileLayer, Tooltip, useMap, useMapEvents } from 'react-leaflet'
 import L, { type LatLngBoundsExpression, type LatLngTuple } from 'leaflet'
 import type { MapPin } from './AreaMap'
 
@@ -45,24 +45,37 @@ const PIN_COLOR: Record<MapPin['state'], string> = {
   acquired: '#1F4FB8',
 }
 
+// 元のイラストマップと同じ涙型ピンの見た目を、地図上でも目立つように divIcon で再現
+function treasureIcon(pin: MapPin) {
+  const big = pin.selected
+  const fill = PIN_COLOR[pin.state]
+  const stroke = pin.state === 'located' ? '#22406E' : '#FFFFFF'
+  const text = pin.state === 'located' ? '#22406E' : '#FFFFFF'
+  const s = big ? 1.2 : 1
+  const w = 32 * s
+  const h = 38 * s
+  const html = `
+    <svg width="${w}" height="${h}" viewBox="0 0 32 38" xmlns="http://www.w3.org/2000/svg" style="filter: drop-shadow(0 1px 2px rgba(34,64,110,.45))">
+      <path d="M16 37 C 12 27, 2 20, 2 13 A14 14 0 1 1 30 13 C 30 20, 20 27, 16 37 Z" fill="${fill}" stroke="${stroke}" stroke-width="2.5" />
+      <text x="16" y="17.5" text-anchor="middle" font-size="11.5" font-weight="700" fill="${text}" font-family="Noto Sans JP, sans-serif">${pin.no}</text>
+    </svg>`
+  return L.divIcon({
+    className: 'treasure-pin-icon',
+    html,
+    iconSize: [w, h],
+    iconAnchor: [w / 2, h],
+  })
+}
+
 function TreasureMarker({ pin, onSelect }: { pin: MapPin; onSelect: (id: string) => void }) {
   const pos = pinToLatLng(pin.x, pin.y)
+  const icon = useMemo(() => treasureIcon(pin), [pin])
   return (
-    <CircleMarker
-      center={pos}
-      radius={pin.selected ? 14 : 11}
-      pathOptions={{
-        color: pin.state === 'located' ? '#22406E' : '#FFFFFF',
-        weight: pin.state === 'located' ? 2.2 : 2,
-        fillColor: PIN_COLOR[pin.state],
-        fillOpacity: 1,
-      }}
-      eventHandlers={{ click: () => onSelect(pin.id) }}
-    >
-      <Tooltip direction="top" offset={[0, -10]}>
+    <Marker position={pos} icon={icon} eventHandlers={{ click: () => onSelect(pin.id) }} zIndexOffset={pin.selected ? 1000 : 0}>
+      <Tooltip direction="top" offset={[0, -34]}>
         No.{pin.no}
       </Tooltip>
-    </CircleMarker>
+    </Marker>
   )
 }
 
