@@ -100,6 +100,8 @@ export function loadStage(): Promise<void> {
   }
   setStatus('loading')
   const cv = stageCanvas()
+  // iPhone の Safari はメモリが足りないと WebGL を捨てることがある。そのときは SVG の宝箱に切り替える
+  cv.addEventListener('webglcontextlost', () => setStatus('failed'))
   window.TreasureStageNotify = (m: string) => {
     if (m === 'ready') setStatus('ready')
     messageListeners.forEach((f) => f(m))
@@ -115,6 +117,11 @@ export function loadStage(): Promise<void> {
         productName: 'TreasureStage',
         productVersion: '0.1.0',
         devicePixelRatio: Math.min(window.devicePixelRatio || 1, 2),
+        // Unity の既定ではエラーを alert で出してしまう。演出が止まるだけなので、黙って SVG に切り替える
+        errorHandler: () => {
+          setStatus('failed')
+          return true
+        },
       }),
     )
     .then((u) => {

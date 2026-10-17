@@ -119,7 +119,7 @@ NavMeshSettings:
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 0}
---- !u!1 &1423964820
+--- !u!1 &1219360974
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -127,9 +127,9 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 1423964823}
-  - component: {fileID: 1423964822}
-  - component: {fileID: 1423964821}
+  - component: {fileID: 1219360977}
+  - component: {fileID: 1219360976}
+  - component: {fileID: 1219360975}
   m_Layer: 0
   m_Name: Bridge
   m_TagString: Untagged
@@ -137,38 +137,38 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &1423964821
+--- !u!114 &1219360975
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1423964820}
+  m_GameObject: {fileID: 1219360974}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 72ace607520194997b5a90bda6718102, type: 3}
   m_Name: 
   m_EditorClassIdentifier: TreasureStage::TreasureStage.Bridge
---- !u!114 &1423964822
+--- !u!114 &1219360976
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1423964820}
+  m_GameObject: {fileID: 1219360974}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 235963dd164ad47d7a0e850a13b957a5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: TreasureStage::TreasureStage.Stage
   Transparent: 1
---- !u!4 &1423964823
+--- !u!4 &1219360977
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1423964820}
+  m_GameObject: {fileID: 1219360974}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
@@ -181,4 +181,4 @@ Transform:
 SceneRoots:
   m_ObjectHideFlags: 0
   m_Roots:
-  - {fileID: 1423964823}
+  - {fileID: 1219360977}
