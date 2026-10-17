@@ -28,6 +28,11 @@ namespace TreasureStage
 
         void Awake()
         {
+#if UNITY_WEBGL && !UNITY_EDITOR
+            // Unity は既定でページ全体のキー入力を横取りし、入力欄の削除キーなどが効かなくなる。
+            // 舞台はキー操作を使わないので、キー入力はすべてページ側に渡す
+            WebGLInput.captureAllKeyboardInput = false;
+#endif
             _lit = Resources.Load<Shader>("Shaders/TSLit") ?? Shader.Find("TS/Lit");
             _unlit = Resources.Load<Shader>("Shaders/TSUnlit") ?? Shader.Find("TS/Unlit");
             _add = Resources.Load<Shader>("Shaders/TSAdditive") ?? Shader.Find("TS/Additive");

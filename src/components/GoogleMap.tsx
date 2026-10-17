@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState, type CSSProperties } from 'react'
+import { useEffect, useMemo, useRef, useState, type CSSProperties, type PointerEvent as ReactPointerEvent } from 'react'
 import { mapChestSvg } from '../art/svgArt'
 import type { TimeOfDay } from '../lib/unityStage'
 import type { MapPin } from './AreaMap'
@@ -6,7 +6,7 @@ import type { MapPin } from './AreaMap'
 // 砂浜エリアの地図（Google マップ）。
 // ・VITE_GOOGLE_MAPS_API_KEY があれば Maps JavaScript API（動かせる地図・時間帯ごとの配色）
 // ・なければ鍵のいらない埋め込み地図を使い、宝箱ピンや現在地は地図の座標から計算して上に重ねる
-//   （埋め込み地図は外から操作できないので、ズーム・現在地はこちらのボタンで地図を出し直す）
+//   （埋め込み地図は外から操作できないので、なぞる・2本指・ボタンの操作はこちらで受けて地図を出し直す）
 
 const API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY as string | undefined
 
@@ -98,11 +98,41 @@ function PinButton({ pin, onSelect, style }: { pin: MapPin; onSelect: (id: strin
 
 // ---------------------------------------------------------------- 鍵なし：埋め込み地図
 
+// project の逆（ピクセル → 緯度経度）
+function unproject(x: number, y: number, z: number): LatLng {
+  const scale = 256 * 2 ** z
+  const lng = (x / scale) * 360 - 180
+  const lat = (Math.atan(Math.sinh(Math.PI * (1 - (2 * y) / scale))) * 180) / Math.PI
+  return { lat, lng }
+}
+
+const PAN_LIMIT = { south: BOUNDS.south - 0.012, west: BOUNDS.west - 0.015, north: BOUNDS.north + 0.012, east: BOUNDS.east + 0.015 }
+const clampCenter = (p: LatLng): LatLng => ({
+  lat: Math.min(PAN_LIMIT.north, Math.max(PAN_LIMIT.south, p.lat)),
+  lng: Math.min(PAN_LIMIT.east, Math.max(PAN_LIMIT.west, p.lng)),
+})
+const embedSrc = (c: LatLng, z: number) => `https://maps.google.com/maps?ll=${c.lat.toFixed(5)},${c.lng.toFixed(5)}&z=${z}&t=m&hl=ja&output=embed`
+
+interface View {
+  center: LatLng
+  zoom: number
+}
+
+/**
+ * 鍵のいらない埋め込み地図は外から動かせないので、指の操作はこちらで受ける。
+ * ・地図は画面の2倍の大きさで読み込み、なぞっている間は地図ごと（ピンも一緒に）ずらして見せる
+ * ・指を離したら、その位置を中心に地図を読み直す（読み終わるまで前の地図を出しておき、ちらつかせない）
+ * ・2本指で広げる／縮めるとズーム
+ */
 function EmbedMap({ pins, onSelect, tod }: Props) {
   const box = useRef<HTMLDivElement>(null)
   const [size, setSize] = useState({ w: 0, h: 0 })
-  const [zoom, setZoom] = useState(16)
-  const [center, setCenter] = useState<LatLng>(BEACH)
+  const [shown, setShown] = useState<View>({ center: BEACH, zoom: 16 })
+  const [pending, setPending] = useState<View | null>(null)
+  const [off, setOff] = useState({ x: 0, y: 0, s: 1 })
+  const pointers = useRef(new Map<number, { x: number; y: number }>())
+  const gesture = useRef<{ x: number; y: number; dist: number; moved: boolean } | null>(null)
+  const suppressClick = useRef(false)
   const me = useMyLocation()
 
   useEffect(() => {
@@ -113,22 +143,118 @@ function EmbedMap({ pins, onSelect, tod }: Props) {
     return () => ro.disconnect()
   }, [])
 
+  const target = pending ?? shown
+  const goTo = (v: View) => {
+    const next = { center: clampCenter(v.center), zoom: Math.min(19, Math.max(14, v.zoom)) }
+    if (embedSrc(next.center, next.zoom) === embedSrc(shown.center, shown.zoom)) {
+      setPending(null)
+      setOff({ x: 0, y: 0, s: 1 })
+    } else setPending(next)
+  }
+
   useEffect(() => {
-    if (me.state === 'on' && me.pos && inBounds(me.pos)) setCenter(me.pos)
     // 現在地ボタンを押した直後の1回だけ寄せる
+    if (me.state === 'on' && me.pos && inBounds(me.pos)) goTo({ center: me.pos, zoom: Math.max(target.zoom, 17) })
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [me.state])
 
-  const c = project(center, zoom)
+  const c = project(shown.center, shown.zoom)
   const place = (p: LatLng) => {
-    const q = project(p, zoom)
-    return { left: size.w / 2 + (q.x - c.x), top: size.h / 2 + (q.y - c.y) }
+    const q = project(p, shown.zoom)
+    return { left: size.w / 2 + (q.x - c.x) * off.s + off.x, top: size.h / 2 + (q.y - c.y) * off.s + off.y }
   }
-  const src = `https://maps.google.com/maps?ll=${center.lat.toFixed(5)},${center.lng.toFixed(5)}&z=${zoom}&t=m&hl=ja&output=embed`
+
+  const twoFingerDist = () => {
+    const [a, b] = [...pointers.current.values()]
+    return a && b ? Math.hypot(a.x - b.x, a.y - b.y) : 0
+  }
+  const mid = () => {
+    const ps = [...pointers.current.values()]
+    return { x: ps.reduce((t, p) => t + p.x, 0) / ps.length, y: ps.reduce((t, p) => t + p.y, 0) / ps.length }
+  }
+
+  const onDown = (e: ReactPointerEvent) => {
+    pointers.current.set(e.pointerId, { x: e.clientX, y: e.clientY })
+    const m = mid()
+    gesture.current = { x: m.x - off.x, y: m.y - off.y, dist: twoFingerDist() / off.s || 0, moved: gesture.current?.moved ?? false }
+  }
+  const onMove = (e: ReactPointerEvent) => {
+    if (!pointers.current.has(e.pointerId) || !gesture.current) return
+    pointers.current.set(e.pointerId, { x: e.clientX, y: e.clientY })
+    const m = mid()
+    const g = gesture.current
+    let x = m.x - g.x
+    let y = m.y - g.y
+    if (!g.moved && Math.hypot(x - off.x, y - off.y) < 6 && pointers.current.size < 2) return
+    if (!g.moved) {
+      g.moved = true
+      box.current?.setPointerCapture(e.pointerId)
+    }
+    let s = off.s
+    if (pointers.current.size >= 2 && g.dist > 0) s = Math.min(4, Math.max(0.25, twoFingerDist() / g.dist))
+    // 読み込んである地図（画面の2倍）の外が見えないところまで
+    x = Math.max(-size.w / 2, Math.min(size.w / 2, x))
+    y = Math.max(-size.h / 2, Math.min(size.h / 2, y))
+    setOff({ x, y, s })
+  }
+  const onUp = (e: ReactPointerEvent) => {
+    pointers.current.delete(e.pointerId)
+    const g = gesture.current
+    if (pointers.current.size > 0) {
+      // 2本指のうち1本が離れた：残った指で続ける
+      const m = mid()
+      gesture.current = g && { ...g, x: m.x - off.x, y: m.y - off.y, dist: twoFingerDist() / off.s || 0 }
+      return
+    }
+    gesture.current = null
+    if (!g?.moved) return
+    suppressClick.current = true
+    window.setTimeout(() => (suppressClick.current = false), 0)
+    const dz = Math.round(Math.log2(off.s))
+    const centerPx = { x: c.x - off.x / off.s, y: c.y - off.y / off.s }
+    goTo({ center: unproject(centerPx.x, centerPx.y, shown.zoom), zoom: shown.zoom + dz })
+  }
+
+  const shownSrc = embedSrc(shown.center, shown.zoom)
+  const pendingSrc = pending && embedSrc(pending.center, pending.zoom)
 
   return (
-    <div className="gmap" ref={box}>
-      <iframe key={src} src={src} title="渋川海岸の Google マップ" referrerPolicy="no-referrer-when-downgrade" tabIndex={-1} />
+    <div
+      className="gmap gmap-pan"
+      ref={box}
+      onPointerDown={onDown}
+      onPointerMove={onMove}
+      onPointerUp={onUp}
+      onPointerCancel={onUp}
+      onClickCapture={(e) => {
+        if (suppressClick.current) {
+          e.stopPropagation()
+          e.preventDefault()
+        }
+      }}
+    >
+      <div className="gmap-layer" style={{ transform: `translate(${off.x}px, ${off.y}px) scale(${off.s})` }}>
+        <iframe key={shownSrc} src={shownSrc} title="渋川海岸の Google マップ" referrerPolicy="no-referrer-when-downgrade" tabIndex={-1} />
+      </div>
+      {pendingSrc && (
+        <div className="gmap-layer gmap-pending">
+          <iframe
+            key={pendingSrc}
+            src={pendingSrc}
+            title="渋川海岸の Google マップ（読み込み中）"
+            referrerPolicy="no-referrer-when-downgrade"
+            tabIndex={-1}
+            onLoad={() => {
+              // 新しい地図が描かれるまで少し待ってから入れ替える
+              window.setTimeout(() => {
+                setShown(pending)
+                setPending(null)
+                setOff({ x: 0, y: 0, s: 1 })
+              }, 250)
+            }}
+          />
+        </div>
+      )}
       <div className={`gmap-light gmap-${tod}`} aria-hidden="true" />
       {size.w > 0 &&
         pins.map((pin) => {
@@ -137,11 +263,11 @@ function EmbedMap({ pins, onSelect, tod }: Props) {
           return <PinButton key={pin.id} pin={pin} onSelect={onSelect} style={{ left: p.left, top: p.top }} />
         })}
       {me.pos && size.w > 0 && <span className="me-dot" style={place(me.pos)} aria-label="現在地" role="img" />}
-      <div className="gmap-tools">
-        <button type="button" className="map-fab" aria-label="ズームイン" onClick={() => setZoom((z) => Math.min(19, z + 1))}>
+      <div className="gmap-tools" onPointerDown={(e) => e.stopPropagation()}>
+        <button type="button" className="map-fab" aria-label="ズームイン" onClick={() => goTo({ center: target.center, zoom: target.zoom + 1 })}>
           ＋
         </button>
-        <button type="button" className="map-fab" aria-label="ズームアウト" onClick={() => setZoom((z) => Math.max(14, z - 1))}>
+        <button type="button" className="map-fab" aria-label="ズームアウト" onClick={() => goTo({ center: target.center, zoom: target.zoom - 1 })}>
           －
         </button>
         <button
@@ -149,8 +275,8 @@ function EmbedMap({ pins, onSelect, tod }: Props) {
           className={'map-fab' + (me.state === 'on' ? ' on' : me.state === 'waiting' ? ' waiting' : '')}
           aria-label="現在地を表示"
           onClick={() => {
-            if (me.state === 'on' && me.pos && inBounds(me.pos)) setCenter(me.pos)
-            else if (me.state === 'on') setCenter(BEACH)
+            if (me.state === 'on' && me.pos && inBounds(me.pos)) goTo({ center: me.pos, zoom: Math.max(target.zoom, 17) })
+            else if (me.state === 'on') goTo({ center: BEACH, zoom: 16 })
             else me.start()
           }}
         >
