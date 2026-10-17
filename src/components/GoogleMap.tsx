@@ -271,6 +271,18 @@ function EmbedMap({ pins, onSelect, tod }: Props) {
     }
   }, [])
 
+  // 地図の外で指を離しても記録を消す（ページ全体で「離した」合図を受ける）
+  const upRef = useRef<(e: PointerEvent) => void>(() => undefined)
+  useEffect(() => {
+    const f = (e: PointerEvent) => upRef.current(e)
+    window.addEventListener('pointerup', f)
+    window.addEventListener('pointercancel', f)
+    return () => {
+      window.removeEventListener('pointerup', f)
+      window.removeEventListener('pointercancel', f)
+    }
+  }, [])
+
   const mid = () => {
     const ps = [...pointers.current.values()]
     return { x: ps.reduce((t, p) => t + p.x, 0) / ps.length, y: ps.reduce((t, p) => t + p.y, 0) / ps.length }
@@ -286,6 +298,13 @@ function EmbedMap({ pins, onSelect, tod }: Props) {
   }
 
   const onDown = (e: ReactPointerEvent) => {
+    // スマホでは、地図の外で指を離したときなどに「離した」合図が届かず、離れたはずの指が残ることがある。
+    // 残ったままだと次の1本指の移動が「2本指で広げた」と判定されてズームになってしまうので、
+    // 新しく触れた最初の指（isPrimary）では、前の指の記録を捨ててから始める
+    if (e.isPrimary) {
+      pointers.current.clear()
+      gesture.current = null
+    }
     pointers.current.set(e.pointerId, local(e))
     restart(gesture.current?.moved ?? false)
   }
@@ -304,7 +323,8 @@ function EmbedMap({ pins, onSelect, tod }: Props) {
     // 指の下の地点が指についてくるように動かす
     setView(clampView({ c: { x: g.anchor.x - (m.x - size.w / 2) / kk, y: g.anchor.y - (m.y - size.h / 2) / kk }, zf }))
   }
-  const onUp = (e: ReactPointerEvent) => {
+  const onUp = (e: { pointerId: number }) => {
+    if (!pointers.current.has(e.pointerId)) return
     pointers.current.delete(e.pointerId)
     const g = gesture.current
     if (pointers.current.size > 0) {
@@ -317,6 +337,7 @@ function EmbedMap({ pins, onSelect, tod }: Props) {
     window.setTimeout(() => (suppressClick.current = false), 0)
     settle(view)
   }
+  upRef.current = onUp
 
   const layer = (z: number) => {
     const sh = sheetFor(z)
