@@ -1,0 +1,366 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>渋川からの挑戦状 チラシ案</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@700;900&family=Noto+Sans+JP:wght@500;700;900&family=Yusei+Magic&family=Dela+Gothic+One&display=swap" rel="stylesheet" />
+<style>
+  html, body { margin: 0; background: #1b2130; }
+  .poster { display: block; width: 1240px; height: 1754px; margin: 0 auto 40px; }
+  body.one .poster { margin: 0; }
+</style>
+</head>
+<body>
+<div id="out"></div>
+<script type="module">
+import { chestSvg, treasureSvg, mapChestSvg } from '../../src/art/svgArt.js'
+import { QR_SVG } from './qr.js'
+
+// =====================================================================
+// 手書き風の文字（レタリング）
+// 字形の元にフォントを使うが、1文字ずつ傾け・大きさを変え、太い縁取り・影・
+// 線のゆらぎ（にじみ）を重ねて「描いた文字」に見せる。一部の字は絵に置き換える。
+// =====================================================================
+let seed = 7
+const rnd = () => ((seed = (seed * 9301 + 49297) % 233280) / 233280)
+const jit = (a) => (rnd() * 2 - 1) * a
+let uid = 0
+
+// 絵に置き換える文字
+const GLYPHS = {
+  // 「の」を、波がくるっと巻いた形に
+  wave: (s) => `<path d="M ${0.2 * s} ${-0.02 * s} C ${0.26 * s} ${-0.36 * s} ${-0.34 * s} ${-0.4 * s} ${-0.34 * s} ${0.02 * s} C ${-0.34 * s} ${0.32 * s} ${0.02 * s} ${0.38 * s} ${0.24 * s} ${0.16 * s} C ${0.4 * s} ${0} ${0.3 * s} ${-0.3 * s} ${0.04 * s} ${-0.34 * s} M ${0.02 * s} ${-0.3 * s} C ${-0.06 * s} ${-0.05 * s} ${-0.1 * s} ${0.15 * s} ${-0.22 * s} ${0.26 * s}" fill="none" stroke-linecap="round" stroke-linejoin="round"/>`,
+  // 「×」を、交差した2本の鍵の形に
+  keys: (s) => `<path d="M ${-0.3 * s} ${-0.3 * s} L ${0.3 * s} ${0.3 * s} M ${0.3 * s} ${-0.3 * s} L ${-0.3 * s} ${0.3 * s}" fill="none" stroke-linecap="round"/>`,
+}
+
+/**
+ * chars: 文字の配列（{g:'wave'} で絵の字）
+ * o: { x, y, size, gap, rot, font, fill:[上,下], edge, outline, white, shadow, rough, stroke }
+ */
+function lettering(chars, o) {
+  const id = 'L' + uid++
+  const size = o.size, gap = o.gap ?? 0.94
+  const outW = o.outW ?? size * 0.2, whiteW = o.whiteW ?? size * 0.11
+  const items = [...chars].map((c, i) => {
+    const r = jit(o.rot ?? 5), sc = 1 + jit(o.scale ?? 0.05), dy = jit(o.dy ?? size * 0.04)
+    const cx = (o.vertical ? 0 : i * size * gap), cy = (o.vertical ? i * size * gap : 0) + dy
+    return { c, r, sc, cx, cy }
+  })
+  const glyph = (it, layer) => {
+    const t = `translate(${it.cx} ${it.cy}) rotate(${it.r}) scale(${it.sc})`
+    if (typeof it.c === 'object') {
+      const strokeW = { shadow: size * 0.13 + outW, out: size * 0.13 + outW, white: size * 0.13 + whiteW, fill: size * 0.13 }[layer]
+      return `<g transform="${t}" stroke-width="${strokeW}">${GLYPHS[it.c.g](size)}</g>`
+    }
+    return `<text transform="${t}" text-anchor="middle" dominant-baseline="central" font-family="${o.font ?? "'Zen Maru Gothic'"}" font-weight="900" font-size="${size}">${it.c}</text>`
+  }
+  const layer = (name, attrs) => `<g ${attrs}>${items.map((it) => glyph(it, name)).join('')}</g>`
+  const rough = o.rough ?? 3
+  return `<g transform="translate(${o.x} ${o.y})">
+    <defs>
+      <linearGradient id="${id}g" x1="0" y1="${-size / 2}" x2="0" y2="${size / 2}" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="${o.fill[0]}"/><stop offset="1" stop-color="${o.fill[1]}"/></linearGradient>
+      <filter id="${id}r" x="-20%" y="-40%" width="140%" height="180%"><feTurbulence type="fractalNoise" baseFrequency="${o.freq ?? 0.035}" numOctaves="2" seed="${uid}"/><feDisplacementMap in="SourceGraphic" scale="${rough}"/></filter>
+    </defs>
+    <g filter="url(#${id}r)">
+      ${o.shadow !== false ? layer('shadow', `fill="${o.shadowColor ?? o.outline}" stroke="${o.shadowColor ?? o.outline}" stroke-width="${outW}" stroke-linejoin="round" transform="translate(${size * 0.06} ${size * 0.08})" opacity="${o.shadowOpacity ?? 1}"`) : ''}
+      ${layer('out', `fill="${o.outline}" stroke="${o.outline}" stroke-width="${outW}" stroke-linejoin="round"`)}
+      ${o.white !== false ? layer('white', `fill="${o.white ?? '#fff'}" stroke="${o.white ?? '#fff'}" stroke-width="${whiteW}" stroke-linejoin="round"`) : ''}
+      ${layer('fill', `fill="url(#${id}g)" stroke="${o.edge ?? 'url(#' + id + 'g)'}" stroke-width="${size * 0.03}" stroke-linejoin="round"`)}
+      ${o.shine !== false ? `<g opacity=".55" clip-path="none">${items.map((it) => typeof it.c === 'object' ? '' : `<text transform="translate(${it.cx - size * 0.03} ${it.cy - size * 0.04}) rotate(${it.r}) scale(${it.sc})" text-anchor="middle" dominant-baseline="central" font-family="${o.font ?? "'Zen Maru Gothic'"}" font-weight="900" font-size="${size}" fill="none" stroke="#fff" stroke-width="${size * 0.018}" stroke-dasharray="${size * 0.25} ${size * 0.6}"/>`).join('')}</g>` : ''}
+    </g>
+  </g>`
+}
+
+const place = (svg, x, y, s = 1) => `<g transform="translate(${x} ${y}) scale(${s})">${svg}</g>`
+
+// ---------------------------------------------------------------- 絵の部品
+function seagull(x, y, s = 1, hat = '#1f4fb8') {
+  return `<g transform="translate(${x} ${y}) scale(${s})">
+    <ellipse cx="0" cy="120" rx="80" ry="16" fill="rgba(0,0,0,.18)"/>
+    <path d="M-70 40 Q-80 -40 0 -50 Q80 -40 70 40 Q60 110 0 115 Q-60 110 -70 40Z" fill="#fff" stroke="#2a3550" stroke-width="6"/>
+    <path d="M-62 30 Q-110 0 -120 40 Q-90 50 -66 60Z" fill="#dfe6f0" stroke="#2a3550" stroke-width="6" stroke-linejoin="round"/>
+    <path d="M60 20 Q118 -20 128 18 Q100 40 64 52Z" fill="#dfe6f0" stroke="#2a3550" stroke-width="6" stroke-linejoin="round"/>
+    <circle cx="-22" cy="-6" r="9" fill="#2a3550"/><circle cx="22" cy="-6" r="9" fill="#2a3550"/>
+    <circle cx="-19" cy="-9" r="3" fill="#fff"/><circle cx="25" cy="-9" r="3" fill="#fff"/>
+    <path d="M-16 12 L16 12 L0 34Z" fill="#ffb21a" stroke="#2a3550" stroke-width="5" stroke-linejoin="round"/>
+    <ellipse cx="-42" cy="18" rx="10" ry="6" fill="#ffb3b3" opacity=".8"/><ellipse cx="42" cy="18" rx="10" ry="6" fill="#ffb3b3" opacity=".8"/>
+    <path d="M-50 -46 Q0 -96 50 -46 Z" fill="${hat}" stroke="#2a3550" stroke-width="6" stroke-linejoin="round"/>
+    <rect x="-60" y="-52" width="120" height="16" rx="8" fill="#fff" stroke="#2a3550" stroke-width="6"/>
+    <path d="M-10 -78 l10 -8 l10 8" fill="none" stroke="#ffd36b" stroke-width="5" stroke-linecap="round"/>
+    <path d="M-30 112 l-6 18 M-14 114 l-2 18 M14 114 l2 18 M30 112 l6 18" stroke="#ffb21a" stroke-width="7" stroke-linecap="round"/>
+  </g>`
+}
+
+function bubble(x, y, w, h, text, tail = 'left') {
+  const tx = tail === 'left' ? 40 : w - 60
+  return `<g transform="translate(${x} ${y})">
+    <path d="M24 0 H${w - 24} Q${w} 0 ${w} 24 V${h - 24} Q${w} ${h} ${w - 24} ${h} H${tx + 40} L${tx + 10} ${h + 34} L${tx + 10} ${h} H24 Q0 ${h} 0 ${h - 24} V24 Q0 0 24 0Z" fill="#fff" stroke="#2a3550" stroke-width="6" stroke-linejoin="round"/>
+    <text x="${w / 2}" y="${h / 2}" text-anchor="middle" dominant-baseline="central" font-family="'Yusei Magic'" font-size="34" fill="#2a3550">${text}</text>
+  </g>`
+}
+
+function bridge(x, y, w, color, lights) {
+  const t1 = x + w * 0.28, t2 = x + w * 0.72, top = y - 150
+  const lamp = lights ? Array.from({ length: 26 }, (_, i) => `<circle cx="${x + (w * i) / 25}" cy="${y + 2}" r="3.5" fill="#ffd27a"/>`).join('') : ''
+  return `<g stroke="${color}" fill="none" stroke-linecap="round">
+    <path d="M${x} ${y} H${x + w}" stroke-width="10"/>
+    ${[t1, t2].map((t) => `<path d="M${t - 14} ${y + 30} V${top} M${t + 14} ${y + 30} V${top} M${t - 14} ${top + 30} H${t + 14} M${t - 14} ${top + 90} H${t + 14}" stroke-width="8"/>`).join('')}
+    <path d="M${x} ${y - 10} Q${(x + t1) / 2} ${y - 40} ${t1} ${top + 4} Q${(t1 + t2) / 2} ${y - 20} ${t2} ${top + 4} Q${(t2 + x + w) / 2} ${y - 40} ${x + w} ${y - 10}" stroke-width="4"/>
+    ${lamp}
+  </g>`
+}
+
+function rays(cx, cy, r, color, n = 28, op = 0.35) {
+  return `<g opacity="${op}">${Array.from({ length: n }, (_, i) => {
+    const a = (i / n) * Math.PI * 2, b = a + Math.PI / n * 0.8
+    return `<path d="M${cx} ${cy} L${cx + Math.cos(a) * r} ${cy + Math.sin(a) * r} L${cx + Math.cos(b) * r} ${cy + Math.sin(b) * r}Z" fill="${color}"/>`
+  }).join('')}</g>`
+}
+
+function sparkle(x, y, s, c = '#fff') {
+  return `<path transform="translate(${x} ${y}) scale(${s})" d="M0 -20 Q2 -2 20 0 Q2 2 0 20 Q-2 2 -20 0 Q-2 -2 0 -20Z" fill="${c}"/>`
+}
+
+function qr(x, y, size) {
+  return `<g transform="translate(${x} ${y})"><rect x="-14" y="-14" width="${size + 28}" height="${size + 28}" rx="16" fill="#fff"/><svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}">${QR_SVG.replace('<svg', `<svg width="${size}" height="${size}"`)}</svg></g>`
+}
+
+// 情報欄（細かい文字はフォント）
+function infoBlock(y, theme) {
+  const ink = theme.ink, sub = theme.sub, box = theme.box, acc = theme.acc
+  return `<g transform="translate(0 ${y})">
+    <rect x="50" y="0" width="1140" height="300" rx="28" fill="${box}" stroke="${theme.boxLine}" stroke-width="4"/>
+    <g font-family="'Noto Sans JP'" fill="${ink}">
+      <rect x="86" y="36" width="150" height="46" rx="10" fill="${acc}"/>
+      <text x="161" y="67" text-anchor="middle" font-size="26" font-weight="900" fill="#fff">受付時間</text>
+      <text x="256" y="72" font-size="44" font-weight="900">9:30〜15:30</text>
+      <text x="560" y="70" font-size="22" font-weight="700" fill="${sub}">（ゴール受付は16:00まで）</text>
+      <rect x="86" y="104" width="150" height="46" rx="10" fill="${acc}"/>
+      <text x="161" y="135" text-anchor="middle" font-size="26" font-weight="900" fill="#fff">受付場所</text>
+      <text x="256" y="139" font-size="34" font-weight="900">渋川海岸 パークセンター</text>
+      <rect x="86" y="172" width="150" height="46" rx="10" fill="${acc}"/>
+      <text x="161" y="203" text-anchor="middle" font-size="26" font-weight="900" fill="#fff">あそびかた</text>
+      <text x="256" y="196" font-size="24" font-weight="700">スマホで右のQRを読み、謎を解いて浜のお宝を探そう。</text>
+      <text x="256" y="230" font-size="24" font-weight="700">お宝を6個集めると、受付で記念品と交換できます。</text>
+      <text x="86" y="276" font-size="19" font-weight="500" fill="${sub}">※ 日時・景品などは仮の内容です。 ※ 満潮の時間帯は波打ち際に近づかないでください。</text>
+    </g>
+    ${qr(935, 40, 190)}
+    <text x="1030" y="292" text-anchor="middle" font-family="'Noto Sans JP'" font-size="18" font-weight="700" fill="${sub}">aipapagames.com/shibukawa</text>
+  </g>`
+}
+
+// 日付（手書き風）
+function dateBlock(x, y, c) {
+  const S = 104, G = 0.8, step = S * G
+  const d1 = ['1', '1', '/', '3'], d2 = ['1', '1', '/', '2', '9']
+  const end1 = x + S * 0.3 + (d1.length - 1) * step + S * 0.5
+  const a0 = end1 + 52, a1 = a0 + 60
+  const x2 = a1 + 40
+  const end2 = x2 + S * 0.3 + (d2.length - 1) * step + S * 0.5
+  const L = (chars, xx, yy, o) => lettering(chars, { x: xx, y: yy, rot: 3, fill: [c.fill1, c.fill2], outline: c.out, rough: 2.5, font: "'Dela Gothic One'", ...o })
+  const wd = (txt, xx) => lettering([...txt], { x: xx, y: y + 70, size: 30, gap: 0.95, vertical: true, rot: 0, fill: [c.out, c.out], outline: '#fff', outW: 7, white: false, shadow: false, shine: false, rough: 1, font: "'Dela Gothic One'" })
+  return `<g>
+    ${L(['2', '0', '2', '6', '.'], x + 4, y + 4, { size: 54, gap: 0.82, outW: 8, whiteW: 4 })}
+    ${L(d1, x + S * 0.3, y + 104, { size: S, gap: G, outW: 15, whiteW: 8 })}
+    ${wd('TUE', end1 + 20)}
+    <path d="M${a0} ${y + 104} h60 m-22 -22 l22 22 l-22 22" fill="none" stroke="${c.out}" stroke-width="13" stroke-linecap="round" stroke-linejoin="round"/>
+    ${L(d2, x2 + S * 0.3, y + 104, { size: S, gap: G, outW: 15, whiteW: 8 })}
+    ${wd('SUN', end2 + 20)}
+  </g>`
+}
+
+// 「参加無料」のリボン
+function ribbon(x, y, w, color, text, c2) {
+  return `<g transform="translate(${x} ${y}) rotate(-3)">
+    <path d="M0 0 H${w} L${w - 26} 40 L${w} 80 H0 L26 40Z" fill="${color}" stroke="${c2}" stroke-width="6" stroke-linejoin="round"/>
+    ${lettering([...text], { x: 70, y: 40, size: 50, gap: 1.0, rot: 3, fill: ['#fff', '#fff6d8'], outline: c2, outW: 8, whiteW: 0.1, white: false, rough: 1.5, shine: false })}
+  </g>`
+}
+
+// =====================================================================
+// 案A：昼・海と開いた宝箱（参考のチラシに近い構図）
+// =====================================================================
+function posterA() {
+  seed = 11
+  const W = 1240, H = 1754
+  return `<svg class="poster" viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="aSky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#4f9be8"/><stop offset=".55" stop-color="#a8d8f5"/><stop offset="1" stop-color="#fff3d6"/></linearGradient>
+    <radialGradient id="aSun" cx="0.62" cy="0.5" r="0.5"><stop offset="0" stop-color="#fffbe8"/><stop offset=".35" stop-color="#fff0a8" stop-opacity=".9"/><stop offset="1" stop-color="#fff0a8" stop-opacity="0"/></radialGradient>
+    <linearGradient id="aSea" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2f7fd0"/><stop offset="1" stop-color="#6cc4e8"/></linearGradient>
+    <linearGradient id="aSand" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f3dcae"/><stop offset="1" stop-color="#e2bd82"/></linearGradient>
+    <filter id="aPaper"><feTurbulence type="fractalNoise" baseFrequency=".9" numOctaves="2" seed="3"/><feColorMatrix values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 .06 0"/><feComposite in2="SourceGraphic" operator="over"/></filter>
+    <filter id="aGlow"><feGaussianBlur stdDeviation="14"/></filter>
+  </defs>
+  <rect width="${W}" height="${H}" fill="url(#aSky)"/>
+  <!-- 上の帯 -->
+  <rect width="${W}" height="88" fill="#1b3a6e"/>
+  <text x="${W / 2}" y="58" text-anchor="middle" font-family="'Noto Sans JP'" font-weight="900" font-size="34" fill="#fff" letter-spacing="4">岡山県玉野市・渋川海岸　リアル宝探しイベント</text>
+  <!-- 光の渦 -->
+  ${rays(760, 900, 900, '#fffbe0', 32, 0.35)}
+  <circle cx="760" cy="900" r="520" fill="url(#aSun)"/>
+  ${[440, 360, 280].map((r, i) => `<circle cx="760" cy="900" r="${r}" fill="none" stroke="#fff" stroke-width="${18 - i * 4}" opacity="${0.35 - i * 0.08}"/>`).join('')}
+  <!-- 雲 -->
+  ${[[150, 760, 1.1], [1080, 640, 0.9], [980, 300, 0.7]].map(([x, y, s]) => `<g transform="translate(${x} ${y}) scale(${s})" fill="#fff" opacity=".9"><ellipse cx="0" cy="0" rx="110" ry="40"/><ellipse cx="-50" cy="-20" rx="60" ry="45"/><ellipse cx="40" cy="-30" rx="70" ry="55"/></g>`).join('')}
+  <!-- 島と瀬戸大橋 -->
+  <path d="M0 1010 Q120 960 240 990 Q320 950 420 985 L420 1010Z" fill="#5f8fb5" opacity=".7"/>
+  <path d="M760 1012 Q880 958 1010 990 Q1120 960 1240 985 V1012Z" fill="#5f8fb5" opacity=".7"/>
+  ${bridge(230, 1000, 760, '#3f6f9e', false)}
+  <!-- 海と波打ち際 -->
+  <rect y="1010" width="${W}" height="220" fill="url(#aSea)"/>
+  ${Array.from({ length: 9 }, (_, i) => `<path d="M${-40 + (i % 3) * 420 + (i * 37) % 120} ${1050 + Math.floor(i / 3) * 50} q30 -14 60 0 t60 0" fill="none" stroke="#fff" stroke-width="5" stroke-linecap="round" opacity=".7"/>`).join('')}
+  <path d="M0 1200 Q300 1160 620 1190 T1240 1170 V1754 H0Z" fill="url(#aSand)"/>
+  <path d="M0 1200 Q300 1160 620 1190 T1240 1170" fill="none" stroke="#fff" stroke-width="16" stroke-linecap="round"/>
+  ${Array.from({ length: 7 }, (_, i) => `<circle cx="${80 + i * 170}" cy="${1140 + (i % 2) * 18}" r="13" fill="#ff6a3a" stroke="#a3361e" stroke-width="4"/>`).join('')}
+  <!-- 宝箱と光 -->
+  <ellipse cx="560" cy="1090" rx="300" ry="220" fill="#fff7c8" filter="url(#aGlow)" opacity=".85"/>
+  ${place(chestSvg('a1', { size: 470, open: true }), 330, 820)}
+  ${[[420, 830, 1.6], [700, 790, 1.2], [560, 760, 2], [780, 900, 1], [350, 930, 1]].map(([x, y, s]) => sparkle(x, y, s)).join('')}
+  ${place(treasureSvg('a2', 'compass', 120), 300, 690)}
+  ${place(treasureSvg('a3', 'bottle', 100), 720, 660)}
+  ${place(treasureSvg('a4', 'key', 110), 820, 780)}
+  <!-- うみねこ船長 -->
+  ${seagull(1010, 1060, 1.25)}
+  ${bubble(780, 820, 400, 90, 'ぼくと一緒に探そう！', 'right')}
+  <!-- タイトル（レタリング） -->
+  <g transform="translate(90 168) rotate(-3)">
+    <rect x="0" y="0" width="560" height="78" rx="39" fill="#ff6a3a" stroke="#7a2e10" stroke-width="6"/>
+    ${lettering(['リ', 'ア', 'ル', '謎', '解', 'き'], { x: 50, y: 40, size: 50, gap: 0.92, rot: 4, fill: ['#fff', '#fff3d0'], outline: '#7a2e10', outW: 8, white: false, rough: 1.5, shine: false })}
+    ${lettering([{ g: 'keys' }], { x: 352, y: 40, size: 44, rot: 0, fill: ['#ffd36b', '#ffd36b'], outline: '#7a2e10', outW: 8, white: false, rough: 1, shine: false })}
+    ${lettering(['宝', '探', 'し'], { x: 410, y: 40, size: 50, gap: 0.92, rot: 4, fill: ['#fff', '#fff3d0'], outline: '#7a2e10', outW: 8, white: false, rough: 1.5, shine: false })}
+  </g>
+  ${lettering(['渋', '川', 'か', 'ら', { g: 'wave' }], { x: 140, y: 360, size: 168, gap: 0.92, rot: 6, fill: ['#ffffff', '#bfe6ff'], outline: '#16336b', outW: 34, whiteW: 18, rough: 4 })}
+  ${lettering(['挑', '戦', '状'], { x: 210, y: 590, size: 290, gap: 0.98, rot: 5, fill: ['#ffe680', '#f29a1f'], outline: '#6e2a0c', outW: 46, whiteW: 24, rough: 5 })}
+  ${[[1080, 420, 2.2, '#fff'], [1150, 560, 1.4, '#ffe680'], [90, 520, 1.6, '#fff']].map(([x, y, s, c]) => sparkle(x, y, s, c)).join('')}
+  <!-- 日付・参加無料 -->
+  <rect x="40" y="1236" width="1160" height="200" rx="30" fill="rgba(255,255,255,.55)"/>
+  ${dateBlock(80, 1262, { fill1: '#3aa0ff', fill2: '#1f4fb8', out: '#0f2a5c' })}
+  ${ribbon(860, 1252, 320, '#ff6a3a', '参加無料', '#7a2e10')}
+  ${infoBlock(1448, { ink: '#16233a', sub: '#4d5d76', box: 'rgba(255,255,255,.92)', boxLine: '#1b3a6e', acc: '#1f4fb8' })}
+  <rect width="${W}" height="${H}" fill="none" filter="url(#aPaper)"/>
+  </svg>`
+}
+
+// =====================================================================
+// 案B：夕方・宝の地図（古い羊皮紙に描いた渋川の地図）
+// =====================================================================
+function posterB() {
+  seed = 23
+  const W = 1240, H = 1754
+  const spots = [[260, 820, '01'], [380, 900, '02'], [500, 975, '03'], [700, 1080, '04'], [820, 1150, '05']]
+  return `<svg class="poster" viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <radialGradient id="bPaper" cx=".5" cy=".45" r=".75"><stop offset="0" stop-color="#fbefd2"/><stop offset=".7" stop-color="#f0d9a8"/><stop offset="1" stop-color="#c99a5a"/></radialGradient>
+    <linearGradient id="bSky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#5a2a4a"/><stop offset=".45" stop-color="#e8662c"/><stop offset="1" stop-color="#ffcf7a"/></linearGradient>
+    <filter id="bTex"><feTurbulence type="fractalNoise" baseFrequency=".02" numOctaves="4" seed="9"/><feColorMatrix values="0 0 0 0 .45  0 0 0 0 .3  0 0 0 0 .15  0 0 0 .22 0"/><feComposite in2="SourceGraphic" operator="in"/></filter>
+    <filter id="bEdge"><feTurbulence type="fractalNoise" baseFrequency=".03" numOctaves="3" seed="4"/><feDisplacementMap in="SourceGraphic" scale="22"/></filter>
+    <clipPath id="bClip"><rect x="40" y="430" width="1160" height="880" rx="10"/></clipPath>
+  </defs>
+  <rect width="${W}" height="${H}" fill="#3a1a14"/>
+  <!-- 夕焼けの空 -->
+  <rect width="${W}" height="600" fill="url(#bSky)"/>
+  <circle cx="1060" cy="420" r="110" fill="#ffe29a"/>
+  ${rays(1060, 420, 900, '#ffd27a', 26, 0.25)}
+  <path d="M0 500 Q160 460 330 485 Q500 440 700 480 Q900 450 1240 475 V600 H0Z" fill="#3a1a24" opacity=".85"/>
+  <text x="${W / 2}" y="62" text-anchor="middle" font-family="'Noto Sans JP'" font-weight="900" font-size="32" fill="#ffe8c8" letter-spacing="4">岡山県玉野市・渋川海岸　リアル宝探しイベント</text>
+  <!-- 羊皮紙の地図 -->
+  <g transform="translate(0 540) scale(1 0.8) translate(0 -430)"><g filter="url(#bEdge)"><rect x="40" y="430" width="1160" height="880" rx="10" fill="url(#bPaper)"/></g>
+  <rect x="40" y="430" width="1160" height="880" fill="#fff" filter="url(#bTex)" opacity=".9"/>
+  <g clip-path="url(#bClip)">
+    <!-- 海（左下）と陸（右上） -->
+    <path d="M40 700 Q200 760 330 860 Q520 1000 760 1120 Q920 1200 1200 1230 V1320 H40Z" fill="#7fb2c4" opacity=".55"/>
+    <path d="M40 700 Q200 760 330 860 Q520 1000 760 1120 Q920 1200 1200 1230" fill="none" stroke="#6a4a2a" stroke-width="5"/>
+    <path d="M60 690 Q220 740 345 838 Q530 975 770 1095 Q930 1172 1200 1200" fill="none" stroke="#e8c88a" stroke-width="46" opacity=".9"/>
+    ${Array.from({ length: 10 }, (_, i) => `<path d="M${100 + i * 110} ${1180 + (i % 3) * 30} q20 -10 40 0 t40 0" fill="none" stroke="#4a7a8a" stroke-width="4" opacity=".6"/>`).join('')}
+    <!-- 松林・建物 -->
+    ${Array.from({ length: 12 }, (_, i) => { const x = 380 + (i % 6) * 120 + (i > 5 ? 50 : 0), y = 640 + (i > 5 ? 90 : 0) + (i % 2) * 20; return `<path d="M${x} ${y - 40} l26 40 h-52Z M${x} ${y - 60} l20 30 h-40Z" fill="#5a7a4a" stroke="#3a4a2a" stroke-width="3"/>` }).join('')}
+    <!-- 歩く道（点線）と × 印 -->
+    <path d="M1080 760 Q960 820 840 880 Q700 950 520 960 Q400 950 380 900 Q330 850 260 820 Q300 900 500 975 Q620 1040 700 1080 Q760 1120 820 1150" fill="none" stroke="#b8402a" stroke-width="7" stroke-dasharray="4 16" stroke-linecap="round"/>
+    ${spots.map(([x, y, no]) => `<g transform="translate(${x} ${y})"><path d="M-22 -22 L22 22 M22 -22 L-22 22" stroke="#b8402a" stroke-width="12" stroke-linecap="round"/><circle cx="34" cy="-34" r="24" fill="#fbefd2" stroke="#6a4a2a" stroke-width="4"/><text x="34" y="-33" text-anchor="middle" dominant-baseline="central" font-family="'Dela Gothic One'" font-size="22" fill="#6a2a1a">${no}</text></g>`).join('')}
+    ${place(mapChestSvg('S', false), 1050, 700, 2.2)}
+    <text x="1100" y="820" text-anchor="middle" font-family="'Yusei Magic'" font-size="30" fill="#5a3a1a">受付</text>
+    <!-- 方位 -->
+    <g transform="translate(150 560)"><circle r="70" fill="none" stroke="#6a4a2a" stroke-width="4"/><path d="M0 -84 L14 0 L0 84 L-14 0Z" fill="#b8402a"/><path d="M-84 0 L0 14 L84 0 L0 -14Z" fill="#6a4a2a"/><text y="-96" text-anchor="middle" font-family="'Dela Gothic One'" font-size="30" fill="#6a4a2a">N</text></g>
+    ${place(treasureSvg('b1', 'scale', 110), 560, 1120)}
+    ${place(treasureSvg('b2', 'marble', 90), 980, 980)}
+    ${place(treasureSvg('b3', 'stone', 100), 160, 1000)}
+    <text x="250" y="1160" font-family="'Yusei Magic'" font-size="44" fill="#4a7a8a" opacity=".8" transform="rotate(-12 250 1160)">瀬戸内海</text>
+  </g></g>
+  <!-- うみねこ -->
+  ${seagull(1070, 1110, 0.95, '#b8402a')}
+  ${bubble(690, 930, 330, 84, '× が お宝の場所！', 'right')}
+  <!-- タイトル -->
+  <g transform="translate(70 110) rotate(-2)">
+    <rect width="600" height="76" rx="12" fill="#6a2a1a" stroke="#ffe0a8" stroke-width="5"/>
+    ${lettering(['リ', 'ア', 'ル', '謎', '解', 'き', '×', '宝', '探', 'し'], { x: 50, y: 38, size: 48, gap: 0.98, rot: 3, fill: ['#ffe8b8', '#ffd27a'], outline: '#3a120a', outW: 6, white: false, rough: 1.5, shine: false })}
+  </g>
+  ${lettering(['渋', '川', 'か', 'ら', { g: 'wave' }], { x: 130, y: 250, size: 128, gap: 0.92, rot: 6, fill: ['#fff3dc', '#ffd9a8'], outline: '#3a120a', outW: 28, whiteW: 0.1, white: false, rough: 6, freq: 0.05 })}
+  ${lettering(['挑', '戦', '状'], { x: 200, y: 430, size: 210, gap: 0.98, rot: 7, vertical: false, fill: ['#ffe680', '#e8662c'], outline: '#3a120a', outW: 36, whiteW: 18, white: '#fff3dc', rough: 7, freq: 0.05 })}
+  <!-- 日付 -->
+  <g transform="translate(0 1262)"><rect x="40" y="0" width="1160" height="176" rx="20" fill="#fbefd2" stroke="#6a4a2a" stroke-width="5"/></g>
+  ${dateBlock(80, 1272, { fill1: '#ff9a3d', fill2: '#b8402a', out: '#3a120a' })}
+  ${ribbon(890, 1232, 300, '#2a8a6a', '参加無料', '#123a2a')}
+  ${infoBlock(1450, { ink: '#3a2414', sub: '#7a5a3a', box: '#fbefd2', boxLine: '#6a4a2a', acc: '#b8402a' })}
+  </svg>`
+}
+
+// =====================================================================
+// 案C：夜・光る宝箱と瀬戸大橋の夜景
+// =====================================================================
+function posterC() {
+  seed = 41
+  const W = 1240, H = 1754
+  const stars = Array.from({ length: 90 }, () => `<circle cx="${rnd() * W}" cy="${rnd() * 900}" r="${rnd() * 2.6 + 0.6}" fill="#fff" opacity="${rnd() * 0.7 + 0.3}"/>`).join('')
+  return `<svg class="poster" viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="cSky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#060d24"/><stop offset=".6" stop-color="#14306a"/><stop offset="1" stop-color="#1f4a8a"/></linearGradient>
+    <radialGradient id="cGlow" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#fff3b0"/><stop offset=".4" stop-color="#ffd36b" stop-opacity=".7"/><stop offset="1" stop-color="#ffd36b" stop-opacity="0"/></radialGradient>
+    <filter id="cNeon" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="10" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+  </defs>
+  <rect width="${W}" height="${H}" fill="url(#cSky)"/>
+  ${stars}
+  <circle cx="1060" cy="220" r="70" fill="#fff6d8"/><circle cx="1088" cy="200" r="64" fill="#0c1a3e"/>
+  <text x="${W / 2}" y="62" text-anchor="middle" font-family="'Noto Sans JP'" font-weight="900" font-size="32" fill="#ffe7a6" letter-spacing="4">岡山県玉野市・渋川海岸　リアル宝探しイベント</text>
+  <!-- タイトル（光る金の文字） -->
+  <g transform="translate(330 140)">
+    <rect width="580" height="74" rx="37" fill="none" stroke="#ffd36b" stroke-width="4"/>
+    <text x="290" y="49" text-anchor="middle" font-family="'Dela Gothic One'" font-size="40" fill="#ffd36b" letter-spacing="6">リアル謎解き×宝探し</text>
+  </g>
+  <g filter="url(#cNeon)">
+    ${lettering(['渋', '川', 'か', 'ら', { g: 'wave' }], { x: 230, y: 340, size: 160, gap: 0.92, rot: 5, fill: ['#ffffff', '#cfe3ff'], outline: '#0a1638', outW: 22, whiteW: 10, white: '#7fb0ff', rough: 3 })}
+    ${lettering(['挑', '戦', '状'], { x: 260, y: 580, size: 300, gap: 0.98, rot: 4, fill: ['#fff8d8', '#f2c14e'], outline: '#2a1a00', outW: 30, whiteW: 14, white: '#ffd36b', rough: 4 })}
+  </g>
+  <!-- 夜景 -->
+  <path d="M0 980 Q150 930 300 960 Q420 920 560 955 L560 990 H0Z" fill="#0a1430"/>
+  <path d="M680 990 Q820 925 980 958 Q1100 930 1240 952 V990Z" fill="#0a1430"/>
+  ${bridge(120, 985, 1000, '#9fb8e8', true)}
+  <rect y="990" width="${W}" height="260" fill="#0b1c44"/>
+  ${Array.from({ length: 26 }, (_, i) => `<rect x="${120 + i * 39}" y="${1000 + (i % 4) * 10}" width="4" height="${60 + (i % 5) * 18}" fill="#ffd27a" opacity=".35"/>`).join('')}
+  <path d="M0 1210 Q300 1180 620 1205 T1240 1190 V1754 H0Z" fill="#3a3a5a"/>
+  <!-- 光る宝箱 -->
+  ${rays(620, 1080, 700, '#ffd36b', 30, 0.22)}
+  <circle cx="620" cy="1080" r="330" fill="url(#cGlow)"/>
+  ${place(chestSvg('c1', { size: 430, open: true }), 405, 880)}
+  ${Array.from({ length: 22 }, () => `<circle cx="${rnd() * W}" cy="${700 + rnd() * 600}" r="${rnd() * 4 + 2}" fill="#ffe7a6" opacity="${rnd() * 0.6 + 0.4}"/>`).join('')}
+  ${place(treasureSvg('c2', 'bell', 110), 300, 820)}
+  ${place(treasureSvg('c3', 'bottle', 110), 840, 800)}
+  ${seagull(1020, 1110, 1.1, '#f2c14e')}
+  ${bubble(820, 880, 380, 86, '夜の浜にも お宝が…！', 'right')}
+  <!-- 日付 -->
+  ${dateBlock(80, 1262, { fill1: '#fff3b0', fill2: '#f2c14e', out: '#2a1a00' })}
+  ${ribbon(870, 1236, 320, '#d9472b', '参加無料', '#3a120a')}
+  ${infoBlock(1448, { ink: '#eef3ff', sub: '#a9bce0', box: 'rgba(12,24,54,.9)', boxLine: '#ffd36b', acc: '#d9a520' })}
+  </svg>`
+}
+
+const posters = [posterA, posterB, posterC]
+const p = new URLSearchParams(location.search).get('p')
+if (p !== null) document.body.classList.add('one')
+document.getElementById('out').innerHTML = p !== null ? posters[+p]() : posters.map((f) => f()).join('')
+</script>
+</body>
+</html>
