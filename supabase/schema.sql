@@ -74,9 +74,12 @@ create table if not exists private.treasure_secrets (
   token text not null unique,
   short_code text not null unique,
   place_hint text not null default '',
+  place_image_url text,
   locate_answers text[] not null,
   acquire_answers text[] not null
 );
+
+alter table private.treasure_secrets add column if not exists place_image_url text;
 
 create table if not exists private.answer_logs (
   id bigint generated always as identity primary key,
@@ -189,7 +192,7 @@ begin
     'player', (select to_jsonb(p) - 'id' from public.players p where p.id = uid),
     'progress', coalesce((select jsonb_agg(to_jsonb(pt) - 'player_id') from public.player_treasures pt where pt.player_id = uid), '[]'::jsonb),
     'place_hints', coalesce((
-      select jsonb_object_agg(s.treasure_id, s.place_hint)
+      select jsonb_object_agg(s.treasure_id, jsonb_build_object('text', nullif(s.place_hint, ''), 'image_url', nullif(s.place_image_url, '')))
       from private.treasure_secrets s
       join public.player_treasures pt on pt.treasure_id = s.treasure_id and pt.player_id = uid
       where pt.state <> 'locked'), '{}'::jsonb),

@@ -60,10 +60,16 @@ export interface Content {
   settings: Settings
 }
 
+/** 宝の道標に正解した後に見られる場所ヒント（画像・説明とも任意） */
+export interface PlaceHint {
+  text: string | null
+  image_url: string | null
+}
+
 interface MyState {
   player: Player | null
   progress: Record<string, TreasureProgress>
-  placeHints: Record<string, string>
+  placeHints: Record<string, PlaceHint>
   redeemed: boolean
 }
 
@@ -122,11 +128,14 @@ async function loadMe(): Promise<MyState> {
   if (!sess.session) return EMPTY
   const { data, error } = await supabase.rpc('get_my_state')
   if (error) throw error
-  const d = data as { player: Player | null; progress: TreasureProgress[]; place_hints: Record<string, string>; redeemed: boolean }
+  const d = data as { player: Player | null; progress: TreasureProgress[]; place_hints: Record<string, PlaceHint | string>; redeemed: boolean }
   return {
     player: d.player,
     progress: Object.fromEntries((d.progress ?? []).map((p) => [p.treasure_id, p])),
-    placeHints: d.place_hints ?? {},
+    // 旧形式（文字列）にも対応
+    placeHints: Object.fromEntries(
+      Object.entries(d.place_hints ?? {}).map(([k, v]) => [k, typeof v === 'string' ? { text: v || null, image_url: null } : v]),
+    ),
     redeemed: !!d.redeemed,
   }
 }

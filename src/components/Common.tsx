@@ -26,8 +26,8 @@ export function BackHeader({ title, sub, to, right }: { title: string; sub?: str
 
 const LABEL: Record<TreasureState, string> = {
   locked: '未解決',
-  located: '場所判明',
-  found: '発見',
+  located: '道標クリア',
+  found: '宝箱発見',
   acquired: '獲得',
 }
 

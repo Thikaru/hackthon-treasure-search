@@ -68,10 +68,10 @@ export default function Dashboard() {
                     <th>No</th>
                     <th>お宝</th>
                     <th>エリア</th>
-                    <th>場所判明</th>
-                    <th>発見</th>
+                    <th>道標クリア</th>
+                    <th>宝箱発見</th>
                     <th>獲得</th>
-                    <th style={{ width: 180 }}>発見→獲得</th>
+                    <th style={{ width: 180 }}>宝箱発見→獲得</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -97,7 +97,7 @@ export default function Dashboard() {
                 </tbody>
               </table>
             </div>
-            <p className="small muted">オレンジの行：発見したのに獲得の謎で止まっている人が多いお宝（ヒントや難易度の見直し候補）。30秒ごとに自動更新します。</p>
+            <p className="small muted">オレンジの行：宝箱を見つけたのに鍵の謎で止まっている人が多いお宝（ヒントや難易度の見直し候補）。30秒ごとに自動更新します。</p>
           </section>
         </>
       )}

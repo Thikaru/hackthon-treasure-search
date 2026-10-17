@@ -10,7 +10,7 @@ export default function TreasuresAdmin() {
         クリア条件：{settings.clearCount} / {content.treasures.length} 個　景品：{settings.prizeName || '（未設定）'}
         <br />
         内容の編集は Supabase の Table Editor で行います。問題文・ヒント・地図の位置は <code>public.treasures</code>、
-        正解・場所ヒント・QRトークンは <code>private.treasure_secrets</code>、クリア条件や景品名は <code>public.settings</code> です。
+        正解・場所ヒント（説明 <code>place_hint</code>・画像URL <code>place_image_url</code>）・QRトークンは <code>private.treasure_secrets</code>、クリア条件や景品名は <code>public.settings</code> です。
       </p>
       <section className="admin-card">
         <div className="table-wrap">
@@ -20,8 +20,8 @@ export default function TreasuresAdmin() {
                 <th>No</th>
                 <th>お宝</th>
                 <th>エリア</th>
-                <th>場所の謎</th>
-                <th>獲得の謎</th>
+                <th>宝の道標</th>
+                <th>宝箱の謎</th>
                 <th>ヒント数</th>
               </tr>
             </thead>

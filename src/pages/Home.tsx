@@ -4,13 +4,17 @@ import AreaMap, { type MapPin } from '../components/AreaMap'
 import { StatusChip } from '../components/Common'
 import { HelpIcon } from '../components/Icons'
 import { acquiredCount, progressOf, useGame, type Treasure } from '../lib/game'
+import { GuidepostRow } from './Guideposts'
+
+// 地図に出すのは QR を読んだお宝（宝箱発見・獲得）だけ。場所はヒントの画像・説明で探す
+const onMap = (st: string) => st === 'found' || st === 'acquired'
 
 export default function Home() {
   const { me, content } = useGame()
   const { treasures, areas, settings } = content
-  const by = (st: string) => treasures.find((t) => progressOf(me, t.id).state === st)
-  const next = by('found') ?? by('located') ?? by('locked')
-  const [areaId, setAreaId] = useState<string>(next?.area_id ?? areas[0]?.id ?? '')
+  const firstFound = treasures.find((t) => progressOf(me, t.id).state === 'found')
+  const firstOpen = treasures.find((t) => progressOf(me, t.id).state !== 'acquired')
+  const [areaId, setAreaId] = useState<string>(firstFound?.area_id ?? firstOpen?.area_id ?? areas[0]?.id ?? '')
   const [picked, setPicked] = useState<string | null>(null)
 
   const got = acquiredCount(me)
@@ -19,22 +23,18 @@ export default function Home() {
   const area = areas.find((a) => a.id === areaId)
 
   const inArea = treasures.filter((t) => t.area_id === areaId)
-  const visible = inArea.filter((t) => progressOf(me, t.id).state !== 'locked')
-  const defaultPick =
-    next && next.area_id === areaId && progressOf(me, next.id).state !== 'locked'
-      ? next.id
-      : (visible.find((t) => progressOf(me, t.id).state !== 'acquired')?.id ?? null)
-  const selectedId = picked && inArea.some((t) => t.id === picked) ? picked : defaultPick
-  const pins: MapPin[] = visible.map((t) => ({
-    id: t.id,
-    no: t.no,
-    x: t.pin_x,
-    y: t.pin_y,
-    state: progressOf(me, t.id).state,
-    selected: t.id === selectedId,
-  }))
-  const selected = selectedId ? treasures.find((t) => t.id === selectedId) : undefined
-  const lockedInArea = inArea.filter((t) => progressOf(me, t.id).state === 'locked')
+  const pins: MapPin[] = inArea
+    .filter((t) => onMap(progressOf(me, t.id).state))
+    .map((t) => ({
+      id: t.id,
+      no: t.no,
+      x: t.pin_x,
+      y: t.pin_y,
+      state: progressOf(me, t.id).state,
+      selected: t.id === picked,
+    }))
+  const selected = picked ? inArea.find((t) => t.id === picked && onMap(progressOf(me, t.id).state)) : undefined
+  const waiting = inArea.filter((t) => progressOf(me, t.id).state === 'found').length
 
   return (
     <div className="screen home">
@@ -81,12 +81,8 @@ export default function Home() {
         <AreaMap areaId={areaId} areaName={area?.name ?? ''} pins={pins} onSelect={setPicked} />
         <div className="map-legend">
           <span>
-            <i className="dot dot-located" />
-            場所判明
-          </span>
-          <span>
             <i className="dot dot-found" />
-            発見
+            宝箱発見（鍵の謎あり）
           </span>
           <span>
             <i className="dot dot-acquired" />
@@ -99,27 +95,21 @@ export default function Home() {
       <section className="sheet" aria-live="polite">
         <span className="sheet-handle" aria-hidden="true" />
         {selected ? (
-          <SheetFor t={selected} />
-        ) : lockedInArea.length > 0 ? (
-          <>
-            <div className="sheet-head">
-              <StatusChip state="locked" />
-              <h2>まだ場所が分からないお宝 {lockedInArea.length} 個</h2>
-            </div>
-            <p className="sheet-text">謎を解くと、お宝の場所が地図に表示されます。</p>
-            <Link to={`/puzzle/${lockedInArea[0].id}`} className="btn btn-primary">
-              No.{lockedInArea[0].no} の謎に挑戦
-            </Link>
-          </>
+          <SheetFor t={selected} onClose={() => setPicked(null)} />
         ) : (
           <>
-            <div className="sheet-head">
-              <StatusChip state="acquired" />
-              <h2>このエリアのお宝はすべて獲得！</h2>
+            <div className="between">
+              <h2 className="sheet-title">宝の道標（{area?.short_name}）</h2>
+              <Link to="/guideposts" className="small bold">
+                すべての道標を見る
+              </Link>
             </div>
-            <Link to="/treasures" className="btn btn-outline">
-              コレクションを見る
-            </Link>
+            {waiting > 0 && <p className="sheet-text accent-text">地図の宝箱をタップすると、鍵の謎にどこからでも回答できます。</p>}
+            <div className="gp-scroll">
+              {inArea.map((t) => (
+                <GuidepostRow key={t.id} t={t} />
+              ))}
+            </div>
           </>
         )}
       </section>
@@ -127,7 +117,7 @@ export default function Home() {
   )
 }
 
-function SheetFor({ t }: { t: Treasure }) {
+function SheetFor({ t, onClose }: { t: Treasure; onClose: () => void }) {
   const { me, content } = useGame()
   const st = progressOf(me, t.id).state
   const area = content.areas.find((a) => a.id === t.area_id)
@@ -140,35 +130,25 @@ function SheetFor({ t }: { t: Treasure }) {
           {st === 'acquired' && ` ${t.name}`}
         </h2>
       </div>
-      {st === 'located' && (
-        <>
-          <p className="sheet-text">{me.placeHints[t.id]}</p>
-          <div className="row-8">
-            <Link to="/scan" className="btn btn-primary grow">
-              QRを読み込む
-            </Link>
-            <Link to={`/puzzle/${t.id}`} className="btn btn-outline">
-              謎を見返す
-            </Link>
-          </div>
-        </>
-      )}
       {st === 'found' && (
         <>
-          <p className="sheet-text">お宝は見つけました。最後の「獲得の謎」を解こう。</p>
+          <p className="sheet-text">鍵のかかった宝箱を見つけました。鍵を開ける謎は、ここからいつでも回答できます。</p>
           <Link to={`/found/${t.id}`} className="btn btn-primary">
-            獲得の謎へ
+            鍵のかかった宝箱の謎を解く
           </Link>
         </>
       )}
       {st === 'acquired' && (
         <>
           <p className="sheet-text">{t.description}</p>
-          <Link to="/treasures" className="btn btn-outline">
-            コレクションを見る
+          <Link to={`/got/${t.id}`} className="btn btn-outline">
+            お宝を見る
           </Link>
         </>
       )}
+      <button type="button" className="btn btn-text" onClick={onClose}>
+        宝の道標の一覧に戻る
+      </button>
     </>
   )
 }

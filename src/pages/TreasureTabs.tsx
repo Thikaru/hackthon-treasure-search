@@ -90,7 +90,7 @@ export function Collection() {
                         <span className="t-text">
                           <span className="small muted">No.{t.no}</span>
                           <span className="t-name">{st === 'acquired' ? t.name : '？？？'}</span>
-                          <span className={`t-state t-state-${st}`}>{st === 'found' ? '発見・獲得の謎へ' : stateLabel(st)}</span>
+                          <span className={`t-state t-state-${st}`}>{st === 'found' ? '宝箱の謎へ' : stateLabel(st)}</span>
                         </span>
                       </Link>
                     )

@@ -1,13 +1,17 @@
+import { useState } from 'react'
 import { Link, Navigate, useNavigate, useParams } from 'react-router-dom'
 import { StatusChip } from '../components/Common'
-import { CloseIcon, LockIcon } from '../components/Icons'
+import { CloseIcon } from '../components/Icons'
 import PuzzleForm from '../components/PuzzleForm'
+import { LockedChest } from '../components/TreasureArt'
 import { progressOf, useGame } from '../lib/game'
 
+// 鍵のかかった宝箱の謎：宝箱をタップすると問題と回答欄が開く。QRを読んだ後はどこからでも回答できる
 export default function Found() {
   const { id = '' } = useParams()
   const nav = useNavigate()
   const { me, content } = useGame()
+  const [opened, setOpened] = useState(false)
   const t = content.treasures.find((x) => x.id === id)
   if (!t) return <Navigate to="/home" replace />
   const p = progressOf(me, t.id)
@@ -24,37 +28,49 @@ export default function Found() {
           </Link>
           <StatusChip state="found" />
         </div>
-        <svg width="120" height="104" viewBox="0 0 120 104" aria-hidden="true">
-          <ellipse cx="60" cy="96" rx="48" ry="7" fill="#172E52" />
-          <rect x="14" y="44" width="92" height="50" rx="8" fill="#172E52" stroke="#F1DDB8" strokeWidth="2" strokeDasharray="5 5" />
-          <path d="M20 44 V34 a14 14 0 0 1 14 -14 h52 a14 14 0 0 1 14 14 V44 Z" fill="#172E52" stroke="#F1DDB8" strokeWidth="2" strokeDasharray="5 5" />
-          <text x="60" y="80" textAnchor="middle" fontSize="28" fontWeight="900" fill="#F1DDB8" fontFamily="Zen Maru Gothic, sans-serif">
-            ?
-          </text>
-        </svg>
-        <h1>お宝を発見！</h1>
-        <p>
-          {area?.name}・No.{t.no}　最後の謎を解いて手に入れよう
-        </p>
+        <span className="found-kicker">
+          {area?.name}・No.{t.no}
+        </span>
+        <h1>鍵のかかった宝箱の謎</h1>
+        <button
+          type="button"
+          className={'chest-btn' + (opened ? ' opened' : '')}
+          onClick={() => setOpened(true)}
+          aria-expanded={opened}
+          aria-controls="chest-puzzle"
+          aria-label={opened ? '宝箱の謎を表示中' : '宝箱をタップして謎を表示'}
+        >
+          <LockedChest size={190} />
+        </button>
+        <p>{opened ? '鍵を開ける謎を解いて、お宝を手に入れよう' : '宝箱をタップすると、鍵を開ける謎が現れます'}</p>
       </section>
-      <div className="page stack-16">
-        <section className="card stack-12">
-          <h2 className="card-title row-8">
-            <LockIcon size={20} />
-            獲得の謎
-          </h2>
-          <p className="puzzle-text">{t.acquire_question}</p>
-          <p className="tip">まわりの看板や景色、ポールの札をよく見てみよう。答えはこの場所にあります</p>
-        </section>
-        <PuzzleForm
-          treasureId={t.id}
-          kind="acquire"
-          hints={t.acquire_hints}
-          hintsUsed={p.acquire_hints}
-          submitLabel="獲得"
-          onCorrect={() => nav(`/got/${t.id}?new=1`, { replace: true })}
-        />
-      </div>
+
+      {opened ? (
+        <div className="page stack-16" id="chest-puzzle">
+          <section className="card stack-12 reveal">
+            <span className="eyebrow">宝箱の鍵の謎</span>
+            <p className="puzzle-text">{t.acquire_question}</p>
+          </section>
+          <PuzzleForm
+            treasureId={t.id}
+            kind="acquire"
+            hints={t.acquire_hints}
+            hintsUsed={p.acquire_hints}
+            submitLabel="鍵を開ける"
+            onCorrect={() => nav(`/got/${t.id}?new=1`, { replace: true })}
+          />
+          <p className="small muted center">この宝箱の謎は、地図からいつでも回答できます。</p>
+        </div>
+      ) : (
+        <div className="page stack-12">
+          <button type="button" className="btn btn-primary btn-lg" onClick={() => setOpened(true)}>
+            宝箱を調べる
+          </button>
+          <Link to="/home" className="btn btn-text">
+            あとで解く（地図の宝箱からいつでも回答できます）
+          </Link>
+        </div>
+      )}
     </div>
   )
 }
