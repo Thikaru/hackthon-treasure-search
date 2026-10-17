@@ -77,9 +77,8 @@ export default function Home() {
       <header className="home-header">
         <h1>{me.player?.nickname} さん</h1>
         <div className="home-header-actions">
-          <Link to="/certificate" className="cert-btn">
-            <AwardIcon size={18} />
-            クリア証明
+          <Link to="/certificate" className="cert-btn" aria-label="クリア証明" title="クリア証明">
+            <AwardIcon size={20} />
           </Link>
           <Link to="/help" className="icon-btn" aria-label="遊び方・ヘルプ">
             <HelpIcon size={22} />
