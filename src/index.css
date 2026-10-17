@@ -1548,3 +1548,6 @@ input.narrow { max-width: 360px; height: 46px; font-size: 14px; }
 
 /* ホーム（地図）を開いている間は、ページ自体をスクロール・引っぱって更新させない */
 html:has(.screen.home), body:has(.screen.home) { overflow: hidden; overscroll-behavior: none; height: 100%; }
+/* iPhone で入力欄に触れたときの自動ズームを防ぐ（16px 未満だとズームされる）。横にはみ出す演出があってもページが横に広がらないようにする */
+html, body { overflow-x: hidden; -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
+.app-shell input, .app-shell textarea, .app-shell select { font-size: max(16px, 1em); }
