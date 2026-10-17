@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { BackHeader, StatusChip } from '../components/Common'
-import { progressOf, useGame, type Treasure, type TreasureState } from '../lib/game'
+import { isGuidepostOpen, progressOf, useGame, type Treasure, type TreasureState } from '../lib/game'
 
 function linkFor(t: Treasure, st: TreasureState) {
   if (st === 'acquired') return `/got/${t.id}`
@@ -28,7 +28,7 @@ export function GuidepostRow({ t }: { t: Treasure }) {
   )
 }
 
-// 宝の道標の一覧。最初から全問を確認でき、どれからでも挑戦できる
+// 宝の道標の一覧。エリアごとに、前のお宝を獲得すると次の道標が現れる
 export default function Guideposts() {
   const { me, content } = useGame()
   const [filter, setFilter] = useState<string>('all')
@@ -40,7 +40,7 @@ export default function Guideposts() {
       <BackHeader title="宝の道標" sub={`全${content.treasures.length}問・${solved}問クリア`} to="/home" />
       <div className="page stack-14">
         <p className="small muted lh">
-          道標の謎を解くと、お宝の場所のヒントが届きます。どの道標からでも挑戦できます。
+          道標の謎を解くと、お宝の場所のヒントが届きます。お宝を獲得すると、次の道標が現れます。
         </p>
         <div className="chips" role="group" aria-label="エリアで絞り込み">
           <button type="button" aria-pressed={filter === 'all'} className={filter === 'all' ? 'on' : ''} onClick={() => setFilter('all')}>
@@ -60,9 +60,19 @@ export default function Guideposts() {
             </h2>
             {content.treasures
               .filter((t) => t.area_id === a.id)
-              .map((t) => (
-                <GuidepostRow key={t.id} t={t} />
-              ))}
+              .map((t) =>
+                isGuidepostOpen(me, content, t) ? (
+                  <GuidepostRow key={t.id} t={t} />
+                ) : (
+                  <div key={t.id} className="gp-row gp-hidden" aria-label={`道標 ${t.no}（未解放）`}>
+                    <span className="gp-no">{t.no}</span>
+                    <span className="gp-body">
+                      <span className="gp-q muted">？？？</span>
+                      <span className="small muted">前の道標のお宝を獲得すると現れます</span>
+                    </span>
+                  </div>
+                ),
+              )}
           </section>
         ))}
       </div>

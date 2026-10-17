@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom'
 import AreaMap, { type MapPin } from '../components/AreaMap'
 import { StatusChip } from '../components/Common'
 import { ChestIcon, HelpIcon } from '../components/Icons'
-import { acquiredCount, progressOf, useGame, type Treasure } from '../lib/game'
+import { acquiredCount, currentGuidepost, progressOf, useGame, type Treasure } from '../lib/game'
 import { GuidepostRow } from './Guideposts'
 
 // 地図に出すのは QR を読んだお宝（宝箱発見・獲得）だけ。場所はヒントの画像・説明で探す
@@ -35,6 +35,7 @@ export default function Home() {
     }))
   const selected = picked ? inArea.find((t) => t.id === picked && onMap(progressOf(me, t.id).state)) : undefined
   const waiting = inArea.filter((t) => progressOf(me, t.id).state === 'found').length
+  const current = currentGuidepost(me, content, areaId)
 
   return (
     <div className="screen home">
@@ -115,11 +116,16 @@ export default function Home() {
               </Link>
             </div>
             {waiting > 0 && <p className="sheet-text accent-text">地図の宝箱をタップすると、鍵の謎にどこからでも回答できます。</p>}
-            <div className="gp-scroll">
-              {inArea.map((t) => (
-                <GuidepostRow key={t.id} t={t} />
-              ))}
-            </div>
+            {current ? (
+              <>
+                <p className="small muted">
+                  {inArea.indexOf(current) + 1}問目 / 全{inArea.length}問・お宝を獲得すると次の道標が現れます
+                </p>
+                <GuidepostRow t={current} />
+              </>
+            ) : (
+              <p className="sheet-text">このエリアの道標はすべてクリアしました！</p>
+            )}
           </>
         )}
       </section>

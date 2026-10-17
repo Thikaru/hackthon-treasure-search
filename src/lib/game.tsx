@@ -266,6 +266,22 @@ export function areaCounts(me: MyState, content: Content, areaId: AreaId) {
   return { got: list.filter((t) => progressOf(me, t.id).state === 'acquired').length, total: list.length }
 }
 
+/**
+ * 宝の道標はエリアごとに1問ずつ解放される。
+ * 同じエリアで前の道標のお宝をすべて獲得していれば表示できる（すでに挑戦中・解決済みのものは常に表示）
+ */
+export function isGuidepostOpen(me: MyState, content: Content, t: Treasure) {
+  if (progressOf(me, t.id).state !== 'locked') return true
+  const list = content.treasures.filter((x) => x.area_id === t.area_id)
+  const idx = list.findIndex((x) => x.id === t.id)
+  return list.slice(0, idx).every((x) => progressOf(me, x.id).state === 'acquired')
+}
+
+/** エリア内でいま挑戦中の道標（最初の未獲得のもの）。すべて獲得済みなら undefined */
+export function currentGuidepost(me: MyState, content: Content, areaId: AreaId) {
+  return content.treasures.find((t) => t.area_id === areaId && progressOf(me, t.id).state !== 'acquired')
+}
+
 // QRを読んだが未登録だったときに、登録後に戻るためのメモ
 const PENDING = 'takara-nazo:pending-token'
 export function setPendingToken(token: string) {

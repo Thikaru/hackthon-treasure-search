@@ -3,14 +3,14 @@ import { BackHeader, StatusChip } from '../components/Common'
 import { CheckIcon, LockIcon } from '../components/Icons'
 import PuzzleForm from '../components/PuzzleForm'
 import { PlaceHintCard } from '../components/TreasureArt'
-import { progressOf, useGame } from '../lib/game'
+import { isGuidepostOpen, progressOf, useGame } from '../lib/game'
 
 // 宝の道標：解くと、お宝の場所のヒント（画像・説明）が見られる
 export default function LocatePuzzle() {
   const { id = '' } = useParams()
   const { me, content } = useGame()
   const t = content.treasures.find((x) => x.id === id)
-  if (!t) return <Navigate to="/guideposts" replace />
+  if (!t || !isGuidepostOpen(me, content, t)) return <Navigate to="/guideposts" replace />
   const p = progressOf(me, t.id)
   const solved = p.state !== 'locked'
   const area = content.areas.find((a) => a.id === t.area_id)
