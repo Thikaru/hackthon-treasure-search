@@ -1,0 +1,9 @@
+# Unity が再生成するもの
+/Library/
+/Temp/
+/Obj/
+/Logs/
+/UserSettings/
+/Build/
+*.csproj
+*.sln

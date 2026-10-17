@@ -1,0 +1,797 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>渋川からの挑戦状 画面デザイン案</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@500;700;900&family=Noto+Sans+JP:wght@400;500;700&family=Shippori+Mincho:wght@600;800&display=swap" rel="stylesheet" />
+<style>
+/* =========================================================
+   デザイン案：トップ画面（実写 × 時間帯）の空気を全画面に通す
+   ・背景は時間帯ごとの写真をぼかして敷く（どの画面でも「今の渋川」にいる）
+   ・前面は「すりガラス」と「生成りの紙（手帳）」の2素材だけ
+   ・差し色は時間帯で変わる：昼＝コバルト／夕＝茜と金／夜＝金の灯り
+   ========================================================= */
+:root {
+  --display: 'Zen Maru Gothic', sans-serif;
+  --body: 'Noto Sans JP', system-ui, sans-serif;
+  --paperfont: 'Shippori Mincho', serif;
+  --page-bg: #0d1626;
+  --page-ink: #e9eef7;
+  --page-muted: #9fb0c8;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; background: var(--page-bg); color: var(--page-ink); font-family: var(--body); -webkit-font-smoothing: antialiased; }
+h1, h2, h3, p { margin: 0; }
+
+/* ---------- 時間帯テーマ ---------- */
+.t-day {
+  --bgimg: url('../../src/assets/title-beach.jpg');
+  --bgpos: center 30%;
+  --bgscale: 1;
+  --glass: rgba(255, 255, 255, 0.66);
+  --glass-strong: rgba(255, 255, 255, 0.84);
+  --glass-line: rgba(255, 255, 255, 0.9);
+  --gink: #1b2a40;
+  --gmuted: #4d5d76;
+  --accent: #1f4fb8;
+  --accent2: #3f7fd9;
+  --accent-ink: #ffffff;
+  --gold: #e8b64a;
+  --glow: rgba(255, 236, 170, 0.0);
+  --scrim-top: rgba(10, 26, 48, 0.18);
+  --scrim-bot: rgba(10, 26, 48, 0.28);
+  --sky1: #6b9be0; --sky2: #b9d4f2;
+  --sea1: #3f86cf; --sea2: #2a5e9e; --sea3: #1d4479;
+  --sand1: #ecd3a6; --sand2: #d7b47c; --sand3: #b98f58;
+  --pine1: #3f7a52; --pine2: #2a5a3c;
+  --land1: #8fb877; --land2: #6e9a5c;
+  --roof: #d9472b; --wall: #f4efe6;
+  --shadow: rgba(30, 50, 80, 0.28);
+  --light-overlay: rgba(255, 250, 230, 0.08);
+  --win: #fff6d8; --win-op: 0;
+  --star-op: 0;
+  --chip-bg: rgba(255,255,255,0.85); --chip-ink: #1f4fb8;
+  --paper: #fbf5e8; --paper2: #f1e6cf; --paper-ink: #2c2416; --paper-line: rgba(120, 90, 40, 0.18);
+}
+.t-dusk {
+  --bgimg: url('../../src/assets/title-dusk.jpg');
+  --bgpos: 50% 40%;
+  --bgscale: 1;
+  --glass: rgba(42, 22, 16, 0.5);
+  --glass-strong: rgba(48, 26, 18, 0.72);
+  --glass-line: rgba(255, 196, 140, 0.35);
+  --gink: #fff3e6;
+  --gmuted: #f0c9a6;
+  --accent: #e86a2c;
+  --accent2: #f39a3d;
+  --accent-ink: #fffaf2;
+  --gold: #ffc35a;
+  --glow: rgba(255, 170, 80, 0.35);
+  --scrim-top: rgba(30, 14, 10, 0.25);
+  --scrim-bot: rgba(20, 10, 10, 0.45);
+  --sky1: #f2a35b; --sky2: #ffd59a;
+  --sea1: #d98a52; --sea2: #8a4a3a; --sea3: #4a2a2c;
+  --sand1: #e6b07a; --sand2: #c88a58; --sand3: #8e5a3c;
+  --pine1: #5a4a36; --pine2: #3a2c22;
+  --land1: #a8885a; --land2: #7a6040;
+  --roof: #b8402a; --wall: #f6d6b4;
+  --shadow: rgba(60, 20, 10, 0.4);
+  --light-overlay: rgba(255, 140, 60, 0.18);
+  --win: #ffd27a; --win-op: 0.55;
+  --star-op: 0;
+  --chip-bg: rgba(255, 235, 210, 0.9); --chip-ink: #b0461c;
+  --paper: #fbeedd; --paper2: #f0d9bb; --paper-ink: #3a2414; --paper-line: rgba(140, 70, 30, 0.2);
+}
+.t-night {
+  --bgimg: url('../../src/assets/title-night.jpg');
+  --bgpos: 15% 15%;
+  --bgscale: 1.25;
+  --glass: rgba(10, 20, 46, 0.55);
+  --glass-strong: rgba(12, 24, 54, 0.78);
+  --glass-line: rgba(160, 190, 255, 0.25);
+  --gink: #eef3ff;
+  --gmuted: #a9bce0;
+  --accent: #f2c14e;
+  --accent2: #ffd978;
+  --accent-ink: #1a1404;
+  --gold: #ffd36b;
+  --glow: rgba(255, 205, 100, 0.45);
+  --scrim-top: rgba(2, 6, 16, 0.4);
+  --scrim-bot: rgba(2, 6, 16, 0.6);
+  --sky1: #0b1a3c; --sky2: #1c3566;
+  --sea1: #163266; --sea2: #0d2148; --sea3: #071530;
+  --sand1: #6a6a86; --sand2: #4f5070; --sand3: #383a55;
+  --pine1: #1d3330; --pine2: #10201f;
+  --land1: #2a3e3a; --land2: #1c2c2a;
+  --roof: #5a2a3a; --wall: #3a4a6a;
+  --shadow: rgba(0, 0, 10, 0.5);
+  --light-overlay: rgba(10, 20, 60, 0.25);
+  --win: #ffd27a; --win-op: 1;
+  --star-op: 1;
+  --chip-bg: rgba(255, 211, 107, 0.92); --chip-ink: #2a1c00;
+  --paper: #f4ead2; --paper2: #e3d3ad; --paper-ink: #2a2010; --paper-line: rgba(120, 90, 40, 0.2);
+}
+
+/* ---------- ページ ---------- */
+.wrap { max-width: 1680px; margin: 0 auto; padding: 32px 24px 80px; }
+.hero { display: flex; flex-wrap: wrap; align-items: end; justify-content: space-between; gap: 20px; margin-bottom: 28px; }
+.hero h1 { font-family: var(--display); font-weight: 900; font-size: 30px; letter-spacing: 0.04em; }
+.hero p { color: var(--page-muted); margin-top: 8px; line-height: 1.8; font-size: 14px; max-width: 760px; }
+.tabs { display: inline-flex; padding: 4px; border-radius: 999px; background: #18233a; gap: 4px; }
+.tabs button { border: 0; background: transparent; color: var(--page-muted); font: 700 14px var(--body); padding: 9px 18px; border-radius: 999px; cursor: pointer; }
+.tabs button[aria-pressed='true'] { background: #f2f5fb; color: #13203a; }
+.section { margin-top: 36px; }
+.section-head { display: flex; align-items: baseline; gap: 14px; margin-bottom: 16px; }
+.section-head h2 { font-family: var(--display); font-size: 22px; font-weight: 900; }
+.section-head span { color: var(--page-muted); font-size: 13px; }
+.rail { display: flex; gap: 28px; overflow-x: auto; padding: 8px 4px 24px; scroll-snap-type: x mandatory; }
+.shot { flex: 0 0 360px; width: 360px; scroll-snap-align: start; }
+body.export .wrap { max-width: none; } body.export .hero, body.export .notes { display: none; } body.export .section { margin-top: 0; }
+.shot figcaption { margin-top: 12px; font-size: 13px; color: var(--page-muted); text-align: center; }
+.shot figcaption b { color: var(--page-ink); font-weight: 700; margin-right: 6px; }
+.notes { margin-top: 48px; display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; }
+.note { background: #141f33; border-radius: 16px; padding: 18px 20px; line-height: 1.8; font-size: 13.5px; color: #c8d3e6; }
+.note h3 { font-family: var(--display); font-size: 16px; color: #fff; margin-bottom: 6px; }
+.swatches { display: flex; gap: 6px; margin-top: 8px; }
+.swatches i { width: 26px; height: 26px; border-radius: 8px; display: inline-block; box-shadow: inset 0 0 0 1px rgba(255,255,255,0.15); }
+
+/* ---------- 端末フレーム ---------- */
+.phone { width: 360px; height: 760px; border-radius: 46px; padding: 10px; background: #05080f; box-shadow: 0 30px 60px rgba(0,0,0,0.45), inset 0 0 0 2px #2a3346; }
+.screen { position: relative; width: 100%; height: 100%; border-radius: 37px; overflow: hidden; color: var(--gink); font-family: var(--body); isolation: isolate; }
+.island { position: absolute; top: 10px; left: 50%; transform: translateX(-50%); width: 104px; height: 30px; border-radius: 20px; background: #000; z-index: 50; }
+.statusbar { position: absolute; top: 0; left: 0; right: 0; height: 50px; display: flex; align-items: center; justify-content: space-between; padding: 6px 30px 0; font: 700 14px var(--body); z-index: 40; color: #fff; text-shadow: 0 1px 3px rgba(0,0,0,0.3); }
+.t-day .statusbar.ink { color: #13203a; text-shadow: none; }
+
+/* 背景写真（ぼかし有り／無し） */
+.bg { position: absolute; inset: -20px; background: var(--bgimg) var(--bgpos) / cover no-repeat; transform: scale(var(--bgscale)); transform-origin: 15% 15%; z-index: -3; }
+.bg.blur { filter: blur(18px) saturate(1.2) brightness(0.95); }
+.t-day .bg.blur { filter: blur(18px) saturate(1.25) brightness(1.04); }
+.scrim { position: absolute; inset: 0; z-index: -2; background: linear-gradient(to bottom, var(--scrim-top) 0%, transparent 30%, transparent 55%, var(--scrim-bot) 100%); }
+.scrim.heavy { background: linear-gradient(to bottom, var(--scrim-top), var(--scrim-bot)); }
+.t-day .scrim.heavy { background: linear-gradient(to bottom, rgba(240,246,255,0.1), rgba(240,246,255,0.35)); }
+
+/* すりガラス */
+.glass { background: var(--glass); backdrop-filter: blur(22px) saturate(1.4); -webkit-backdrop-filter: blur(22px) saturate(1.4); border: 1px solid var(--glass-line); box-shadow: 0 10px 30px rgba(0,0,0,0.12); }
+.glass-strong { background: var(--glass-strong); }
+
+/* 紙（手帳） */
+.paper {
+  background:
+    radial-gradient(120% 80% at 0% 0%, rgba(255,255,255,0.55), transparent 60%),
+    repeating-linear-gradient(to bottom, transparent 0 27px, var(--paper-line) 27px 28px),
+    linear-gradient(180deg, var(--paper), var(--paper2));
+  color: var(--paper-ink);
+  box-shadow: 0 1px 0 rgba(255,255,255,0.6) inset, 0 14px 30px rgba(0,0,0,0.25);
+}
+.paper-edge { position: relative; }
+.paper-edge::after { content: ''; position: absolute; left: 0; right: 0; top: -6px; height: 7px; background: radial-gradient(circle at 6px 7px, var(--paper) 5px, transparent 5.5px) 0 0 / 12px 7px repeat-x; }
+
+/* ボタン：押すと沈む、厚みのあるボタン */
+.btn { display: flex; align-items: center; justify-content: center; gap: 8px; height: 54px; border-radius: 18px; border: 0; font: 700 16px var(--body); letter-spacing: 0.04em; cursor: pointer; width: 100%; text-decoration: none; }
+.btn-primary { color: var(--accent-ink); background: linear-gradient(180deg, var(--accent2), var(--accent)); box-shadow: 0 4px 0 rgba(0,0,0,0.22), 0 10px 24px color-mix(in srgb, var(--accent) 45%, transparent), inset 0 1px 0 rgba(255,255,255,0.35); }
+.btn-glass { color: var(--gink); }
+.btn-ghost { background: transparent; color: #fff; height: 40px; text-shadow: 0 1px 4px rgba(0,0,0,0.4); font-size: 14px; }
+.chip { display: inline-flex; align-items: center; gap: 6px; padding: 4px 11px; border-radius: 999px; font: 700 11.5px var(--body); letter-spacing: 0.08em; background: var(--chip-bg); color: var(--chip-ink); }
+
+/* ---------- 1. タイトル ---------- */
+.title-photo { position: absolute; inset: 0; background: var(--bgimg) var(--bgpos) / cover no-repeat; transform: scale(var(--bgscale)); transform-origin: 15% 15%; z-index: -3; animation: kenburns 24s ease-in-out infinite alternate; }
+.t-day .title-photo { background-position: center 62%; }
+.t-dusk .title-photo { background-position: 55% 50%; }
+@keyframes kenburns { from { transform: scale(var(--bgscale)); } to { transform: scale(calc(var(--bgscale) * 1.08)) translateY(-6px); } }
+.title-glow { position: absolute; inset: 0; z-index: -1; pointer-events: none; }
+.t-dusk .title-glow { background: radial-gradient(60% 40% at 50% 34%, rgba(255,180,90,0.35), transparent 70%); }
+.t-night .title-glow { background: radial-gradient(70% 34% at 50% 38%, rgba(3,8,20,0.6), rgba(3,8,20,0) 75%); }
+.t-day .title-glow { background: radial-gradient(70% 30% at 50% 40%, rgba(255,255,255,0.18), transparent 70%); }
+.title-mid { position: absolute; left: 24px; right: 24px; top: 40%; transform: translateY(-50%); display: flex; flex-direction: column; align-items: center; text-align: center; }
+.seal { width: 74px; height: 74px; margin-bottom: 12px; filter: drop-shadow(0 6px 14px rgba(0,0,0,0.35)); animation: bob 4s ease-in-out infinite; }
+@keyframes bob { 50% { transform: translateY(-5px); } }
+.title-name { font-family: var(--display); font-weight: 900; font-size: 42px; line-height: 1.18; letter-spacing: 0.02em; margin-top: 12px;
+  background: linear-gradient(180deg, #ffffff 0%, #ffffff 52%, #ffe9b8 53%, #f6c868 100%); -webkit-background-clip: text; background-clip: text; color: transparent;
+  filter: drop-shadow(0 3px 0 rgba(10, 26, 48, 0.35)) drop-shadow(0 8px 18px rgba(10, 26, 48, 0.45)); }
+.t-day .title-name { background: linear-gradient(180deg, #ffffff 0%, #ffffff 55%, #fff1cf 56%, #ffe0a0 100%); -webkit-background-clip: text; background-clip: text; }
+.title-rule { display: flex; align-items: center; gap: 10px; margin-top: 14px; color: #fff; font: 700 12px var(--body); letter-spacing: 0.3em; opacity: 0.95; text-shadow: 0 1px 4px rgba(0,0,0,0.4); }
+.title-rule::before, .title-rule::after { content: ''; width: 34px; height: 1px; background: linear-gradient(90deg, transparent, #fff); }
+.title-rule::after { transform: scaleX(-1); }
+.title-lead { margin-top: 16px; color: #fff; font-size: 14.5px; line-height: 1.9; font-weight: 500; text-shadow: 0 1px 6px rgba(10,26,48,0.6); }
+.title-bottom { position: absolute; left: 24px; right: 24px; bottom: 34px; display: flex; flex-direction: column; gap: 10px; }
+.tod-pill { position: absolute; top: 58px; right: 20px; display: flex; align-items: center; gap: 6px; padding: 6px 12px 6px 8px; border-radius: 999px; font: 700 12px var(--body); color: var(--gink); }
+.sparkles { position: absolute; inset: 0; pointer-events: none; z-index: 1; }
+.sparkles i { position: absolute; width: 4px; height: 4px; border-radius: 50%; background: #fff; box-shadow: 0 0 8px 2px rgba(255,255,255,0.8); animation: twinkle 3s ease-in-out infinite; opacity: 0; }
+.t-dusk .sparkles i { background: #ffe1a8; box-shadow: 0 0 10px 3px rgba(255,190,100,0.8); }
+.t-night .sparkles i { background: #ffe7a6; box-shadow: 0 0 10px 3px rgba(255,210,120,0.75); }
+@keyframes twinkle { 0%, 100% { opacity: 0; transform: scale(0.4); } 50% { opacity: 1; transform: scale(1); } }
+
+/* ---------- 2. ホーム（ジオラマ地図） ---------- */
+.home-top { position: absolute; top: 50px; left: 14px; right: 14px; display: flex; align-items: center; gap: 10px; z-index: 5; }
+.avatar { width: 40px; height: 40px; border-radius: 14px; display: grid; place-items: center; font: 900 17px var(--display); color: var(--accent-ink); background: linear-gradient(160deg, var(--accent2), var(--accent)); box-shadow: 0 4px 12px rgba(0,0,0,0.2); }
+.home-who { flex: 1; min-width: 0; }
+.home-who b { display: block; font: 900 16px var(--display); }
+.home-who small { font-size: 11.5px; color: var(--gmuted); font-weight: 700; }
+.round-btn { width: 40px; height: 40px; border-radius: 14px; display: grid; place-items: center; color: var(--gink); }
+.progress-dots { display: flex; gap: 3px; margin-top: 4px; }
+.progress-dots i { width: 14px; height: 5px; border-radius: 3px; background: color-mix(in srgb, var(--gink) 22%, transparent); }
+.progress-dots i.on { background: linear-gradient(90deg, var(--gold), #ffdf8a); box-shadow: 0 0 6px var(--gold); }
+.seg { position: absolute; top: 102px; left: 14px; right: 14px; display: flex; padding: 4px; border-radius: 16px; z-index: 5; }
+.seg button { flex: 1; border: 0; background: transparent; color: var(--gmuted); font: 700 13px var(--body); height: 34px; border-radius: 12px; }
+.seg button.on { background: var(--accent); color: var(--accent-ink); box-shadow: 0 3px 10px color-mix(in srgb, var(--accent) 50%, transparent); }
+.diorama { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; }
+/* 砂浜エリア：Google マップ（実地図）。時間帯は地図の色調とかぶせる光で表現（本番は Maps JavaScript API のマップスタイルを時間帯ごとに用意） */
+.gmap { position: absolute; left: 0; right: 0; top: -70px; height: 598px; overflow: hidden; z-index: -2; background: #dfe7ee; }
+.gmap iframe { width: 100%; height: 100%; border: 0; pointer-events: none; }
+.t-dusk .gmap iframe { filter: saturate(0.85) brightness(0.97); }
+.t-night .gmap iframe { filter: invert(0.92) hue-rotate(185deg) brightness(0.88) saturate(0.85) contrast(0.95); }
+.gmap-light { position: absolute; left: 0; right: 0; top: 0; height: 528px; z-index: -1; pointer-events: none; }
+.t-day .gmap-light { background: linear-gradient(180deg, rgba(220,235,255,0.55) 0%, rgba(220,235,255,0) 32%); }
+.t-dusk .gmap-light { background: linear-gradient(180deg, rgba(150,60,30,0.75) 0%, rgba(255,150,90,0.5) 35%, rgba(255,175,120,0.4) 100%); mix-blend-mode: multiply; }
+.t-night .gmap-light { background: linear-gradient(180deg, rgba(4,10,30,0.7) 0%, rgba(10,20,60,0.25) 40%, rgba(10,20,60,0.15) 100%); }
+.home-below { position: absolute; left: 0; right: 0; top: 528px; bottom: 0; z-index: -2; background: var(--bgimg) var(--bgpos) / cover no-repeat; filter: blur(16px); }
+.gpin { position: absolute; z-index: 3; transform: translate(-50%, -100%); filter: drop-shadow(0 6px 8px rgba(0,0,0,0.35)); }
+.gpin .halo { position: absolute; left: 50%; top: 62%; width: 70px; height: 70px; margin: -35px 0 0 -35px; border-radius: 50%; background: radial-gradient(circle, color-mix(in srgb, var(--gold) 80%, transparent), transparent 70%); }
+.gpin .ring { position: absolute; left: 50%; top: 66%; width: 40px; height: 40px; margin: -20px 0 0 -20px; border-radius: 50%; border: 3px solid #ff6a3a; animation: ping 1.8s ease-out infinite; }
+.me-dot { position: absolute; z-index: 3; width: 18px; height: 18px; margin: -9px 0 0 -9px; border-radius: 50%; background: #3f7fd9; border: 3px solid #fff; box-shadow: 0 0 0 10px rgba(63,127,217,0.25), 0 2px 6px rgba(0,0,0,0.3); }
+.map-fab { position: absolute; right: 14px; z-index: 5; width: 42px; height: 42px; border-radius: 14px; display: grid; place-items: center; color: var(--gink); }
+.map-tag { position: absolute; z-index: 4; padding: 5px 10px; border-radius: 10px; font: 700 11px var(--body); color: var(--gink); }
+.sheet { position: absolute; left: 10px; right: 10px; bottom: 10px; border-radius: 26px; padding: 10px 18px 18px; z-index: 6; }
+.grip { width: 44px; height: 5px; border-radius: 3px; background: color-mix(in srgb, var(--paper-ink) 25%, transparent); margin: 0 auto 12px; }
+.sheet-row { display: flex; gap: 14px; align-items: center; }
+.sheet-q { font-family: var(--paperfont); font-weight: 800; font-size: 15.5px; line-height: 1.6; margin-top: 6px; }
+.sheet .kicker { display: flex; align-items: center; gap: 6px; font: 700 11px var(--body); letter-spacing: 0.12em; color: color-mix(in srgb, var(--paper-ink) 65%, transparent); }
+.sheet .btns { display: flex; gap: 10px; margin-top: 14px; }
+.sheet .btns .btn { height: 48px; border-radius: 15px; font-size: 14.5px; }
+.btn-paper { background: rgba(255,255,255,0.55); color: var(--paper-ink); box-shadow: inset 0 0 0 1.5px color-mix(in srgb, var(--paper-ink) 18%, transparent); }
+
+/* ---------- 3. 宝の道標 ---------- */
+.topbar { position: absolute; top: 50px; left: 14px; right: 14px; display: flex; align-items: center; justify-content: space-between; z-index: 5; }
+.back { width: 40px; height: 40px; border-radius: 14px; display: grid; place-items: center; color: var(--gink); }
+.sign-wrap { position: absolute; top: 96px; left: 0; right: 0; display: flex; justify-content: center; }
+.puzzle-panel { position: absolute; left: 12px; right: 12px; bottom: 12px; border-radius: 26px; padding: 18px; display: flex; flex-direction: column; gap: 12px; }
+.field { height: 52px; border-radius: 15px; display: flex; align-items: center; padding: 0 16px; font-size: 15px; color: var(--gmuted); background: rgba(255,255,255,0.5); box-shadow: inset 0 0 0 1.5px color-mix(in srgb, var(--gink) 20%, transparent); }
+.t-dusk .field, .t-night .field { background: rgba(255,255,255,0.08); }
+.field .caret { width: 2px; height: 22px; background: var(--accent); margin-left: 2px; animation: blink 1s steps(1) infinite; }
+@keyframes blink { 50% { opacity: 0; } }
+.notes-row { display: flex; gap: 8px; }
+.sticky { flex: 1; border-radius: 4px 4px 12px 4px; padding: 10px 10px 12px; font-size: 11.5px; line-height: 1.6; color: #3a2a10; font-weight: 500; box-shadow: 0 6px 14px rgba(0,0,0,0.18); position: relative; }
+.sticky b { display: block; font-size: 10.5px; letter-spacing: 0.1em; margin-bottom: 3px; opacity: 0.7; }
+.sticky.y { background: linear-gradient(180deg, #ffe98a, #ffdc5e); transform: rotate(-1.5deg); }
+.sticky.locked { background: repeating-linear-gradient(135deg, rgba(255,255,255,0.18) 0 8px, rgba(255,255,255,0.08) 8px 16px); color: var(--gink); box-shadow: inset 0 0 0 1.5px color-mix(in srgb, var(--gink) 25%, transparent); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; transform: rotate(1deg); }
+.label-sm { font: 700 11px var(--body); letter-spacing: 0.14em; color: var(--gmuted); }
+
+/* ---------- 4. 宝箱 ---------- */
+.chest-stage { position: absolute; top: 120px; left: 0; right: 0; height: 360px; display: grid; place-items: center; }
+.rays { position: absolute; width: 520px; height: 520px; left: 50%; top: 50%; transform: translate(-50%, -50%); background: repeating-conic-gradient(from 0deg, color-mix(in srgb, var(--gold) 26%, transparent) 0 6deg, transparent 6deg 18deg); -webkit-mask: radial-gradient(circle, #000 0 18%, transparent 62%); mask: radial-gradient(circle, #000 0 18%, transparent 62%); animation: spin 40s linear infinite; opacity: 0.7; }
+.t-day .rays { opacity: 0.55; }
+@keyframes spin { to { transform: translate(-50%, -50%) rotate(360deg); } }
+.chest-svg { position: relative; filter: drop-shadow(0 22px 26px rgba(0,0,0,0.35)); animation: bob 3.6s ease-in-out infinite; }
+.tap-ring { position: absolute; left: 50%; top: 58%; width: 70px; height: 70px; margin: -35px 0 0 -35px; border-radius: 50%; border: 2px solid var(--gold); animation: ping 2s ease-out infinite; }
+@keyframes ping { 0% { transform: scale(0.6); opacity: 1; } 100% { transform: scale(2); opacity: 0; } }
+.chest-title { position: absolute; top: 104px; left: 0; right: 0; text-align: center; }
+.chest-title h1 { font: 900 24px var(--display); color: #fff; text-shadow: 0 2px 10px rgba(0,0,0,0.45); }
+.chest-title p { margin-top: 6px; font-size: 12px; font-weight: 700; color: #fff; opacity: 0.9; letter-spacing: 0.1em; text-shadow: 0 1px 4px rgba(0,0,0,0.5); }
+
+/* ---------- 5. 獲得 ---------- */
+.burst { position: absolute; left: 50%; top: 290px; width: 600px; height: 600px; transform: translate(-50%, -50%); background: radial-gradient(circle, color-mix(in srgb, var(--gold) 70%, white) 0%, color-mix(in srgb, var(--gold) 35%, transparent) 18%, transparent 52%); z-index: -1; }
+.beams { position: absolute; left: 50%; top: 290px; width: 640px; height: 640px; transform: translate(-50%, -50%); background: repeating-conic-gradient(from 10deg, rgba(255,255,255,0.32) 0 4deg, transparent 4deg 22deg); -webkit-mask: radial-gradient(circle, #000 0 10%, transparent 58%); mask: radial-gradient(circle, #000 0 10%, transparent 58%); animation: spin 30s linear infinite; z-index: -1; }
+.float { animation: float 3.2s ease-in-out infinite; }
+@keyframes float { 50% { transform: translateY(-10px) rotate(-3deg); } }
+.got-card { position: absolute; left: 14px; right: 14px; bottom: 14px; border-radius: 26px; padding: 18px 18px 16px; }
+.got-card h1 { font: 900 25px var(--display); letter-spacing: 0.02em; }
+.got-card .desc { font-family: var(--paperfont); font-weight: 600; font-size: 14px; line-height: 1.75; margin-top: 6px; }
+.counter { display: flex; gap: 10px; margin-top: 14px; }
+.counter div { flex: 1; border-radius: 14px; padding: 8px 12px; background: rgba(255,255,255,0.45); }
+.counter small { display: block; font-size: 10.5px; font-weight: 700; letter-spacing: 0.1em; opacity: 0.7; }
+.counter b { font: 900 22px var(--display); }
+.counter b span { font-size: 13px; opacity: 0.6; }
+.got-banner { position: absolute; top: 100px; left: 0; right: 0; text-align: center; font: 900 15px var(--display); color: #fff; letter-spacing: 0.4em; text-shadow: 0 2px 8px rgba(0,0,0,0.5); }
+
+/* ---------- 6. コレクション ---------- */
+.shelf-wrap { position: absolute; top: 152px; left: 12px; right: 12px; bottom: 96px; border-radius: 22px; padding: 14px 12px; overflow: hidden;
+  background:
+    linear-gradient(180deg, rgba(0,0,0,0.0), rgba(0,0,0,0.15)),
+    repeating-linear-gradient(90deg, rgba(0,0,0,0.04) 0 2px, transparent 2px 9px),
+    linear-gradient(180deg, #8a5a34, #6c4224);
+  box-shadow: inset 0 0 0 3px #4a2c16, inset 0 0 0 6px #a06e42, 0 20px 40px rgba(0,0,0,0.35); }
+.t-night .shelf-wrap { background: repeating-linear-gradient(90deg, rgba(0,0,0,0.05) 0 2px, transparent 2px 9px), linear-gradient(180deg, #4a3020, #2c1a10); box-shadow: inset 0 0 0 3px #1f1208, inset 0 0 0 6px #6a4628, 0 20px 40px rgba(0,0,0,0.5); }
+.shelf-label { font: 700 11px var(--body); letter-spacing: 0.18em; color: #fbe6c2; display: flex; justify-content: space-between; padding: 0 4px 6px; }
+.shelf { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; padding: 6px 4px 0; position: relative; margin-bottom: 14px; }
+.shelf::after { content: ''; position: absolute; left: -12px; right: -12px; bottom: -10px; height: 12px; background: linear-gradient(180deg, #c48a52, #7a4a26); box-shadow: 0 6px 10px rgba(0,0,0,0.35); }
+.t-night .shelf::after { background: linear-gradient(180deg, #8a5a34, #3a2414); }
+.slot { height: 92px; border-radius: 12px; display: grid; place-items: center; position: relative; background: radial-gradient(60% 50% at 50% 30%, rgba(255,240,200,0.18), transparent 70%), rgba(0,0,0,0.18); box-shadow: inset 0 6px 12px rgba(0,0,0,0.3); }
+.t-night .slot.got { background: radial-gradient(60% 60% at 50% 45%, rgba(255,210,120,0.35), transparent 70%), rgba(0,0,0,0.25); }
+.slot small { position: absolute; bottom: 4px; left: 0; right: 0; text-align: center; font: 700 9.5px var(--body); color: #fbe6c2; letter-spacing: 0.04em; }
+.slot.cover { background: rgba(0,0,0,0.25); }
+.slot .cloth { width: 64px; height: 58px; border-radius: 40% 40% 12px 12px; background: linear-gradient(170deg, #c9b79a, #9c8768); box-shadow: inset 0 -8px 12px rgba(0,0,0,0.25); display: grid; place-items: center; color: rgba(60,40,20,0.55); font: 900 20px var(--display); }
+.coll-foot { position: absolute; left: 12px; right: 12px; bottom: 14px; border-radius: 20px; padding: 12px 16px; display: flex; align-items: center; gap: 12px; }
+.coll-foot .meter { flex: 1; height: 10px; border-radius: 6px; background: color-mix(in srgb, var(--gink) 15%, transparent); overflow: hidden; }
+.coll-foot .meter i { display: block; height: 100%; width: 62%; border-radius: 6px; background: linear-gradient(90deg, var(--gold), #ffe7a0); box-shadow: 0 0 10px var(--gold); }
+
+/* ---------- 7. クリア証明 ---------- */
+.cert { position: absolute; top: 104px; left: 16px; right: 16px; bottom: 16px; border-radius: 10px; padding: 22px 20px 18px; display: flex; flex-direction: column; align-items: center; text-align: center; overflow: hidden;
+  background:
+    radial-gradient(120% 70% at 50% 0%, rgba(255,255,255,0.7), transparent 60%),
+    linear-gradient(180deg, #fbf3df, #f0e0bc);
+  color: #3a2a12; box-shadow: 0 24px 50px rgba(0,0,0,0.45); }
+.cert::before { content: ''; position: absolute; inset: 8px; border: 1.5px solid #c49a4a; border-radius: 6px; box-shadow: inset 0 0 0 4px #fbf3df, inset 0 0 0 5px #c49a4a; pointer-events: none; }
+.cert .shine { position: absolute; inset: 0; background: linear-gradient(115deg, transparent 35%, rgba(255,255,255,0.75) 48%, transparent 60%); background-size: 260% 100%; animation: shine 3.2s ease-in-out infinite; pointer-events: none; }
+@keyframes shine { from { background-position: 130% 0; } to { background-position: -130% 0; } }
+.cert h1 { font-family: var(--paperfont); font-weight: 800; font-size: 30px; letter-spacing: 0.35em; margin-top: 6px; padding-left: 0.35em; }
+.cert .who { font-family: var(--paperfont); font-weight: 800; font-size: 18px; margin-top: 8px; }
+.cert .who small { font-family: var(--body); font-size: 11px; font-weight: 700; color: #8a6a3a; display: block; letter-spacing: 0.1em; margin-top: 2px; }
+.qr-box { margin-top: 12px; padding: 10px; background: #fff; border-radius: 12px; box-shadow: 0 0 0 1.5px #c49a4a, 0 8px 18px rgba(80,50,10,0.18); position: relative; z-index: 1; }
+.clock { margin-top: 10px; font: 900 26px var(--display); letter-spacing: 0.06em; font-variant-numeric: tabular-nums; }
+.clock small { font: 700 11px var(--body); color: #8a6a3a; letter-spacing: 0.1em; display: block; }
+.wax { position: absolute; right: 18px; bottom: 18px; width: 70px; height: 70px; animation: spinslow 12s linear infinite; z-index: 2; }
+@keyframes spinslow { to { transform: rotate(360deg); } }
+
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; } }
+@media (max-width: 600px) { .wrap { padding: 20px 12px 60px; } .phone { transform: scale(0.86); transform-origin: top left; margin-right: -50px; margin-bottom: -106px; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="hero">
+    <div>
+      <h1>渋川からの挑戦状　画面デザイン案</h1>
+      <p>トップ画面の「実写 × 時間帯」を全画面に通した案です。どの画面でも背景にいまの時間帯の渋川の写真が敷かれ、前面は<b>すりガラス</b>と<b>生成りの紙（冒険手帳）</b>の2素材だけ。差し色は昼＝コバルト、夕方＝茜と金、夜＝金の灯りに切り替わります。地図はミニチュア模型（ジオラマ）風に描き、光も時間帯で変わります。</p>
+    </div>
+    <div class="tabs" role="group" aria-label="時間帯">
+      <button type="button" data-show="all" aria-pressed="true">3つ並べる</button>
+      <button type="button" data-show="day" aria-pressed="false">昼</button>
+      <button type="button" data-show="dusk" aria-pressed="false">夕方</button>
+      <button type="button" data-show="night" aria-pressed="false">夜</button>
+    </div>
+  </div>
+  <div id="sections"></div>
+
+  <div class="notes">
+    <div class="note"><h3>昼（6:00–16:00）</h3>砂浜の写真。白いすりガラスと濃紺の文字で、直射日光の下でも読める明るさを優先。差し色はブイの朱とコバルト。<div class="swatches"><i style="background:#1f4fb8"></i><i style="background:#3f7fd9"></i><i style="background:#ecd3a6"></i><i style="background:#d9472b"></i><i style="background:#e8b64a"></i></div></div>
+    <div class="note"><h3>夕方（16:00–18:00）</h3>王子ヶ岳の夕日。焦げ茶のすりガラスに白文字、ボタンは茜。ジオラマは影が長く伸び、窓に灯りがともり始める。<div class="swatches"><i style="background:#e86a2c"></i><i style="background:#f39a3d"></i><i style="background:#ffc35a"></i><i style="background:#4a2a2c"></i><i style="background:#fbeedd"></i></div></div>
+    <div class="note"><h3>夜（18:00–6:00）</h3>瀬戸大橋の夜景。紺のすりガラスに金のボタン。ジオラマは月明かりと街の灯り、宝箱は自分で光る。星がまたたく。<div class="swatches"><i style="background:#f2c14e"></i><i style="background:#ffd978"></i><i style="background:#163266"></i><i style="background:#071530"></i><i style="background:#f4ead2"></i></div></div>
+    <div class="note"><h3>Unity にするときの対応</h3>背景写真＝カメラ奥のスカイボックス（ぼかしは被写界深度）、すりガラス＝UI の背景ブラー、ジオラマ＝URP のローポリ模型＋時間帯ごとのライティング、宝箱・お宝＝3D モデル。この画面の配色と配置をそのまま Unity の見た目の基準にします。</div>
+  </div>
+</div>
+
+<script>
+// ---------------------------------------------------------------
+// 部品（SVG）。時間帯ごとに id がぶつからないよう接頭辞 p を付ける
+// ---------------------------------------------------------------
+const THEMES = [
+  { key: 'day', name: '昼', label: '日中', clock: '10:24', icon: 'sun' },
+  { key: 'dusk', name: '夕方', label: '夕方', clock: '16:52', icon: 'sunset' },
+  { key: 'night', name: '夜', label: '夜', clock: '19:38', icon: 'moon' },
+]
+
+const todIcon = (k) => ({
+  sun: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4.5" fill="#ffcf4a" stroke="#e8a21a"/><path d="M12 2v2.5M12 19.5V22M2 12h2.5M19.5 12H22M4.9 4.9l1.8 1.8M17.3 17.3l1.8 1.8M4.9 19.1l1.8-1.8M17.3 6.7l1.8-1.8" stroke="#e8a21a"/></svg>',
+  sunset: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke-linecap="round" stroke-width="2"><path d="M5 16a7 7 0 0 1 14 0" fill="#ff9a3d" stroke="#e8661a"/><path d="M2 19h20M5 22h14" stroke="#e8661a"/><path d="M12 3v3M4.5 8.5l1.8 1.5M19.5 8.5l-1.8 1.5" stroke="#e8661a"/></svg>',
+  moon: '<svg width="18" height="18" viewBox="0 0 24 24"><path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5Z" fill="#ffd36b" stroke="#d9a520" stroke-width="1.6"/><circle cx="18" cy="5" r="1.2" fill="#ffd36b"/></svg>',
+}[k])
+
+function statusbar(t, ink) {
+  return `<div class="island"></div><div class="statusbar ${ink ? 'ink' : ''}"><span>${t.clock}</span><span style="display:flex;gap:6px;align-items:center">
+  <svg width="17" height="11" viewBox="0 0 17 11" fill="currentColor"><rect x="0" y="7" width="3" height="4" rx="1"/><rect x="4.5" y="5" width="3" height="6" rx="1"/><rect x="9" y="2.5" width="3" height="8.5" rx="1"/><rect x="13.5" y="0" width="3" height="11" rx="1"/></svg>
+  <svg width="25" height="12" viewBox="0 0 25 12" fill="none"><rect x="0.5" y="0.5" width="21" height="11" rx="3.5" stroke="currentColor" opacity=".5"/><rect x="2" y="2" width="15" height="8" rx="2" fill="currentColor"/><rect x="23" y="4" width="1.6" height="4" rx=".8" fill="currentColor" opacity=".5"/></svg></span></div>`
+}
+
+// 挑戦状の封蝋（タイトル用）
+function seal(p) {
+  return `<svg class="seal" viewBox="0 0 100 100">
+    <defs>
+      <radialGradient id="${p}wax" cx="38%" cy="32%" r="70%"><stop offset="0" stop-color="#ff7a5a"/><stop offset=".55" stop-color="#c8341e"/><stop offset="1" stop-color="#7a1608"/></radialGradient>
+      <linearGradient id="${p}gold" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff2c4"/><stop offset=".5" stop-color="#f2c45a"/><stop offset="1" stop-color="#b8821e"/></linearGradient>
+    </defs>
+    <path d="M50 4c7 0 9 6 15 7s12-3 16 2-1 11 2 16 9 7 8 14-8 7-9 13 4 11-1 16-11 1-16 4-5 10-13 10-9-7-15-8-12 3-16-2 1-11-2-16-9-7-8-14 8-7 9-13-4-11 1-16 11-1 16-4 6-9 13-9Z" fill="url(#${p}wax)"/>
+    <circle cx="50" cy="50" r="30" fill="none" stroke="rgba(255,220,200,.35)" stroke-width="2"/>
+    <g transform="translate(50 52)">
+      <path d="M-18 -2h36v16a3 3 0 0 1-3 3h-30a3 3 0 0 1-3-3Z" fill="url(#${p}gold)"/>
+      <path d="M-18 -2v-4a10 9 0 0 1 10-9h16a10 9 0 0 1 10 9v4Z" fill="url(#${p}gold)"/>
+      <rect x="-18" y="-3" width="36" height="3.5" fill="#8a5a10" opacity=".55"/>
+      <rect x="-4.5" y="-6" width="9" height="10" rx="2" fill="#7a1608"/>
+      <circle cx="0" cy="-1.5" r="1.8" fill="url(#${p}gold)"/>
+    </g>
+    <ellipse cx="36" cy="26" rx="12" ry="5" fill="rgba(255,255,255,.28)" transform="rotate(-25 36 26)"/>
+  </svg>`
+}
+
+// 宝箱（閉じ／開き）。宝ごとに錠前が変わる想定（ここでは貝殻の錠）
+function chest(p, { size = 230, open = false } = {}) {
+  const h = size * 0.86
+  return `<svg class="chest-svg" width="${size}" height="${h}" viewBox="0 0 260 224">
+  <defs>
+    <linearGradient id="${p}wood" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#b8743a"/><stop offset=".55" stop-color="#8e5226"/><stop offset="1" stop-color="#5e3216"/></linearGradient>
+    <linearGradient id="${p}woodlid" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#d08a48"/><stop offset="1" stop-color="#8a4e24"/></linearGradient>
+    <linearGradient id="${p}metal" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff0b8"/><stop offset=".35" stop-color="#f0c058"/><stop offset=".7" stop-color="#c08a26"/><stop offset="1" stop-color="#7a5210"/></linearGradient>
+    <linearGradient id="${p}metalv" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#8a5c14"/><stop offset=".3" stop-color="#f6cc66"/><stop offset=".55" stop-color="#fff3c4"/><stop offset=".8" stop-color="#d8a236"/><stop offset="1" stop-color="#8a5c14"/></linearGradient>
+    <radialGradient id="${p}inner" cx="50%" cy="100%" r="80%"><stop offset="0" stop-color="#fff6c8"/><stop offset=".4" stop-color="#ffd25a"/><stop offset="1" stop-color="#b86a10"/></radialGradient>
+    <radialGradient id="${p}shell" cx="50%" cy="80%" r="80%"><stop offset="0" stop-color="#fff"/><stop offset=".6" stop-color="#f6dcd0"/><stop offset="1" stop-color="#d9a08c"/></radialGradient>
+    <pattern id="${p}grain" width="40" height="8" patternUnits="userSpaceOnUse"><path d="M0 4 Q10 1 20 4 T40 4" stroke="rgba(60,25,5,.25)" fill="none" stroke-width="1.2"/></pattern>
+  </defs>
+  <ellipse cx="130" cy="212" rx="112" ry="11" fill="rgba(0,0,0,.35)"/>
+  <!-- 箱 -->
+  <path d="M26 104h208v94a12 12 0 0 1-12 12H38a12 12 0 0 1-12-12Z" fill="url(#${p}wood)"/>
+  <path d="M26 104h208v94a12 12 0 0 1-12 12H38a12 12 0 0 1-12-12Z" fill="url(#${p}grain)"/>
+  <path d="M26 104h208v10H26Z" fill="rgba(0,0,0,.25)"/>
+  <rect x="26" y="150" width="208" height="3" fill="rgba(0,0,0,.18)"/>
+  <rect x="44" y="104" width="20" height="106" fill="url(#${p}metalv)"/>
+  <rect x="196" y="104" width="20" height="106" fill="url(#${p}metalv)"/>
+  <g fill="#7a5210">${[118, 138, 158, 178, 196].map((y) => `<circle cx="54" cy="${y}" r="2.6"/><circle cx="206" cy="${y}" r="2.6"/>`).join('')}</g>
+  <path d="M26 196h208v2a12 12 0 0 1-12 12H38a12 12 0 0 1-12-12Z" fill="url(#${p}metal)"/>
+  ${open ? `
+  <!-- 開いたフタ -->
+  <path d="M30 104 Q130 70 230 104 L224 112 Q130 84 36 112Z" fill="url(#${p}inner)"/>
+  <g transform="translate(0 -6)">
+    <path d="M36 98 L50 22 Q130 -4 210 22 L224 98 Q130 74 36 98Z" fill="url(#${p}woodlid)"/>
+    <path d="M36 98 L50 22 Q130 -4 210 22 L224 98 Q130 74 36 98Z" fill="url(#${p}grain)"/>
+    <path d="M56 92 L66 18 L84 14 L76 89Z" fill="url(#${p}metalv)"/>
+    <path d="M204 92 L194 18 L176 14 L184 89Z" fill="url(#${p}metalv)"/>
+    <path d="M36 98 Q130 74 224 98 L222 104 Q130 82 38 104Z" fill="url(#${p}metal)"/>
+  </g>
+  <ellipse cx="130" cy="106" rx="92" ry="16" fill="url(#${p}inner)"/>
+  <g fill="#fff3b0">${[[96, 100, 6], [118, 96, 7], [142, 99, 6], [162, 104, 5], [108, 106, 5], [130, 104, 6]].map(([x, y, r]) => `<circle cx="${x}" cy="${y}" r="${r}" stroke="#d8981e" stroke-width="1.5"/>`).join('')}</g>
+  ` : `
+  <!-- 閉じたフタ -->
+  <path d="M26 106V78a52 44 0 0 1 52-44h104a52 44 0 0 1 52 44v28Z" fill="url(#${p}woodlid)"/>
+  <path d="M26 106V78a52 44 0 0 1 52-44h104a52 44 0 0 1 52 44v28Z" fill="url(#${p}grain)"/>
+  <path d="M40 60 Q130 30 220 60" stroke="rgba(255,230,190,.35)" stroke-width="3" fill="none"/>
+  <path d="M44 106V66a30 30 0 0 1 20-28v68Z" fill="url(#${p}metalv)"/>
+  <path d="M216 106V66a30 30 0 0 0-20-28v68Z" fill="url(#${p}metalv)"/>
+  <rect x="24" y="100" width="212" height="10" rx="3" fill="url(#${p}metal)"/>
+  <!-- 貝殻の錠前 -->
+  <g transform="translate(130 120)">
+    <path d="M-15 -16v-12a15 15 0 0 1 30 0v12" fill="none" stroke="url(#${p}metalv)" stroke-width="8" stroke-linecap="round"/>
+    <path d="M-30 -14 Q-32 18 0 30 Q32 18 30 -14 Q0 -24 -30 -14Z" fill="url(#${p}metal)" stroke="#7a5210" stroke-width="2.5"/>
+    <g stroke="#9a6a18" stroke-width="2" fill="none" opacity=".75"><path d="M0 26 L0 -18"/><path d="M0 26 L-14 -16"/><path d="M0 26 L14 -16"/><path d="M0 26 L-24 -10"/><path d="M0 26 L24 -10"/></g>
+    <circle cx="0" cy="2" r="9" fill="url(#${p}shell)" stroke="#7a5210" stroke-width="2"/>
+    <path d="M0 -1v8" stroke="#3a2408" stroke-width="3" stroke-linecap="round"/>
+    <circle cx="0" cy="-2" r="2.6" fill="#3a2408"/>
+    <path d="M-22 -12 Q-10 -18 6 -16" stroke="rgba(255,255,255,.75)" stroke-width="3" fill="none" stroke-linecap="round"/>
+  </g>`}
+  <path d="M34 112h6M220 112h6" stroke="rgba(255,255,255,.4)" stroke-width="2"/>
+</svg>`
+}
+
+// お宝アイコン（8種）
+function treasureIcon(p, kind, s = 64) {
+  const d = `<defs>
+    <linearGradient id="${p}${kind}g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff2c4"/><stop offset=".5" stop-color="#f0c058"/><stop offset="1" stop-color="#a87418"/></linearGradient>
+    <radialGradient id="${p}${kind}r" cx="35%" cy="30%" r="75%"><stop offset="0" stop-color="#fff"/><stop offset="1" stop-color="rgba(255,255,255,0)"/></radialGradient></defs>`
+  const art = {
+    compass: `<path d="M32 6 Q52 10 56 34 Q52 56 32 58 Q12 56 8 34 Q12 10 32 6Z" fill="#f7e2d6" stroke="#c98a72" stroke-width="2.5"/>
+      <g stroke="#d9a490" stroke-width="1.8" fill="none"><path d="M32 56V10M32 56 18 14M32 56 46 14M32 56 11 26M32 56 53 26"/></g>
+      <circle cx="32" cy="34" r="13" fill="url(#${p}${kind}g)" stroke="#7a5210" stroke-width="2"/><circle cx="32" cy="34" r="9.5" fill="#fbf5e6"/>
+      <path d="M32 25 L35 34 L32 43 L29 34Z" fill="#d9472b"/><path d="M32 34 L35 34 L32 43 L29 34Z" fill="#22406e"/><circle cx="32" cy="34" r="1.6" fill="#3a2408"/>`,
+    key: `<g transform="rotate(-35 32 32)"><rect x="8" y="27" width="40" height="10" rx="5" fill="#a77446" stroke="#5e3a1a" stroke-width="2"/>
+      <path d="M12 30q8 -2 16 0t16 0" stroke="#6e4422" stroke-width="1.5" fill="none"/>
+      <circle cx="50" cy="32" r="10" fill="none" stroke="#a77446" stroke-width="7"/><circle cx="50" cy="32" r="10" fill="none" stroke="#5e3a1a" stroke-width="1.5"/>
+      <path d="M10 37v9h6v-5h5v6h6v-10" fill="#a77446" stroke="#5e3a1a" stroke-width="2" stroke-linejoin="round"/>
+      <path d="M14 30 L44 30" stroke="#ffe7a0" stroke-width="1.5" opacity=".9"/></g>`,
+    stone: `<path d="M14 58V22a18 16 0 0 1 36 0v36Z" fill="#9aa6b2" stroke="#4e5a68" stroke-width="2.5"/><path d="M14 58V22a18 16 0 0 1 36 0v36Z" fill="url(#${p}${kind}r)" opacity=".35"/>
+      <g stroke="#3f86cf" stroke-width="2.5" fill="none" stroke-linecap="round"><path d="M20 30q4 -4 8 0t8 0t8 0"/><path d="M20 38q4 -4 8 0t8 0t8 0"/><path d="M20 46q4 -4 8 0t8 0t8 0"/></g><rect x="8" y="56" width="48" height="6" rx="2" fill="#6e7a88"/>`,
+    bottle: `<rect x="25" y="4" width="14" height="9" rx="2" fill="#b07a44" stroke="#6e4422" stroke-width="2"/>
+      <path d="M27 13h10v6c9 3 14 11 14 20v12a8 8 0 0 1-8 8H21a8 8 0 0 1-8-8V39c0-9 5-17 14-20Z" fill="rgba(190,225,255,.55)" stroke="#5a86b8" stroke-width="2.5"/>
+      <path d="M15 42h34v9a6 6 0 0 1-6 6H21a6 6 0 0 1-6-6Z" fill="#f6d98a"/>
+      <g fill="#fff6c8">${[[22, 47], [30, 51], [38, 46], [44, 52], [27, 54]].map(([x, y]) => `<path d="M${x} ${y - 3}l1 2 2 1-2 1-1 2-1-2-2-1 2-1Z"/>`).join('')}</g><path d="M19 24q-3 8 -2 18" stroke="#fff" stroke-width="2.5" fill="none" stroke-linecap="round" opacity=".8"/>`,
+    scale: `<defs><linearGradient id="${p}irid" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#7ef0e0"/><stop offset=".35" stop-color="#7aa8ff"/><stop offset=".65" stop-color="#d48aff"/><stop offset="1" stop-color="#ffb3c8"/></linearGradient></defs>
+      <path d="M32 6 Q56 18 50 44 Q44 60 32 60 Q20 60 14 44 Q8 18 32 6Z" fill="url(#${p}irid)" stroke="#5a5aa8" stroke-width="2"/>
+      <g stroke="rgba(255,255,255,.7)" stroke-width="1.6" fill="none"><path d="M18 36q14 -10 28 0"/><path d="M20 46q12 -8 24 0"/><path d="M22 26q10 -8 20 0"/></g><path d="M24 14q-6 8 -6 18" stroke="#fff" stroke-width="3" fill="none" stroke-linecap="round"/>`,
+    map: `<path d="M8 12l14 -4 20 6 14 -4v44l-14 4-20 -6-14 4Z" fill="#f2deb0" stroke="#9a6a2a" stroke-width="2.2"/><path d="M22 8v44M42 14v44" stroke="#c9a868" stroke-width="1.5"/>
+      <path d="M14 40q6 -10 14 -4t14 -10" stroke="#b8402a" stroke-width="2" stroke-dasharray="3 3" fill="none"/><path d="M44 22l4 4m0 -4l-4 4" stroke="#b8402a" stroke-width="2.5" stroke-linecap="round"/>
+      <path d="M54 46l-6 2 -4 -4 6 -2Z" fill="#f2deb0" stroke="#9a6a2a" stroke-width="1.5"/>`,
+    marble: `<circle cx="32" cy="32" r="24" fill="#5aa8ee" stroke="#2a5e9e" stroke-width="2"/><path d="M14 38q10 -6 20 0t18 -2" stroke="#fff" stroke-width="5" fill="none" stroke-linecap="round" opacity=".9"/><path d="M18 26q8 -4 14 0" stroke="#fff" stroke-width="3.5" fill="none" stroke-linecap="round" opacity=".7"/><circle cx="32" cy="32" r="24" fill="url(#${p}${kind}r)" opacity=".7"/>`,
+    bell: `<path d="M32 6v6" stroke="#7a5210" stroke-width="3"/><path d="M14 46c4-4 4-10 4-18a14 14 0 0 1 28 0c0 8 0 14 4 18Z" fill="url(#${p}${kind}g)" stroke="#7a5210" stroke-width="2.5"/><rect x="10" y="44" width="44" height="6" rx="3" fill="#c08a26" stroke="#7a5210" stroke-width="2"/><circle cx="32" cy="54" r="5" fill="#c08a26" stroke="#7a5210" stroke-width="2"/><path d="M22 22q2 -6 8 -8" stroke="#fff" stroke-width="3" fill="none" stroke-linecap="round" opacity=".8"/>`,
+  }[kind]
+  return `<svg width="${s}" height="${s}" viewBox="0 0 64 64">${d}${art}</svg>`
+}
+
+// 宝の道標＝木の立て札
+function signpost(p, text) {
+  return `<svg width="330" height="250" viewBox="0 0 330 250">
+  <defs>
+    <linearGradient id="${p}board" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#e6c08a"/><stop offset="1" stop-color="#b98a52"/></linearGradient>
+    <linearGradient id="${p}post" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#6e4422"/><stop offset=".5" stop-color="#a77446"/><stop offset="1" stop-color="#5e3a1a"/></linearGradient>
+    <pattern id="${p}sg" width="60" height="10" patternUnits="userSpaceOnUse"><path d="M0 5 Q15 2 30 5 T60 5" stroke="rgba(90,50,20,.2)" fill="none" stroke-width="1.2"/></pattern>
+  </defs>
+  <ellipse cx="165" cy="244" rx="70" ry="6" fill="rgba(0,0,0,.3)"/>
+  <rect x="152" y="150" width="26" height="96" rx="4" fill="url(#${p}post)"/>
+  <path d="M20 22h276l18 70-18 70H20a8 8 0 0 1-8-8V30a8 8 0 0 1 8-8Z" fill="url(#${p}board)" stroke="#6e4422" stroke-width="4"/>
+  <path d="M20 22h276l18 70-18 70H20a8 8 0 0 1-8-8V30a8 8 0 0 1 8-8Z" fill="url(#${p}sg)"/>
+  <circle cx="30" cy="40" r="4" fill="#6e4422"/><circle cx="30" cy="144" r="4" fill="#6e4422"/>
+  <path d="M24 30 H290" stroke="rgba(255,240,210,.6)" stroke-width="2"/>
+  <foreignObject x="42" y="30" width="250" height="124"><div xmlns="http://www.w3.org/1999/xhtml" style="height:100%;display:flex;flex-direction:column;justify-content:center;font-family:'Shippori Mincho',serif;font-weight:800;color:#3a2410;font-size:22px;line-height:1.5;letter-spacing:.02em">
+    <div style="font:700 10.5px 'Noto Sans JP';letter-spacing:.2em;color:#7a4e22;margin-bottom:4px">宝の道標 No.03</div>${text}</div></foreignObject>
+  <path d="M286 140 q8 -2 14 6" stroke="#6e4422" stroke-width="2" fill="none"/>
+</svg>`
+}
+
+// ジオラマ地図（渋川海岸をミニチュア風に。光と色は時間帯の変数で変わる）
+function diorama(p, { compact = false } = {}) {
+  const stars = Array.from({ length: 34 }, (_, i) => {
+    const x = (i * 97) % 360, y = 10 + ((i * 53) % 120)
+    return `<circle cx="${x}" cy="${y}" r="${i % 5 === 0 ? 1.4 : 0.8}" fill="#fff" opacity="${0.4 + (i % 3) * 0.2}"/>`
+  }).join('')
+  const pines = [[30, 520], [62, 540], [20, 580], [96, 560], [300, 520], [330, 548], [276, 566], [320, 600], [52, 610], [150, 600], [212, 610], [250, 590]]
+    .map(([x, y]) => `<g transform="translate(${x} ${y})"><ellipse cx="6" cy="16" rx="16" ry="5" fill="var(--shadow)"/><rect x="-2" y="2" width="4" height="14" fill="#5e3a1a"/><path d="M0 -26 L14 -4 L6 -4 L16 10 L-16 10 L-6 -4 L-14 -4Z" fill="var(--pine1)"/><path d="M0 -26 L14 -4 L6 -4 L16 10 L0 10Z" fill="var(--pine2)"/></g>`).join('')
+  const buoys = [40, 80, 120, 160, 200, 240, 280, 320].map((x, i) => `<g transform="translate(${x} ${300 + Math.sin(i) * 6})"><ellipse cx="0" cy="4" rx="6" ry="2" fill="rgba(0,0,0,.2)"/><circle r="5" fill="#ff6a3a" stroke="#a3361e" stroke-width="1.5"/><circle cx="-1.5" cy="-1.5" r="1.5" fill="#fff" opacity=".7"/></g>`).join('')
+  return `<svg class="diorama" viewBox="0 0 360 760" preserveAspectRatio="xMidYMid slice">
+  <defs>
+    <linearGradient id="${p}sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" style="stop-color:var(--sky1)"/><stop offset="1" style="stop-color:var(--sky2)"/></linearGradient>
+    <linearGradient id="${p}sea" x1="0" y1="0" x2="0" y2="1"><stop offset="0" style="stop-color:var(--sea3)"/><stop offset=".55" style="stop-color:var(--sea2)"/><stop offset="1" style="stop-color:var(--sea1)"/></linearGradient>
+    <linearGradient id="${p}sand" x1="0" y1="0" x2="0" y2="1"><stop offset="0" style="stop-color:var(--sand1)"/><stop offset="1" style="stop-color:var(--sand2)"/></linearGradient>
+    <linearGradient id="${p}land" x1="0" y1="0" x2="0" y2="1"><stop offset="0" style="stop-color:var(--land1)"/><stop offset="1" style="stop-color:var(--land2)"/></linearGradient>
+    <radialGradient id="${p}chestglow"><stop offset="0" style="stop-color:var(--gold)" stop-opacity=".9"/><stop offset="1" style="stop-color:var(--gold)" stop-opacity="0"/></radialGradient>
+    <radialGradient id="${p}fog"><stop offset="0" stop-color="#fff" stop-opacity=".7"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></radialGradient>
+    <linearGradient id="${p}tilt" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".0"/><stop offset="1" stop-color="#000" stop-opacity=".0"/></linearGradient>
+    <filter id="${p}soft"><feGaussianBlur stdDeviation="2.2"/></filter>
+    <filter id="${p}soft2"><feGaussianBlur stdDeviation="1"/></filter>
+  </defs>
+  <rect width="360" height="760" fill="url(#${p}sky)"/>
+  <g opacity="var(--star-op)" style="opacity:var(--star-op)">${stars}<circle cx="310" cy="166" r="10" fill="#fff6d8"/><circle cx="314" cy="163" r="9" fill="var(--sky1)"/></g>
+  <!-- 遠景：島と瀬戸大橋（ぼかし＝ミニチュアの奥ボケ） -->
+  <g filter="url(#${p}soft)">
+    <path d="M0 182 Q40 160 80 176 Q120 150 170 172 Q220 158 260 174 Q310 156 360 170 V200 H0Z" fill="var(--sea3)" opacity=".85"/>
+    <g stroke="var(--wall)" stroke-width="2" opacity=".75"><path d="M150 172v-26M182 172v-26"/><path d="M60 170 Q150 140 166 146 Q182 140 300 172" fill="none" stroke-width="1.2"/><path d="M40 176H330" stroke-width="2.5"/></g>
+    ${'<circle r="1.5" fill="var(--win)" style="opacity:var(--win-op)"/>'.repeat(0)}
+    <g style="opacity:var(--win-op)" fill="#ffd27a">${[60, 90, 120, 150, 182, 210, 240, 270, 300].map((x) => `<circle cx="${x}" cy="176" r="1.6"/>`).join('')}</g>
+  </g>
+  <!-- 海 -->
+  <rect y="178" width="360" height="190" fill="url(#${p}sea)"/>
+  <g stroke="rgba(255,255,255,.35)" stroke-width="1.5" fill="none" stroke-linecap="round">
+    <path d="M30 220q10 -4 20 0"/><path d="M200 210q10 -4 20 0"/><path d="M110 250q12 -5 24 0"/><path d="M260 260q10 -4 20 0"/><path d="M60 280q10 -4 20 0"/><path d="M300 236q8 -3 16 0"/>
+  </g>
+  <g style="opacity:var(--win-op)"><rect x="150" y="190" width="24" height="120" fill="url(#${p}chestglow)" opacity=".35"/></g>
+  ${buoys}
+  <!-- 防波堤と灯台 -->
+  <path d="M300 300 L340 240 L350 244 L312 306Z" fill="#c9c2b4" stroke="#8a8476" stroke-width="1.5"/>
+  <g transform="translate(340 232)"><rect x="-5" y="-26" width="10" height="26" fill="#fff"/><rect x="-5" y="-18" width="10" height="5" fill="#d9472b"/><rect x="-7" y="-32" width="14" height="7" rx="2" fill="#4a5568"/><circle cy="-29" r="6" fill="#ffe08a" style="opacity:var(--win-op)" filter="url(#${p}soft2)"/></g>
+  <!-- 波打ち際と砂浜 -->
+  <path d="M0 330 Q90 312 180 326 T360 318 V470 H0Z" fill="url(#${p}sand)"/>
+  <path d="M0 330 Q90 312 180 326 T360 318" stroke="rgba(255,255,255,.85)" stroke-width="5" fill="none" stroke-linecap="round"/>
+  <path d="M0 338 Q90 322 180 334 T360 328" stroke="rgba(255,255,255,.35)" stroke-width="3" fill="none"/>
+  <g fill="var(--sand3)" opacity=".35">${Array.from({ length: 40 }, (_, i) => `<circle cx="${(i * 41) % 360}" cy="${350 + ((i * 29) % 110)}" r="1.4"/>`).join('')}</g>
+  <!-- 足あと（目的地へ誘う点線） -->
+  <path d="M110 452 Q150 420 190 400 T268 362" stroke="var(--sand3)" stroke-width="3" stroke-dasharray="2 9" stroke-linecap="round" fill="none" opacity=".7"/>
+  <!-- 公園の芝・建物 -->
+  <path d="M0 460 Q180 440 360 462 V760 H0Z" fill="url(#${p}land)"/>
+  <path d="M0 520 Q120 500 200 530 T360 520" stroke="#e6dccb" stroke-width="10" fill="none" opacity=".8"/>
+  <g transform="translate(170 486)">
+    <ellipse cx="10" cy="34" rx="46" ry="8" fill="var(--shadow)"/>
+    <path d="M-34 6h68v26h-68Z" fill="var(--wall)" stroke="rgba(0,0,0,.2)"/>
+    <path d="M-40 8 L0 -16 L40 8Z" fill="var(--roof)"/>
+    <g fill="var(--win)" style="opacity:calc(.25 + var(--win-op))">${[-24, -10, 4, 18].map((x) => `<rect x="${x}" y="13" width="8" height="8" rx="1"/>`).join('')}</g>
+    <rect x="-5" y="20" width="10" height="12" fill="#6e4422"/>
+  </g>
+  ${pines}
+  <!-- 宝箱ピン：獲得（開・光） -->
+  <g transform="translate(92 392)">
+    <circle r="34" fill="url(#${p}chestglow)" opacity=".6"/>
+    <ellipse cx="0" cy="14" rx="18" ry="5" fill="var(--shadow)"/>
+    <path d="M-15 0h30v12a3 3 0 0 1-3 3h-24a3 3 0 0 1-3-3Z" fill="#9a5a2a" stroke="#4a2a10" stroke-width="1.5"/>
+    <path d="M-15 0 L-12 -14 Q0 -19 12 -14 L15 0Z" fill="#c8823e" stroke="#4a2a10" stroke-width="1.5" transform="rotate(-12 -15 0)"/>
+    <ellipse cx="0" cy="0" rx="13" ry="3" fill="#ffe08a"/>
+    <rect x="-4" y="-2" width="8" height="3" fill="#ffd25a"/>
+    <g transform="translate(14 -28)"><rect x="-13" y="-10" width="26" height="18" rx="9" fill="#1f4fb8" stroke="#fff" stroke-width="2"/><text x="0" y="3.5" font-size="10" font-weight="700" fill="#fff" text-anchor="middle" font-family="Noto Sans JP">01</text></g>
+  </g>
+  <!-- 宝箱ピン：発見（閉・朱色のリング＝鍵の謎あり） -->
+  <g transform="translate(248 400)">
+    <circle r="22" fill="none" stroke="#ff6a3a" stroke-width="2.5" opacity=".9"><animate attributeName="r" values="14;30" dur="1.8s" repeatCount="indefinite"/><animate attributeName="opacity" values=".9;0" dur="1.8s" repeatCount="indefinite"/></circle>
+    <ellipse cx="0" cy="14" rx="18" ry="5" fill="var(--shadow)"/>
+    <path d="M-15 0h30v12a3 3 0 0 1-3 3h-24a3 3 0 0 1-3-3Z" fill="#9a5a2a" stroke="#4a2a10" stroke-width="1.5"/>
+    <path d="M-15 1v-5a8 8 0 0 1 8-8h14a8 8 0 0 1 8 8v5Z" fill="#c8823e" stroke="#4a2a10" stroke-width="1.5"/>
+    <rect x="-15" y="-1" width="30" height="3" fill="#f0c058"/>
+    <rect x="-4" y="0" width="8" height="8" rx="1.5" fill="#f0c058" stroke="#7a5210"/>
+    <g transform="translate(14 -26)"><rect x="-13" y="-10" width="26" height="18" rx="9" fill="#d9472b" stroke="#fff" stroke-width="2"/><text x="0" y="3.5" font-size="10" font-weight="700" fill="#fff" text-anchor="middle" font-family="Noto Sans JP">02</text></g>
+  </g>
+  <!-- まだ見つかっていない宝の気配（霧と ?） -->
+  <g transform="translate(176 372)" opacity=".9">
+    <ellipse rx="34" ry="16" fill="url(#${p}fog)"/>
+    <text y="6" font-size="18" font-weight="900" font-family="Zen Maru Gothic" text-anchor="middle" fill="#fff" opacity=".9">?</text>
+  </g>
+  <!-- 自分の位置 -->
+  <g transform="translate(110 456)"><circle r="16" fill="rgba(63,127,217,.25)"/><circle r="7" fill="#3f7fd9" stroke="#fff" stroke-width="3"/></g>
+  <!-- 時間帯の光（昼は白く、夕は橙、夜は青く沈める） -->
+  <rect width="360" height="760" style="fill:var(--light-overlay)"/>
+  <!-- チルトシフト：上下を少しぼかす代わりに、上下端をかすませる -->
+  <rect width="360" height="160" fill="url(#${p}tilt)"/>
+</svg>`
+}
+
+
+// Google マップの上に重ねる宝箱ピン（獲得＝開いて光る／発見＝閉じて朱のリング）
+function mapChest(no, opened) {
+  return `<svg width="54" height="60" viewBox="-27 -40 54 60">
+    <ellipse cx="0" cy="15" rx="17" ry="4.5" fill="rgba(0,0,0,.3)"/>
+    <path d="M-15 0h30v12a3 3 0 0 1-3 3h-24a3 3 0 0 1-3-3Z" fill="#9a5a2a" stroke="#4a2a10" stroke-width="1.5"/>
+    ${opened ? '<path d="M-15 0 L-12 -14 Q0 -19 12 -14 L15 0Z" fill="#c8823e" stroke="#4a2a10" stroke-width="1.5" transform="rotate(-12 -15 0)"/><ellipse cx="0" cy="0" rx="13" ry="3" fill="#ffe08a"/>'
+      : '<path d="M-15 1v-5a8 8 0 0 1 8-8h14a8 8 0 0 1 8 8v5Z" fill="#c8823e" stroke="#4a2a10" stroke-width="1.5"/><rect x="-15" y="-1" width="30" height="3" fill="#f0c058"/><rect x="-4" y="0" width="8" height="8" rx="1.5" fill="#f0c058" stroke="#7a5210"/>'}
+    <g transform="translate(13 -27)"><rect x="-13" y="-10" width="26" height="18" rx="9" fill="${opened ? '#1f4fb8' : '#d9472b'}" stroke="#fff" stroke-width="2"/><text x="0" y="3.5" font-size="10" font-weight="700" fill="#fff" text-anchor="middle" font-family="Noto Sans JP">${no}</text></g>
+  </svg>`
+}
+const GMAP_SRC = 'https://maps.google.com/maps?ll=34.4562,133.9024&z=17&t=m&hl=ja&output=embed'
+
+// 見た目用のQR（ダミー模様）
+function fakeQR(seed = 7, size = 150) {
+  const n = 25, c = size / n
+  let s = seed, out = ''
+  const rnd = () => ((s = (s * 9301 + 49297) % 233280) / 233280)
+  const finder = (x, y) => `<rect x="${x * c}" y="${y * c}" width="${7 * c}" height="${7 * c}" fill="#1a1206"/><rect x="${(x + 1) * c}" y="${(y + 1) * c}" width="${5 * c}" height="${5 * c}" fill="#fff"/><rect x="${(x + 2) * c}" y="${(y + 2) * c}" width="${3 * c}" height="${3 * c}" fill="#1a1206"/>`
+  for (let y = 0; y < n; y++) for (let x = 0; x < n; x++) {
+    const inF = (x < 8 && y < 8) || (x > n - 9 && y < 8) || (x < 8 && y > n - 9)
+    if (!inF && rnd() > 0.52) out += `<rect x="${x * c}" y="${y * c}" width="${c + 0.3}" height="${c + 0.3}" fill="#1a1206"/>`
+  }
+  return `<svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}">${out}${finder(0, 0)}${finder(n - 7, 0)}${finder(0, n - 7)}<rect x="${size / 2 - 16}" y="${size / 2 - 16}" width="32" height="32" rx="8" fill="#fff"/><g transform="translate(${size / 2 - 12} ${size / 2 - 12}) scale(.375)"><path d="M8 30h48v22a4 4 0 0 1-4 4H12a4 4 0 0 1-4-4Z" fill="#b8743a"/><path d="M8 32V22a10 10 0 0 1 10-10h28a10 10 0 0 1 10 10v10Z" fill="#d08a48"/><rect x="8" y="28" width="48" height="5" fill="#f0c058"/><rect x="28" y="30" width="8" height="10" rx="2" fill="#f0c058"/></g></svg>`
+}
+
+function sparkles(n = 14, seed = 3) {
+  let s = seed
+  const r = () => ((s = (s * 9301 + 49297) % 233280) / 233280)
+  return `<div class="sparkles">${Array.from({ length: n }, () => `<i style="left:${(r() * 100).toFixed(1)}%;top:${(r() * 100).toFixed(1)}%;animation-delay:${(r() * 3).toFixed(2)}s;transform:scale(${(0.5 + r()).toFixed(2)})"></i>`).join('')}</div>`
+}
+
+const icon = {
+  back: '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>',
+  close: '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>',
+  help: '<svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.7.3-1 .9-1 1.7"/><circle cx="12" cy="17" r=".6" fill="currentColor"/></svg>',
+  award: '<svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"><circle cx="12" cy="9" r="6"/><path d="M8.5 14 7 22l5-3 5 3-1.5-8"/></svg>',
+  qr: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M4 8V5a1 1 0 0 1 1-1h3M16 4h3a1 1 0 0 1 1 1v3M20 16v3a1 1 0 0 1-1 1h-3M8 20H5a1 1 0 0 1-1-1v-3M4 12h16"/></svg>',
+  book: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"><path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2Z"/><path d="M4 21V5"/></svg>',
+  pin: '<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a7 7 0 0 0-7 7c0 5 7 13 7 13s7-8 7-13a7 7 0 0 0-7-7Zm0 9.5A2.5 2.5 0 1 1 12 6.5a2.5 2.5 0 0 1 0 5Z"/></svg>',
+  lock: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>',
+}
+
+// ---------------------------------------------------------------
+// 画面
+// ---------------------------------------------------------------
+const screens = {
+  title: (t, p) => `
+    <div class="title-photo"></div><div class="scrim"></div><div class="title-glow"></div>${sparkles(t.key === 'day' ? 10 : 18, 5)}
+    ${statusbar(t, false)}
+    <div class="tod-pill glass">${todIcon(t.icon)}${t.label}の渋川</div>
+    <div class="title-mid">
+      ${seal(p)}
+      <span class="chip">宝探し × 謎解き</span>
+      <h1 class="title-name">渋川からの<br/>挑戦状</h1>
+      <div class="title-rule">SHIBUKAWA QUEST</div>
+      <p class="title-lead">謎を解いて、砂浜と街にかくれた<br/>お宝を集めよう</p>
+    </div>
+    <div class="title-bottom">
+      <button class="btn btn-primary">${icon.book}はじめる</button>
+      <button class="btn btn-ghost">遊び方を見る</button>
+    </div>`,
+
+  home: (t, p) => `
+    <div class="gmap"><iframe src="${GMAP_SRC}" loading="eager" title="渋川海岸のGoogleマップ"></iframe></div>
+    <div class="gmap-light"></div><div class="home-below"></div>
+    <div class="gpin" style="left:34%;top:318px"><div class="halo"></div>${mapChest('01', true)}</div>
+    <div class="gpin" style="left:70%;top:356px"><div class="ring"></div>${mapChest('02', false)}</div>
+    <div class="me-dot" style="left:52%;top:304px"></div>
+    <div class="map-fab glass" style="top:156px"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg></div>
+    ${statusbar(t, t.key === 'day')}
+    <div class="home-top">
+      <div class="avatar">う</div>
+      <div class="home-who glass" style="padding:6px 12px;border-radius:14px">
+        <b>うみねこ さん</b>
+        <div class="progress-dots">${Array.from({ length: 6 }, (_, i) => `<i class="${i < 3 ? 'on' : ''}"></i>`).join('')}<small style="margin-left:6px;line-height:5px">3/6</small></div>
+      </div>
+      <div class="round-btn glass">${icon.award}</div>
+      <div class="round-btn glass">${icon.help}</div>
+    </div>
+    <div class="seg glass"><button class="on">砂浜</button><button>王子ヶ岳</button><button>たまの湯</button></div>
+        <div class="sheet paper">
+      <div class="grip"></div>
+      <div class="kicker">${icon.pin}いま挑戦中の宝の道標</div>
+      <p class="sheet-q">「なみ」を逆から読むと？<br/>波の音が聞こえる場所に、次の宝が眠る。</p>
+      <div class="btns">
+        <button class="btn btn-paper">謎を解く</button>
+        <button class="btn btn-primary">${icon.qr}QRを読む</button>
+      </div>
+    </div>`,
+
+  guidepost: (t, p) => `
+    <div class="bg blur"></div><div class="scrim heavy"></div>${sparkles(8, 11)}
+    ${statusbar(t, t.key === 'day')}
+    <div class="topbar"><div class="back glass">${icon.back}</div><span class="chip">砂浜エリア</span><div style="width:40px"></div></div>
+    <div class="sign-wrap">${signpost(p, '「なみ」を<br/>逆から読むと？')}</div>
+    <div class="puzzle-panel glass glass-strong">
+      <span class="label-sm">こたえ（ひらがなで）</span>
+      <div class="field">み<span class="caret"></span></div>
+      <div class="notes-row">
+        <div class="sticky y"><b>ヒント 1</b>最後の文字から読んでみよう。</div>
+        <div class="sticky locked">${icon.lock}<span style="font-size:11px;font-weight:700">ヒント 2 を開く</span></div>
+      </div>
+      <button class="btn btn-primary">立て札を調べる</button>
+    </div>`,
+
+  chest: (t, p) => `
+    <div class="bg blur"></div><div class="scrim heavy"></div>${sparkles(16, 21)}
+    ${statusbar(t, false)}
+    <div class="topbar"><div class="back glass">${icon.close}</div><span class="chip" style="background:#ff6a3a;color:#fff">宝箱発見</span><div style="width:40px"></div></div>
+    <div class="chest-title"><p>砂浜エリア・No.02</p><h1>鍵のかかった宝箱</h1></div>
+    <div class="chest-stage"><div class="rays"></div>${chest(p)}<div class="tap-ring"></div></div>
+    <div class="puzzle-panel paper" style="border-radius:24px">
+      <div class="kicker" style="display:flex;gap:6px;align-items:center;font:700 11px var(--body);letter-spacing:.14em;opacity:.65">${icon.lock}貝殻の錠前に刻まれた謎</div>
+      <p class="sheet-q" style="margin-top:0">ポールの札に書かれた「合言葉」を入力しよう。</p>
+      <div class="field" style="background:rgba(255,255,255,.6);color:#8a7a60;box-shadow:inset 0 0 0 1.5px rgba(80,50,20,.2)">合言葉<span class="caret"></span></div>
+      <button class="btn btn-primary">鍵を開ける</button>
+    </div>`,
+
+  acquired: (t, p) => `
+    <div class="bg blur"></div><div class="scrim heavy"></div><div class="burst"></div><div class="beams"></div>${sparkles(26, 33)}
+    ${statusbar(t, false)}
+    <div class="got-banner">お宝を手に入れた！</div>
+    <div style="position:absolute;top:150px;left:0;right:0;display:grid;place-items:center">
+      <div class="float" style="filter:drop-shadow(0 0 24px var(--gold)) drop-shadow(0 12px 18px rgba(0,0,0,.35));margin-bottom:-36px;position:relative;z-index:2">${treasureIcon(p, 'compass', 132)}</div>
+      ${chest(p, { size: 210, open: true })}
+    </div>
+    <div class="got-card paper">
+      <span class="chip" style="background:#1f4fb8;color:#fff">獲得・No.01</span>
+      <h1 style="margin-top:8px">貝殻の羅針盤</h1>
+      <p class="desc">波に運ばれてきた、北を指し続ける不思議な貝殻。</p>
+      <div class="counter"><div><small>砂浜エリア</small><b>3<span> / 5</span></b></div><div><small>クリアまで</small><b>あと3<span> 個</span></b></div></div>
+    </div>`,
+
+  collection: (t, p) => {
+    const items = [['compass', '貝殻の羅針盤', 1], ['key', '流木の鍵', 1], ['stone', '潮騒の石碑', 1], ['bottle', '星砂の小瓶', 0], ['scale', '人魚のうろこ', 1], ['map', '灯台の古地図', 0], ['marble', '空色のビー玉', 0], ['bell', '展望台の鈴', 0]]
+    const slot = ([k, n, got], i) => got ? `<div class="slot got"><div style="filter:drop-shadow(0 6px 6px rgba(0,0,0,.35)) drop-shadow(0 0 10px rgba(255,210,120,.35))">${treasureIcon(p, k, 54)}</div><small>${n}</small></div>` : `<div class="slot cover"><div class="cloth">?</div><small>No.0${i + 1}</small></div>`
+    return `
+    <div class="bg blur"></div><div class="scrim heavy"></div>
+    ${statusbar(t, t.key === 'day')}
+    <div class="topbar"><div class="back glass">${icon.back}</div><span class="chip">お宝の飾り棚</span><div class="round-btn glass">${icon.award}</div></div>
+    <div class="seg glass"><button class="on">すべて</button><button>砂浜</button><button>王子ヶ岳</button><button>たまの湯</button></div>
+    <div class="shelf-wrap">
+      <div class="shelf-label"><span>砂浜エリア</span><span>4 / 5</span></div>
+      <div class="shelf">${items.slice(0, 3).map(slot).join('')}</div>
+      <div class="shelf">${items.slice(3, 5).map((it, i) => slot(it, i + 3)).join('')}<div></div></div>
+      <div class="shelf-label" style="margin-top:6px"><span>王子ヶ岳・たまの湯</span><span>0 / 3</span></div>
+      <div class="shelf">${items.slice(5).map((it, i) => slot(it, i + 5)).join('')}</div>
+    </div>
+    <div class="coll-foot glass glass-strong"><b style="font:900 15px var(--display)">4 / 6</b><div class="meter"><i style="width:66%"></i></div><small style="font-weight:700;color:var(--gmuted)">あと2個でクリア</small></div>`
+  },
+
+  certificate: (t, p) => `
+    <div class="bg blur"></div><div class="scrim heavy"></div>${sparkles(18, 44)}
+    ${statusbar(t, false)}
+    <div class="topbar"><div class="back glass">${icon.back}</div><span class="chip">クリア証明</span><div style="width:40px"></div></div>
+    <div class="cert">
+      <div class="shine"></div>
+      <span style="font:700 10.5px var(--body);letter-spacing:.3em;color:#8a6a3a">渋川からの挑戦状</span>
+      <h1>達成状</h1>
+      <p class="who">うみねこ 殿<small>参加者 No.0128 ・ お宝 6 / 6</small></p>
+      <div class="qr-box">${fakeQR(11, 150)}</div>
+      <div class="clock">${t.clock}:<span>42</span><small>受付でこの画面を見せてください</small></div>
+      <svg class="wax" viewBox="0 0 100 100"><defs><radialGradient id="${p}cw" cx="38%" cy="32%" r="70%"><stop offset="0" stop-color="#ff7a5a"/><stop offset=".55" stop-color="#c8341e"/><stop offset="1" stop-color="#7a1608"/></radialGradient></defs><path d="M50 4c7 0 9 6 15 7s12-3 16 2-1 11 2 16 9 7 8 14-8 7-9 13 4 11-1 16-11 1-16 4-5 10-13 10-9-7-15-8-12 3-16-2 1-11-2-16-9-7-8-14 8-7 9-13-4-11 1-16 11-1 16-4 6-9 13-9Z" fill="url(#${p}cw)"/><circle cx="50" cy="50" r="28" fill="none" stroke="rgba(255,220,200,.45)" stroke-width="2" stroke-dasharray="3 4"/><text x="50" y="58" text-anchor="middle" font-family="Shippori Mincho" font-weight="800" font-size="24" fill="#ffd9c8">済</text></svg>
+    </div>`,
+}
+
+const ORDER = [
+  ['title', 'タイトル', '今の実写背景を継承。封蝋の紋章と金の文字で「挑戦状」らしさ'],
+  ['home', 'ホーム（Googleマップ）', '砂浜エリアは Google マップ。宝箱ピンを重ね、地図の色調を時間帯で変える'],
+  ['guidepost', '宝の道標', '問題は木の立て札に。ヒントは手帳の付箋'],
+  ['chest', '鍵のかかった宝箱', '一番の見せ場。宝ごとに錠前が違う（例：貝殻の錠）'],
+  ['acquired', 'お宝獲得', '開いた宝箱から光とともにお宝がせり上がる'],
+  ['collection', 'コレクション', '木の飾り棚。未獲得は布をかぶった影'],
+  ['certificate', 'クリア証明', '達成状＋光が流れる紙と回る封蝋（スクショ対策）'],
+]
+
+document.getElementById('sections').innerHTML = THEMES.map((t) => `
+  <section class="section" data-tod="${t.key}">
+    <div class="section-head"><h2>${t.name}</h2><span>${{ day: '6:00–16:00　砂浜の青空', dusk: '16:00–18:00　王子ヶ岳の夕日', night: '18:00–6:00　瀬戸大橋の夜景' }[t.key]}</span></div>
+    <div class="rail">${ORDER.map(([k, name, desc]) => `
+      <figure class="shot" style="margin:0"><div class="phone"><div class="screen t-${t.key}">${screens[k](t, `${t.key}-${k}-`)}</div></div>
+      <figcaption><b>${name}</b>${desc}</figcaption></figure>`).join('')}
+    </div>
+  </section>`).join('')
+
+document.querySelectorAll('.tabs button').forEach((b) => b.addEventListener('click', () => {
+  document.querySelectorAll('.tabs button').forEach((x) => x.setAttribute('aria-pressed', String(x === b)))
+  const v = b.dataset.show
+  document.querySelectorAll('.section').forEach((s) => { s.hidden = v !== 'all' && s.dataset.tod !== v })
+}))
+// 画像書き出し用：?only=day などで1つの時間帯だけ表示
+const only = new URLSearchParams(location.search).get('only')
+if (only) document.body.classList.add('export')
+if (only) document.querySelector(`.tabs button[data-show="${only}"]`)?.click()
+</script>
+</body>
+</html>

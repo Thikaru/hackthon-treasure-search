@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>{{{ PRODUCT_NAME }}}</title>
+  <!-- 動作確認用ページ。本番は Web 版（React）が Build/ を直接読み込む。
+       ?demo=chest|unlock|reveal&tod=day|dusk|night&kind=compass（&bg=1 で写真背景を Unity 側で描く） -->
+  <style>
+    html, body { margin: 0; height: 100%; background: #31415e; }
+    body.day { background: linear-gradient(#8fb4e6, #e8d3a8); }
+    body.dusk { background: linear-gradient(#e08a4a, #3a1e1a); }
+    body.night { background: linear-gradient(#0b1838, #04070f); }
+    #unity-canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; background: transparent; }
+  </style>
+</head>
+<body>
+  <canvas id="unity-canvas"></canvas>
+  <script>
+    var tod = (location.search.match(/tod=(\w+)/) || [])[1] || 'day';
+    document.body.className = tod;
+    window.TreasureStageNotify = function (m) { console.log('[stage]', m); document.title = 'stage:' + m; };
+    // Unity は不透明な WebGL を作るので、背景を透かすために alpha 付きで作らせる
+    var cv = document.querySelector('#unity-canvas');
+    var getCtx = cv.getContext.bind(cv);
+    cv.getContext = function (type, attrs) { return getCtx(type, Object.assign({}, attrs, { alpha: true, premultipliedAlpha: true, antialias: true })); };
+    var s = document.createElement('script');
+    s.src = 'Build/{{{ LOADER_FILENAME }}}';
+    s.onload = function () {
+      createUnityInstance(document.querySelector('#unity-canvas'), {
+        dataUrl: 'Build/{{{ DATA_FILENAME }}}',
+        frameworkUrl: 'Build/{{{ FRAMEWORK_FILENAME }}}',
+        codeUrl: 'Build/{{{ CODE_FILENAME }}}',
+        streamingAssetsUrl: 'StreamingAssets',
+        companyName: {{{ JSON.stringify(COMPANY_NAME) }}},
+        productName: {{{ JSON.stringify(PRODUCT_NAME) }}},
+        productVersion: {{{ JSON.stringify(PRODUCT_VERSION) }}},
+        devicePixelRatio: Math.min(window.devicePixelRatio || 1, 2),
+        webglContextAttributes: { premultipliedAlpha: true, preserveDrawingBuffer: true },
+      }).then(function (u) { window.unityInstance = u; });
+    };
+    document.body.appendChild(s);
+  </script>
+</body>
+</html>

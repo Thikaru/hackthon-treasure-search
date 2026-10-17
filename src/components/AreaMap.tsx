@@ -1,7 +1,9 @@
 import type { KeyboardEvent } from 'react'
 import type { AreaId } from '../lib/game'
 import type { TreasureState } from '../lib/game'
-import RealMap from './RealMap'
+import { mapChestSvg } from '../art/svgArt'
+import type { TimeOfDay } from '../lib/unityStage'
+import GoogleMap from './GoogleMap'
 
 export interface MapPin {
   id: string
@@ -17,16 +19,14 @@ interface Props {
   areaName: string
   pins: MapPin[]
   onSelect: (id: string) => void
+  tod: TimeOfDay
 }
 
 const FONT = 'Noto Sans JP, sans-serif'
 
 function Pin({ pin, onSelect }: { pin: MapPin; onSelect: (id: string) => void }) {
-  const big = pin.selected
-  const fill = pin.state === 'acquired' ? '#1F4FB8' : pin.state === 'found' ? '#D9472B' : '#DCE8F7'
-  const stroke = pin.state === 'located' ? '#22406E' : '#FFFFFF'
-  const text = pin.state === 'located' ? '#22406E' : '#FFFFFF'
-  const s = big ? 1.25 : 1
+  const opened = pin.state === 'acquired'
+  const s = pin.selected ? 1.2 : 1
   const onKey = (e: KeyboardEvent) => {
     if (e.key === 'Enter' || e.key === ' ') {
       e.preventDefault()
@@ -44,17 +44,9 @@ function Pin({ pin, onSelect }: { pin: MapPin; onSelect: (id: string) => void })
       onKeyDown={onKey}
       className="map-pin"
     >
-      {big && <circle cy={-22} r={22} fill="#1F4FB8" opacity={0.18} />}
-      <circle cy={-22} r={20} fill="transparent" />
-      <path
-        d="M0 0 C -4 -8, -12 -14, -12 -22 A12 12 0 1 1 12 -22 C 12 -14, 4 -8, 0 0 Z"
-        fill={fill}
-        stroke={stroke}
-        strokeWidth={pin.state === 'located' ? 2.2 : 2}
-      />
-      <text y={-18.5} textAnchor="middle" fontSize={10} fontWeight={700} fill={text} fontFamily={FONT}>
-        {pin.no}
-      </text>
+      {opened && <circle cy={-6} r={26} fill="#ffd36b" opacity={0.35} />}
+      {!opened && <circle cy={-6} r={22} fill="none" stroke="#ff6a3a" strokeWidth={2.5} opacity={0.8} />}
+      <g transform="translate(-27 -46)" dangerouslySetInnerHTML={{ __html: mapChestSvg(pin.no, opened) }} />
     </g>
   )
 }
@@ -79,10 +71,10 @@ function SpotBase({ label }: { label: string }) {
   )
 }
 
-export default function AreaMap({ areaId, areaName, pins, onSelect }: Props) {
+export default function AreaMap({ areaId, areaName, pins, onSelect, tod }: Props) {
   const label = areaName
   if (areaId === 'sand') {
-    return <RealMap pins={pins} onSelect={onSelect} />
+    return <GoogleMap pins={pins} onSelect={onSelect} tod={tod} />
   }
   return (
     <svg

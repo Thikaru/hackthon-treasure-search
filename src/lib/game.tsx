@@ -1,6 +1,7 @@
 // ゲームの状態（コンテンツ＋自分の進捗）を Supabase から読み込んで配るコンテキスト
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react'
 import { supabase } from './supabase'
+import * as demo from './demoState'
 
 export type AreaId = string
 export type TreasureState = 'locked' | 'located' | 'found' | 'acquired'
@@ -153,7 +154,44 @@ async function ensureSession() {
   if (error) throw error
 }
 
+/** 開発時のデモ（?demo=1 / ?demo=clear）。Supabase に触れずに全画面を確かめる */
+const DEMO = import.meta.env.DEV ? new URLSearchParams(window.location.hash.split('?')[1] ?? '').get('demo') ?? new URLSearchParams(window.location.search).get('demo') : null
+
+function DemoProvider({ kind, children }: { kind: string; children: ReactNode }) {
+  const [me, setMe] = useState<MyState>(() => ({ player: demo.demoPlayer, progress: demo.demoProgress(kind), placeHints: demo.demoHints, redeemed: false }))
+  const set = (id: string, patch: Partial<TreasureProgress>) =>
+    setMe((m) => ({ ...m, progress: { ...m.progress, [id]: { ...(m.progress[id] ?? { treasure_id: id, state: 'locked', locate_hints: 0, acquire_hints: 0 }), ...patch } } }))
+  const value: GameCtx = {
+    content: demo.demoContent,
+    me,
+    refresh: async () => undefined,
+    register: async () => undefined,
+    async submitAnswer(id, k, answer) {
+      await new Promise((r) => setTimeout(r, 300))
+      if (answer.trim() === 'まちがい') return false
+      set(id, { state: k === 'locate' ? 'located' : 'acquired' })
+      return true
+    },
+    async useHintFor(id, k) {
+      const p = me.progress[id]
+      set(id, k === 'locate' ? { locate_hints: (p?.locate_hints ?? 0) + 1 } : { acquire_hints: (p?.acquire_hints ?? 0) + 1 })
+    },
+    async scan() {
+      set('t03', { state: 'found' })
+      return { ok: true, treasure_id: 't03', state: 'found' }
+    },
+    issueCertificate: async () => ({ token: 'demo-' + Date.now(), expires_at: '' }),
+    restore: async () => false,
+    leave: async () => undefined,
+  }
+  return <Ctx.Provider value={value}>{children}</Ctx.Provider>
+}
+
 export function GameProvider({ children }: { children: ReactNode }) {
+  return DEMO ? <DemoProvider kind={DEMO}>{children}</DemoProvider> : <LiveProvider>{children}</LiveProvider>
+}
+
+function LiveProvider({ children }: { children: ReactNode }) {
   const [content, setContent] = useState<Content | null>(null)
   const [me, setMe] = useState<MyState>(EMPTY)
   const [error, setError] = useState<string | null>(null)

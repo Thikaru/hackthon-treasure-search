@@ -1,11 +1,16 @@
 import { Link, Navigate, useParams, useSearchParams } from 'react-router-dom'
-import { CompassIcon } from '../components/Icons'
+import { ChestArt, TreasureArt, treasureKind } from '../components/Art'
+import { Sparkles } from '../components/Common'
+import UnityStage from '../components/UnityStage'
 import { acquiredCount, areaCounts, progressOf, useGame } from '../lib/game'
+import { useTimeOfDay } from '../lib/useTimeOfDay'
 
+// お宝獲得：開いた宝箱から、光とともにお宝がせり上がる（Unity。使えない端末では SVG）
 export default function Acquired() {
   const { id = '' } = useParams()
   const [q] = useSearchParams()
   const { me, content } = useGame()
+  const tod = useTimeOfDay()
   const t = content.treasures.find((x) => x.id === id)
   if (!t) return <Navigate to="/home" replace />
   if (progressOf(me, t.id).state !== 'acquired') return <Navigate to={`/puzzle/${t.id}`} replace />
@@ -18,56 +23,59 @@ export default function Acquired() {
   const cleared = got >= clearCount
 
   return (
-    <div className="screen got-screen">
-      {fresh && (
-        <svg className="confetti" viewBox="0 0 390 300" aria-hidden="true">
-          <rect x="48" y="60" width="10" height="5" rx="2" fill="#D9472B" transform="rotate(30 53 62)" />
-          <rect x="320" y="84" width="10" height="5" rx="2" fill="#1F4FB8" transform="rotate(-25 325 86)" />
-          <rect x="86" y="190" width="8" height="4" rx="2" fill="#8EB2E2" transform="rotate(60 90 192)" />
-          <rect x="300" y="210" width="9" height="4" rx="2" fill="#D9472B" transform="rotate(15 304 212)" />
-          <circle cx="70" cy="128" r="4" fill="#D9B98A" />
-          <circle cx="330" cy="150" r="5" fill="#D9B98A" />
-          <circle cx="260" cy="40" r="3" fill="#1F4FB8" />
-        </svg>
-      )}
-      <p className="got-kicker">{fresh ? 'GET!' : `No.${t.no}`}</p>
-      <div className="got-badge">
-        <CompassIcon size={84} stroke="#FFFFFF" strokeWidth={1.6} />
-      </div>
-      <h1 className="got-name">{t.name}</h1>
-      <p className="got-desc">{t.description}</p>
-      <section className="card stack-12 full">
-        <div className="between">
-          <b>{area?.name}</b>
-          <span className="muted">
-            <strong className="num-cobalt">{ac.got}</strong> / {ac.total}
-          </span>
+    <div className={'screen got' + (fresh ? ' fresh' : '')}>
+      <div className="got-burst" aria-hidden="true" />
+      <Sparkles count={26} seed={33} />
+      <p className="got-banner">{fresh ? 'お宝を手に入れた！' : `No.${t.no} のお宝`}</p>
+
+      <UnityStage
+        scene="reveal"
+        tod={tod}
+        kind={treasureKind(t.name)}
+        fresh={fresh}
+        sceneKey={`reveal:${t.id}:${tod}:${fresh ? 'new' : 'see'}`}
+        label={`${t.name}（指でなぞると宝箱が回ります）`}
+        fallback={
+          <div className="got-fallback">
+            <span className="beams" aria-hidden="true" />
+            <TreasureArt name={t.name} size={132} className="art-treasure float" />
+            <ChestArt size={210} open />
+          </div>
+        }
+      />
+
+      <section className="got-card paper">
+        <span className="chip chip-acquired">獲得・No.{t.no}</span>
+        <h1>{t.name}</h1>
+        <p className="desc">{t.description}</p>
+        <div className="counter">
+          <div>
+            <small>{area?.name}</small>
+            <b>
+              {ac.got}
+              <span> / {ac.total}</span>
+            </b>
+          </div>
+          <div>
+            <small>{cleared ? 'クリア条件' : 'クリアまで'}</small>
+            <b>{cleared ? '達成！' : <>あと{clearCount - got}<span> 個</span></>}</b>
+          </div>
         </div>
-        <div className="bar">
-          <span className="bar-fill" style={{ width: `${ac.total ? (ac.got / ac.total) * 100 : 0}%` }} />
+        <div className="got-actions">
+          {cleared ? (
+            <Link to="/certificate" className="btn btn-primary btn-lg">
+              クリア証明を見る
+            </Link>
+          ) : (
+            <Link to="/home" className="btn btn-primary btn-lg">
+              次の謎へ
+            </Link>
+          )}
+          <Link to="/treasures" className="btn btn-paper">
+            お宝の飾り棚を見る
+          </Link>
         </div>
-        <div className="between divider-top">
-          <b className="nowrap">ぜんぶで</b>
-          <span className="muted nowrap">
-            <strong className="num-deep">{got}</strong> / {content.treasures.length} 個
-          </span>
-        </div>
-        <p className="progress-note">{cleared ? 'クリア条件を達成しました！' : `クリアまであと ${clearCount - got} 個`}</p>
       </section>
-      <div className="stack-12 full push-bottom">
-        {cleared ? (
-          <Link to="/certificate" className="btn btn-primary btn-lg">
-            クリア証明を見る
-          </Link>
-        ) : (
-          <Link to="/home" className="btn btn-primary btn-lg">
-            次の謎へ
-          </Link>
-        )}
-        <Link to="/treasures" className="btn btn-outline">
-          コレクションを見る
-        </Link>
-      </div>
     </div>
   )
 }

@@ -1,0 +1,6 @@
+{
+    "name": "TreasureStage.Editor",
+    "rootNamespace": "TreasureStage.EditorTools",
+    "references": ["TreasureStage"],
+    "includePlatforms": ["Editor"]
+}

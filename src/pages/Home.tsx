@@ -3,7 +3,8 @@ import { Link } from 'react-router-dom'
 import AreaMap, { type MapPin } from '../components/AreaMap'
 import { StatusChip } from '../components/Common'
 import { AwardIcon, HelpIcon } from '../components/Icons'
-import { currentGuidepost, progressOf, useGame, type Treasure } from '../lib/game'
+import { acquiredCount, currentGuidepost, progressOf, useGame, type Treasure } from '../lib/game'
+import { useTimeOfDay } from '../lib/useTimeOfDay'
 import { GuidepostRow } from './Guideposts'
 
 // 地図に出すのは QR を読んだお宝（宝箱発見・獲得）だけ。場所はヒントの画像・説明で探す
@@ -12,6 +13,9 @@ const onMap = (st: string) => st === 'found' || st === 'acquired'
 export default function Home() {
   const { me, content } = useGame()
   const { treasures, areas, settings } = content
+  const tod = useTimeOfDay()
+  const got = acquiredCount(me)
+  const nick = me.player?.nickname ?? ''
   const firstFound = treasures.find((t) => progressOf(me, t.id).state === 'found')
   const firstOpen = treasures.find((t) => progressOf(me, t.id).state !== 'acquired')
   const [areaId, setAreaId] = useState<string>(firstFound?.area_id ?? firstOpen?.area_id ?? areas[0]?.id ?? '')
@@ -74,19 +78,46 @@ export default function Home() {
 
   return (
     <div className="screen home">
-      <header className="home-header">
-        <h1>{me.player?.nickname} さん</h1>
-        <div className="home-header-actions">
-          <Link to="/certificate" className="cert-btn" aria-label="クリア証明" title="クリア証明">
-            <AwardIcon size={20} />
-          </Link>
-          <Link to="/help" className="icon-btn" aria-label="遊び方・ヘルプ">
-            <HelpIcon size={22} />
-          </Link>
+      <div className="map-wrap">
+        <AreaMap
+          areaId={areaId}
+          areaName={area?.name ?? ''}
+          pins={pins}
+          tod={tod}
+          onSelect={(id) => {
+            setPicked(id)
+            setOpen(true)
+          }}
+        />
+      </div>
+
+      <header className="home-top">
+        <span className="avatar" aria-hidden="true">
+          {[...nick][0] ?? '？'}
+        </span>
+        <div className="home-who glass">
+          <h1>{nick} さん</h1>
+          <div className="progress-dots" aria-label={`お宝 ${got} / ${settings.clearCount} 個`}>
+            {Array.from({ length: settings.clearCount }, (_, i) => (
+              <i key={i} className={i < got ? 'on' : ''} />
+            ))}
+            <small>
+              {Math.min(got, settings.clearCount)}/{settings.clearCount}
+            </small>
+          </div>
         </div>
+        <Link to="/certificate" className="round-btn glass" aria-label="クリア証明" title="クリア証明">
+          <AwardIcon size={21} />
+        </Link>
+        <Link to="/treasures" className="round-btn glass" aria-label="お宝の飾り棚" title="お宝の飾り棚">
+          <ShelfIcon />
+        </Link>
+        <Link to="/help" className="round-btn glass" aria-label="遊び方・ヘルプ">
+          <HelpIcon size={21} />
+        </Link>
       </header>
 
-      <div className="segmented" role="group" aria-label="表示するエリア">
+      <div className="seg glass" role="group" aria-label="表示するエリア">
         {areas.map((a) => (
           <button
             key={a.id}
@@ -102,31 +133,9 @@ export default function Home() {
           </button>
         ))}
       </div>
+      {area?.needs_car && <span className="map-badge glass">車での移動がおすすめ</span>}
 
-      <div className="map-wrap">
-        <AreaMap
-          areaId={areaId}
-          areaName={area?.name ?? ''}
-          pins={pins}
-          onSelect={(id) => {
-            setPicked(id)
-            setOpen(true)
-          }}
-        />
-        <div className="map-legend">
-          <span>
-            <i className="dot dot-found" />
-            宝箱発見（鍵の謎あり）
-          </span>
-          <span>
-            <i className="dot dot-acquired" />
-            獲得
-          </span>
-        </div>
-        {area?.needs_car && <span className="map-badge">車での移動がおすすめ</span>}
-      </div>
-
-      <section className={'sheet' + (open ? '' : ' collapsed')} aria-live="polite">
+      <section className={'sheet paper' + (open ? '' : ' collapsed')} aria-live="polite">
         <button
           type="button"
           className="sheet-grip"
@@ -177,6 +186,16 @@ export default function Home() {
         </div>
       </section>
     </div>
+  )
+}
+
+function ShelfIcon() {
+  return (
+    <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M3 4h18M3 12h18M3 20h18M5 4v16M19 4v16" />
+      <circle cx="9" cy="9" r="1.6" />
+      <path d="M13 17l2-3 2 3z" />
+    </svg>
   )
 }
 

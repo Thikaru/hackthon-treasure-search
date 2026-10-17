@@ -8,6 +8,7 @@ import QrPrint from './admin/QrPrint'
 import Redeem from './admin/Redeem'
 import TreasuresAdmin from './admin/TreasuresAdmin'
 import { useGame } from './lib/game'
+import { useTimeOfDay } from './lib/useTimeOfDay'
 import Acquired from './pages/Acquired'
 import Found from './pages/Found'
 import Guideposts from './pages/Guideposts'
@@ -46,8 +47,11 @@ export default function App() {
 }
 
 function PlayerRoutes() {
+  // トップ画面と同じく、昼・夕方・夜で全画面の写真背景と差し色が変わる
+  const tod = useTimeOfDay()
   return (
-    <div className="app-shell">
+    <div className={`app-shell tod-${tod}`}>
+      <div className="backdrop" aria-hidden="true" />
       <Routes>
         <Route path="/" element={<Title />} />
         <Route path="/register" element={<Register />} />
