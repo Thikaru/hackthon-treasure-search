@@ -82,8 +82,8 @@ function seagull(x, y, s = 1, hat = '#1f4fb8') {
   return `<g transform="translate(${x} ${y}) scale(${s})">
     <ellipse cx="0" cy="120" rx="80" ry="16" fill="rgba(0,0,0,.18)"/>
     <path d="M-70 40 Q-80 -40 0 -50 Q80 -40 70 40 Q60 110 0 115 Q-60 110 -70 40Z" fill="#fff" stroke="#2a3550" stroke-width="6"/>
-    <path d="M-62 30 Q-110 0 -120 40 Q-90 50 -66 60Z" fill="#dfe6f0" stroke="#2a3550" stroke-width="6" stroke-linejoin="round"/>
-    <path d="M60 20 Q118 -20 128 18 Q100 40 64 52Z" fill="#dfe6f0" stroke="#2a3550" stroke-width="6" stroke-linejoin="round"/>
+    <path d="M-62 30 Q-110 0 -120 40 Q-90 50 -66 60Z" fill="#9a6232" stroke="#2a3550" stroke-width="6" stroke-linejoin="round"/>
+    <path d="M60 20 Q118 -20 128 18 Q100 40 64 52Z" fill="#9a6232" stroke="#2a3550" stroke-width="6" stroke-linejoin="round"/>
     <circle cx="-22" cy="-6" r="9" fill="#2a3550"/><circle cx="22" cy="-6" r="9" fill="#2a3550"/>
     <circle cx="-19" cy="-9" r="3" fill="#fff"/><circle cx="25" cy="-9" r="3" fill="#fff"/>
     <path d="M-16 12 L16 12 L0 34Z" fill="#ffb21a" stroke="#2a3550" stroke-width="5" stroke-linejoin="round"/>
@@ -181,10 +181,104 @@ function ribbon(x, y, w, color, text, c2) {
   </g>`
 }
 
+
+// =====================================================================
+// 渋川の地図のイラスト（宝箱の代わりに置く）。地図の中の座標は 560×380
+// 左下が海（瀬戸内海）、右上が陸。北西から南東へ斜めに砂浜がのびる
+// =====================================================================
+const MW = 560, MH = 380
+const COAST = 'M-10 118 Q150 140 260 214 T570 332'
+const SPOTS_MAP = [[72, 112, '01'], [150, 140, '02'], [236, 190, '03'], [362, 246, '04'], [462, 284, '05']]
+const PINES = [[60, 40], [110, 30], [170, 55], [230, 70], [290, 95], [80, 75], [140, 85], [210, 110], [480, 150], [520, 180], [400, 110], [440, 90], [500, 120]]
+
+function shibukawaMap(p, st) {
+  const pine = ([x, y]) => `<path d="M${x} ${y - 16} l11 16 h-22Z M${x} ${y - 24} l8 12 h-16Z" fill="${st.pine}" stroke="${st.pineLine}" stroke-width="1.5" stroke-linejoin="round"/>`
+  const spot = ([x, y, no]) => st.pins === 'x'
+    ? `<g transform="translate(${x} ${y})"><path d="M-12 -12 L12 12 M12 -12 L-12 12" stroke="${st.x}" stroke-width="7" stroke-linecap="round"/><circle cx="18" cy="-20" r="13" fill="${st.paper}" stroke="${st.ink}" stroke-width="2.5"/><text x="18" y="-19" text-anchor="middle" dominant-baseline="central" font-family="'Dela Gothic One'" font-size="12" fill="${st.ink}">${no}</text></g>`
+    : `<g transform="translate(${x - 17} ${y - 32}) scale(.64)">${mapChestSvg(no, no === '01' || no === '03')}</g>`
+  return `<g>
+    <defs><clipPath id="${p}c"><rect width="${MW}" height="${MH}" rx="${st.rx ?? 6}"/></clipPath></defs>
+    <g clip-path="url(#${p}c)">
+      <rect width="${MW}" height="${MH}" fill="${st.land}"/>
+      ${st.texture ? `<rect width="${MW}" height="${MH}" fill="#fff" filter="url(#${p}tex)" opacity=".9"/>` : ''}
+      <!-- 公園と建物 -->
+      <rect x="300" y="30" width="120" height="62" rx="8" fill="${st.park}" stroke="${st.parkLine}" stroke-width="2"/>
+      <text x="360" y="62" text-anchor="middle" dominant-baseline="central" font-family="'Yusei Magic'" font-size="15" fill="${st.ink}">渋川公園</text>
+      ${[[455, 40], [495, 58], [520, 30]].map(([x, y]) => `<rect x="${x}" y="${y}" width="26" height="18" rx="3" fill="${st.house}" stroke="${st.parkLine}" stroke-width="1.5"/>`).join('')}
+      <!-- 国道430号 -->
+      <path d="M-10 60 Q190 82 320 140 T570 236" fill="none" stroke="${st.roadEdge}" stroke-width="16" stroke-linecap="round"/>
+      <path d="M-10 60 Q190 82 320 140 T570 236" fill="none" stroke="${st.road}" stroke-width="10" stroke-linecap="round"/>
+      ${PINES.map(pine).join('')}
+      <!-- 海と砂浜 -->
+      <path d="${COAST} L570 400 L-10 400Z" fill="${st.sea}"/>
+      <path d="${COAST}" fill="none" stroke="${st.sand}" stroke-width="40" transform="translate(-6 -18)"/>
+      <path d="${COAST}" fill="none" stroke="${st.surf}" stroke-width="5" stroke-linecap="round"/>
+      ${Array.from({ length: 8 }, (_, i) => `<path d="M${30 + (i % 4) * 130} ${250 + Math.floor(i / 4) * 60 + (i % 2) * 14} q12 -7 24 0 t24 0" fill="none" stroke="${st.wave}" stroke-width="3" stroke-linecap="round"/>`).join('')}
+      <text x="110" y="300" font-family="'Yusei Magic'" font-size="26" fill="${st.seaText}" transform="rotate(-8 110 300)">瀬戸内海</text>
+      <!-- 歩く道と宝の場所 -->
+      <path d="M430 168 Q330 172 250 150 Q160 125 72 112 Q110 150 236 190 Q300 222 362 246 Q420 268 462 284" fill="none" stroke="${st.route}" stroke-width="4" stroke-dasharray="3 9" stroke-linecap="round"/>
+      ${SPOTS_MAP.map(spot).join('')}
+      <g transform="translate(430 168)"><circle r="15" fill="${st.start}" stroke="#fff" stroke-width="3"/><text y="1" text-anchor="middle" dominant-baseline="central" font-family="'Dela Gothic One'" font-size="13" fill="#fff">S</text></g>
+      <text x="452" y="174" font-family="'Yusei Magic'" font-size="15" fill="${st.ink}">受付</text>
+      <text x="300" y="232" font-family="'Yusei Magic'" font-size="16" fill="${st.ink}" transform="rotate(25 300 232)">渋川海岸</text>
+      <!-- 方位 -->
+      <g transform="translate(${MW - 46} ${MH - 50})"><circle r="26" fill="${st.paper}" stroke="${st.ink}" stroke-width="2"/><path d="M0 -30 L6 0 L0 30 L-6 0Z" fill="${st.x}"/><path d="M-30 0 L0 6 L30 0 L0 -6Z" fill="${st.ink}"/><text y="-34" text-anchor="middle" font-family="'Dela Gothic One'" font-size="13" fill="${st.ink}">N</text></g>
+    </g>
+    <defs><filter id="${p}tex"><feTurbulence type="fractalNoise" baseFrequency=".03" numOctaves="4" seed="5"/><feColorMatrix values="0 0 0 0 .45  0 0 0 0 .3  0 0 0 0 .15  0 0 0 .25 0"/><feComposite in2="SourceGraphic" operator="in"/></filter></defs>
+  </g>`
+}
+
+const PARCH = { land: '#f4e2b8', paper: '#fbefd2', park: '#cfe0a8', parkLine: '#8a6a3a', house: '#e8cfa0', road: '#ead2a0', roadEdge: '#b08a50', pine: '#7a9a5a', pineLine: '#4a5a2a', sea: '#9cc4c8', sand: '#f0d9a0', surf: '#fff8e8', wave: '#5f8f96', seaText: '#3f6f76', route: '#b8402a', x: '#c8341e', ink: '#5a3a1a', start: '#2a8a6a', pins: 'x', texture: true }
+const MODERN = { land: '#eaf3e1', paper: '#ffffff', park: '#c6e8b8', parkLine: '#8fb88a', house: '#e2e6ea', road: '#ffffff', roadEdge: '#c9d3dc', pine: '#5aa86a', pineLine: '#3a7a4a', sea: '#8fd3f0', sand: '#f6e4bc', surf: '#ffffff', wave: '#ffffff', seaText: '#2f78b0', route: '#ff7a1a', x: '#d9472b', ink: '#3a4a5a', start: '#1f4fb8', pins: 'chest', rx: 14 }
+
+// 地図の見せ方：巻物（羊皮紙）
+function mapScroll(x, y) {
+  const w = MW, h = MH
+  const roll = (rx) => `<g><rect x="${rx - 18}" y="-26" width="36" height="${h + 52}" rx="18" fill="url(#scRoll)" stroke="#6e4422" stroke-width="4"/><ellipse cx="${rx}" cy="-26" rx="18" ry="8" fill="#c99a5a" stroke="#6e4422" stroke-width="4"/><circle cx="${rx}" cy="${h + 34}" r="10" fill="#b8402a" stroke="#6e4422" stroke-width="3"/><path d="M${rx} ${h + 30} q-10 26 -4 44 M${rx} ${h + 30} q8 24 14 40" stroke="#b8402a" stroke-width="5" fill="none" stroke-linecap="round"/></g>`
+  return `<g transform="translate(${x} ${y}) rotate(-4)">
+    <defs><linearGradient id="scRoll" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#a06e3a"/><stop offset=".45" stop-color="#f0d9a0"/><stop offset="1" stop-color="#8a5a2a"/></linearGradient></defs>
+    <ellipse cx="${w / 2}" cy="${h + 52}" rx="${w * 0.55}" ry="16" fill="rgba(0,0,0,.22)"/>
+    <rect x="-6" y="-6" width="${w + 12}" height="${h + 12}" fill="#e8cf98" stroke="#8a6a3a" stroke-width="4"/>
+    ${shibukawaMap('sc', PARCH)}
+    ${roll(-14)}${roll(w + 14)}
+  </g>`
+}
+
+// 地図の見せ方：テープで貼った地図カード（スマホの地図アプリ風）
+function mapCard(x, y) {
+  const w = MW, h = MH
+  return `<g transform="translate(${x} ${y}) rotate(-3)">
+    <rect x="-18" y="-18" width="${w + 36}" height="${h + 70}" rx="22" fill="#fff" stroke="#2a3550" stroke-width="5"/>
+    <rect x="-18" y="-18" width="${w + 36}" height="${h + 70}" rx="22" fill="none" stroke="rgba(0,0,0,.12)" stroke-width="14" transform="translate(6 8)" opacity=".5"/>
+    ${shibukawaMap('cd', MODERN)}
+    <text x="${w / 2}" y="${h + 34}" text-anchor="middle" font-family="'Dela Gothic One'" font-size="22" fill="#2a3550" letter-spacing="4">SHIBUKAWA BEACH MAP</text>
+    <rect x="${w / 2 - 70}" y="-34" width="140" height="34" fill="rgba(255,226,140,.85)" transform="rotate(-3 ${w / 2} -17)"/>
+  </g>`
+}
+
+// 地図の見せ方：模型（ジオラマ）。斜めから見下ろした板の上に、立った宝箱
+function mapDiorama(x, y) {
+  const w = MW, h = MH, k = 0.58, sk = Math.tan((-24 * Math.PI) / 180)
+  const P = (px, py) => [px + py * k * sk, py * k] // 地図の点 → 板の上の点
+  const chests = SPOTS_MAP.map(([px, py, no]) => { const [qx, qy] = P(px, py); return `<g transform="translate(${qx - 26} ${qy - 52})">${mapChestSvg(no, no === '01' || no === '03')}</g>` }).join('')
+  const [sx, sy] = P(430, 168)
+  const flag = `<g transform="translate(${sx} ${sy})"><path d="M0 0 V-60" stroke="#6e4422" stroke-width="5"/><path d="M0 -60 l40 12 l-40 12Z" fill="#2a8a6a" stroke="#123a2a" stroke-width="3"/><text x="16" y="-44" font-family="'Dela Gothic One'" font-size="12" fill="#fff">S</text></g>`
+  return `<g transform="translate(${x + 110} ${y + 70})">
+    <ellipse cx="${w / 2 - 70}" cy="${h * k + 70}" rx="${w * 0.62}" ry="26" fill="rgba(0,0,0,.25)"/>
+    <g transform="skewX(-24) scale(1 ${k})">
+      <rect x="0" y="${h}" width="${w}" height="70" fill="#8a5a34"/>
+      <rect x="0" y="${h}" width="${w}" height="22" fill="#e2bd82"/>
+      <rect x="0" y="${h + 22}" width="${w}" height="10" fill="#b8874a"/>
+      ${shibukawaMap('dr', { ...MODERN, pins: 'none', rx: 4 }).replace(/<g transform="translate\([^)]*\) scale\(\.64\)">[\s\S]*?<\/svg><\/g>/g, '')}
+    </g>
+    ${flag}${chests}
+  </g>`
+}
+
 // =====================================================================
 // 案A：昼・海と開いた宝箱（参考のチラシに近い構図）
 // =====================================================================
-function posterA() {
+function posterA(mapKind = 'chest') {
   seed = 11
   const W = 1240, H = 1754
   return `<svg class="poster" viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg">
@@ -217,8 +311,8 @@ function posterA() {
   <path d="M0 1200 Q300 1160 620 1190 T1240 1170" fill="none" stroke="#fff" stroke-width="16" stroke-linecap="round"/>
   ${Array.from({ length: 7 }, (_, i) => `<circle cx="${80 + i * 170}" cy="${1140 + (i % 2) * 18}" r="13" fill="#ff6a3a" stroke="#a3361e" stroke-width="4"/>`).join('')}
   <!-- 宝箱と光 -->
-  <ellipse cx="560" cy="1090" rx="300" ry="220" fill="#fff7c8" filter="url(#aGlow)" opacity=".85"/>
-  ${place(chestSvg('a1', { size: 470, open: true }), 330, 820)}
+  <ellipse cx="560" cy="1060" rx="340" ry="230" fill="#fff7c8" filter="url(#aGlow)" opacity=".85"/>
+  ${mapKind === 'scroll' ? mapScroll(170, 830) : mapKind === 'card' ? mapCard(150, 820) : mapKind === 'diorama' ? mapDiorama(120, 820) : place(chestSvg('a1', { size: 470, open: true }), 330, 820)}
   ${[[420, 830, 1.6], [700, 790, 1.2], [560, 760, 2], [780, 900, 1], [350, 930, 1]].map(([x, y, s]) => sparkle(x, y, s)).join('')}
   ${place(treasureSvg('a2', 'compass', 120), 300, 690)}
   ${place(treasureSvg('a3', 'bottle', 100), 720, 660)}
@@ -357,7 +451,7 @@ function posterC() {
   </svg>`
 }
 
-const posters = [posterA, posterB, posterC]
+const posters = [() => posterA('scroll'), () => posterA('card'), () => posterA('diorama'), () => posterA('chest'), posterB, posterC]
 const p = new URLSearchParams(location.search).get('p')
 if (p !== null) document.body.classList.add('one')
 document.getElementById('out').innerHTML = p !== null ? posters[+p]() : posters.map((f) => f()).join('')
