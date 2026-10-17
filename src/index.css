@@ -1545,3 +1545,6 @@ input.narrow { max-width: 360px; height: 46px; font-size: 14px; }
 }
 .app-shell .chips button { background: var(--glass); color: var(--gink); border: 1px solid var(--glass-line); -webkit-backdrop-filter: blur(16px); backdrop-filter: blur(16px); font-weight: 700; }
 .app-shell .chips button.on { background: var(--accent); color: var(--accent-ink); border-color: transparent; }
+
+/* ホーム（地図）を開いている間は、ページ自体をスクロール・引っぱって更新させない */
+html:has(.screen.home), body:has(.screen.home) { overflow: hidden; overscroll-behavior: none; height: 100%; }

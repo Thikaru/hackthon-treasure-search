@@ -261,11 +261,17 @@ function EmbedMap({ pins, onSelect, tod }: Props) {
     }
     const stop = (e: Event) => e.preventDefault()
     el.addEventListener('wheel', onWheel, { passive: false })
+    // スマホでは上下になぞると、地図より先にブラウザ（ページのスクロール・引っぱって更新・アドレスバーの出し入れ）が
+    // 指の動きを取ってしまう。iPhone のブラウザは CSS の touch-action を十分に守らないので、
+    // 地図の上で指を動かしたときはブラウザの動作を止め、地図だけが動くようにする
+    // （touchstart は止めないので、宝箱ピンのタップはそのまま効く）
+    el.addEventListener('touchmove', stop, { passive: false })
     // iPhone の Safari の2本指ジェスチャー（ページの拡大）も止める
     el.addEventListener('gesturestart', stop)
     el.addEventListener('gesturechange', stop)
     return () => {
       el.removeEventListener('wheel', onWheel)
+      el.removeEventListener('touchmove', stop)
       el.removeEventListener('gesturestart', stop)
       el.removeEventListener('gesturechange', stop)
     }
