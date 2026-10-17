@@ -1,5 +1,4 @@
 import { Link } from 'react-router-dom'
-import { Seal } from '../components/Art'
 import { Sparkles, TodIcon } from '../components/Common'
 import { useGame } from '../lib/game'
 import { useTimeOfDay } from '../lib/useTimeOfDay'
@@ -30,7 +29,6 @@ export default function Title() {
       </span>
       <div className="title-content">
         <div className="title-heading">
-          <Seal className="title-seal" />
           <p className="title-kicker">{GAME.subtitle}</p>
           <h1 className="title-name">
             {APP_TITLE_1}

@@ -2,7 +2,7 @@ import QRCode from 'qrcode'
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { BackHeader, StatusChip, stateLabel } from '../components/Common'
-import { ChestArt, TreasureArt, WaxSeal } from '../components/Art'
+import { ChestArt, TreasureArt } from '../components/Art'
 import { LockIcon } from '../components/Icons'
 import { acquiredCount, areaCounts, progressOf, useGame, type Treasure, type TreasureState } from '../lib/game'
 import { errorMessage } from '../lib/supabase'
@@ -152,7 +152,6 @@ export function Certificate() {
                 <span className="live-dot" aria-hidden="true" />
                 {pad(now.getHours())}:{pad(now.getMinutes())}:{pad(now.getSeconds())}
               </p>
-              <WaxSeal className="art-wax cert-wax" letter={me.redeemed ? '済' : '証'} />
             </section>
             {err && <p className="form-msg">{err}</p>}
             <section className="glass panel row-12">

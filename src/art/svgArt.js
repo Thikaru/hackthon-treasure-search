@@ -2,25 +2,6 @@
 // Web 版の画面と、Unity に渡すお宝の絵（tools/render-art.mjs で PNG 化）の両方がここを使う。
 // p は SVG 内の id がぶつからないための接頭辞。
 
-export function sealSvg(p) {
-  return `<svg viewBox="0 0 100 100">
-    <defs>
-      <radialGradient id="${p}wax" cx="38%" cy="32%" r="70%"><stop offset="0" stop-color="#ff7a5a"/><stop offset=".55" stop-color="#c8341e"/><stop offset="1" stop-color="#7a1608"/></radialGradient>
-      <linearGradient id="${p}gold" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff2c4"/><stop offset=".5" stop-color="#f2c45a"/><stop offset="1" stop-color="#b8821e"/></linearGradient>
-    </defs>
-    <path d="M50 4c7 0 9 6 15 7s12-3 16 2-1 11 2 16 9 7 8 14-8 7-9 13 4 11-1 16-11 1-16 4-5 10-13 10-9-7-15-8-12 3-16-2 1-11-2-16-9-7-8-14 8-7 9-13-4-11 1-16 11-1 16-4 6-9 13-9Z" fill="url(#${p}wax)"/>
-    <circle cx="50" cy="50" r="30" fill="none" stroke="rgba(255,220,200,.35)" stroke-width="2"/>
-    <g transform="translate(50 52)">
-      <path d="M-18 -2h36v16a3 3 0 0 1-3 3h-30a3 3 0 0 1-3-3Z" fill="url(#${p}gold)"/>
-      <path d="M-18 -2v-4a10 9 0 0 1 10-9h16a10 9 0 0 1 10 9v4Z" fill="url(#${p}gold)"/>
-      <rect x="-18" y="-3" width="36" height="3.5" fill="#8a5a10" opacity=".55"/>
-      <rect x="-4.5" y="-6" width="9" height="10" rx="2" fill="#7a1608"/>
-      <circle cx="0" cy="-1.5" r="1.8" fill="url(#${p}gold)"/>
-    </g>
-    <ellipse cx="36" cy="26" rx="12" ry="5" fill="rgba(255,255,255,.28)" transform="rotate(-25 36 26)"/>
-  </svg>`
-}
-
 export function chestSvg(p, { size = 230, open = false } = {}) {
   const h = size * 0.86
   return `<svg width="${size}" height="${h}" viewBox="0 0 260 224">
@@ -111,10 +92,6 @@ export function treasureSvg(p, kind, s = 64) {
     bell: `<path d="M32 6v6" stroke="#7a5210" stroke-width="3"/><path d="M14 46c4-4 4-10 4-18a14 14 0 0 1 28 0c0 8 0 14 4 18Z" fill="url(#${p}${kind}g)" stroke="#7a5210" stroke-width="2.5"/><rect x="10" y="44" width="44" height="6" rx="3" fill="#c08a26" stroke="#7a5210" stroke-width="2"/><circle cx="32" cy="54" r="5" fill="#c08a26" stroke="#7a5210" stroke-width="2"/><path d="M22 22q2 -6 8 -8" stroke="#fff" stroke-width="3" fill="none" stroke-linecap="round" opacity=".8"/>`,
   }[kind] ?? ''
   return `<svg width="${s}" height="${s}" viewBox="0 0 64 64">${d}${art}</svg>`
-}
-
-export function waxSvg(p, letter = '済') {
-  return `<svg viewBox="0 0 100 100"><defs><radialGradient id="${p}cw" cx="38%" cy="32%" r="70%"><stop offset="0" stop-color="#ff7a5a"/><stop offset=".55" stop-color="#c8341e"/><stop offset="1" stop-color="#7a1608"/></radialGradient></defs><path d="M50 4c7 0 9 6 15 7s12-3 16 2-1 11 2 16 9 7 8 14-8 7-9 13 4 11-1 16-11 1-16 4-5 10-13 10-9-7-15-8-12 3-16-2 1-11-2-16-9-7-8-14 8-7 9-13-4-11 1-16 11-1 16-4 6-9 13-9Z" fill="url(#${p}cw)"/><circle cx="50" cy="50" r="28" fill="none" stroke="rgba(255,220,200,.45)" stroke-width="2" stroke-dasharray="3 4"/><text x="50" y="58" text-anchor="middle" font-family="Shippori Mincho, serif" font-weight="800" font-size="24" fill="#ffd9c8">${letter}</text></svg>`
 }
 
 /** 宝の道標の立て札（文字は HTML で重ねる） */
