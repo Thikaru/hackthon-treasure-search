@@ -1,5 +1,5 @@
-import { useEffect, useMemo, useState } from 'react'
-import { MapContainer, Marker, TileLayer, Tooltip, useMap, useMapEvents } from 'react-leaflet'
+import { useEffect, useMemo } from 'react'
+import { MapContainer, Marker, TileLayer, Tooltip, useMap } from 'react-leaflet'
 import L, { type LatLngBoundsExpression, type LatLngTuple } from 'leaflet'
 import type { MapPin } from './AreaMap'
 
@@ -79,30 +79,12 @@ function TreasureMarker({ pin, onSelect }: { pin: MapPin; onSelect: (id: string)
   )
 }
 
-const dropIcon = L.divIcon({
-  className: 'user-pin-icon',
-  html: '<div class="user-pin"></div>',
-  iconSize: [24, 32],
-  iconAnchor: [12, 32],
-})
-
-function ClickToDrop({ onDrop }: { onDrop: (pos: LatLngTuple) => void }) {
-  useMapEvents({
-    click(e) {
-      onDrop([e.latlng.lat, e.latlng.lng])
-    },
-  })
-  return null
-}
-
 interface Props {
   pins: MapPin[]
   onSelect: (id: string) => void
 }
 
 export default function RealMap({ pins, onSelect }: Props) {
-  const [userPin, setUserPin] = useState<LatLngTuple | null>(null)
-
   return (
     <MapContainer
       center={SHIBUKAWA_CENTER}
@@ -119,17 +101,9 @@ export default function RealMap({ pins, onSelect }: Props) {
         bounds={SHIBUKAWA_BOUNDS}
       />
       <FitShibukawaBounds />
-      <ClickToDrop onDrop={setUserPin} />
       {pins.map((p) => (
         <TreasureMarker key={p.id} pin={p} onSelect={onSelect} />
       ))}
-      {userPin && (
-        <Marker position={userPin} icon={dropIcon}>
-          <Tooltip direction="top" offset={[0, -28]} permanent>
-            ここにピン
-          </Tooltip>
-        </Marker>
-      )}
     </MapContainer>
   )
 }
