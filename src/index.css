@@ -910,17 +910,6 @@ select.input { padding: 0 10px; height: 46px; font-size: 14px; }
 input.narrow { max-width: 360px; height: 46px; font-size: 14px; }
 
 /* ---------- 修正1：宝の道標・鍵のかかった宝箱 ---------- */
-.sheet-title { font-size: 15px; font-weight: 700; color: var(--deep); }
-.accent-text { color: var(--buoy-text); font-weight: 700; }
-.gp-scroll {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  max-height: 230px;
-  overflow-y: auto;
-  margin: 0 -4px;
-  padding: 0 4px 4px;
-}
 .gp-row {
   display: flex;
   gap: 12px;
