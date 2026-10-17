@@ -1,35 +1,10 @@
 import QRCode from 'qrcode'
 import { useEffect, useState } from 'react'
-import { Link, NavLink } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 import { BackHeader, StatusChip, stateLabel } from '../components/Common'
 import { ChestIcon, LockIcon, PinIcon } from '../components/Icons'
 import { acquiredCount, areaCounts, progressOf, useGame, type Treasure, type TreasureState } from '../lib/game'
 import { errorMessage } from '../lib/supabase'
-
-function TreasureHeader() {
-  const { me, content } = useGame()
-  return (
-    <>
-      <BackHeader
-        title="お宝"
-        to="/home"
-        right={
-          <span className="num-cobalt bold">
-            {acquiredCount(me)} / {content.treasures.length} 獲得
-          </span>
-        }
-      />
-      <nav className="segmented seg-lg" aria-label="お宝の表示切替">
-        <NavLink to="/treasures" className={({ isActive }) => (isActive ? 'on' : '')}>
-          コレクション
-        </NavLink>
-        <NavLink to="/certificate" className={({ isActive }) => (isActive ? 'on' : '')}>
-          クリア証明
-        </NavLink>
-      </nav>
-    </>
-  )
-}
 
 function linkFor(t: Treasure, st: TreasureState) {
   if (st === 'acquired') return `/got/${t.id}`
@@ -45,7 +20,7 @@ export function Collection() {
   return (
     <div className="screen">
       <div className="page stack-14">
-        <TreasureHeader />
+        <BackHeader title="お宝" to="/home" />
         <div className="chips" role="group" aria-label="エリアで絞り込み">
           <button type="button" aria-pressed={filter === 'all'} className={filter === 'all' ? 'on' : ''} onClick={() => setFilter('all')}>
             すべて
@@ -145,7 +120,7 @@ export function Certificate() {
   return (
     <div className="screen">
       <div className="page stack-14">
-        <TreasureHeader />
+        <BackHeader title="クリア証明" to="/home" />
         {cleared && me.player ? (
           <>
             <section className="cert">
