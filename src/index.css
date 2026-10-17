@@ -369,15 +369,75 @@ select.input { padding: 0 10px; height: 46px; font-size: 14px; }
 }
 
 /* ---------- title ---------- */
-.title-screen { overflow: hidden; background: #a9c6ec; }
-.title-bg { position: absolute; inset: 0; width: 100%; height: 100%; }
+/* 昼/夕方/夜は .title-screen--day / --dusk / --night（useTimeOfDayが付与）で切り替え */
+.title-screen { overflow: hidden; background: #a9c6ec; transition: background 1.5s ease; }
+.title-bg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  filter: brightness(1.06) saturate(1.3) contrast(1.02);
+  transition: filter 1.5s ease;
+}
+.title-scrim {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(to bottom, rgba(10, 26, 48, 0.22) 0%, rgba(10, 26, 48, 0) 28%, rgba(10, 26, 48, 0) 60%, rgba(10, 26, 48, 0.22) 100%);
+  transition: background 1.5s ease;
+}
+/* 明暗だけを足す層（color合成では写真自体の明るさは変わらないため、本当に暗く沈める部分はこちらで作る） */
+.title-vignette {
+  position: absolute;
+  inset: 0;
+  background: none;
+  transition: background 1.5s ease;
+}
+
+/* 夕方：実写（夕焼け）をそのまま使うので軽い補正のみ */
+.title-screen--dusk { background: #7a5a3a; }
+.title-screen--dusk .title-bg { filter: brightness(0.98) saturate(1.05) contrast(1.02); }
+.title-screen--dusk .title-scrim {
+  background:
+    linear-gradient(to bottom, rgba(30, 14, 10, 0.25) 0%, rgba(30, 14, 10, 0) 30%, rgba(30, 14, 10, 0) 55%, rgba(20, 10, 10, 0.4) 100%);
+}
+
+/* 夜：実写（夜景）をそのまま使うので軽い補正のみ */
+.title-screen--night { background: #0c1830; }
+.title-screen--night .title-bg {
+  filter: brightness(1.05) saturate(1.05) contrast(1.05);
+  object-position: 15% 15%;
+  transform: scale(1.25);
+  transform-origin: 15% 15%;
+}
+.title-screen--night .title-scrim {
+  background:
+    linear-gradient(to bottom, rgba(2, 6, 16, 0.4) 0%, rgba(2, 6, 16, 0) 30%, rgba(2, 6, 16, 0) 55%, rgba(2, 6, 16, 0.55) 100%);
+}
+/* タイトル見出しの裏だけ軽く暗くして、橋の光と重なっても読みやすくする */
+.title-screen--night .title-vignette {
+  background: radial-gradient(ellipse 65% 34% at 50% 38%, rgba(3, 8, 20, 0.55) 0%, rgba(3, 8, 20, 0.22) 55%, rgba(3, 8, 20, 0) 80%);
+}
 .title-content {
   position: relative;
   flex: 1;
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 84px 32px calc(36px + env(safe-area-inset-bottom));
+  padding: 0 32px calc(36px + env(safe-area-inset-bottom));
+}
+/* 見出しブロックを画面の下から3/5（＝上から40%）の位置に配置。title-actionsは従来どおり下部固定 */
+.title-heading {
+  position: absolute;
+  left: 32px;
+  right: 32px;
+  top: 40%;
+  transform: translateY(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 .title-kicker { font-size: 14px; letter-spacing: 0.2em; color: var(--cobalt); font-weight: 700; background: rgba(255, 255, 255, 0.85); border-radius: 14px; padding: 3px 12px; }
 .nowrap { white-space: nowrap; }
@@ -388,11 +448,21 @@ select.input { padding: 0 10px; height: 46px; font-size: 14px; }
   font-size: 40px;
   line-height: 1.25;
   text-align: center;
-  color: #1e3560;
+  color: #ffffff;
+  text-shadow: 0 2px 10px rgba(10, 26, 48, 0.55);
 }
-.title-lead { margin-top: 18px; font-size: 15px; line-height: 1.9; text-align: center; color: #1e3560; font-weight: 500; }
+.title-lead {
+  margin-top: 18px;
+  font-size: 15px;
+  line-height: 1.9;
+  text-align: center;
+  color: #ffffff;
+  font-weight: 500;
+  text-shadow: 0 1px 6px rgba(10, 26, 48, 0.5);
+}
 .title-actions { margin-top: auto; width: 100%; display: flex; flex-direction: column; gap: 12px; }
-.title-note { text-align: center; font-size: 13px; font-weight: 700; color: var(--deep2); }
+.title-actions .btn-text { color: #ffffff; text-shadow: 0 1px 4px rgba(10, 26, 48, 0.5); }
+.title-note { text-align: center; font-size: 13px; font-weight: 700; color: #ffffff; text-shadow: 0 1px 4px rgba(10, 26, 48, 0.5); }
 
 /* ---------- home ---------- */
 .home { height: 100dvh; min-height: 560px; }
