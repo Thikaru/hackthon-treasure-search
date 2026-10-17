@@ -23,8 +23,12 @@ function FitShibukawaBounds() {
     }
     apply()
     map.on('resize', apply)
+    // 下のシートを上げ下げすると地図の高さが変わるので、そのたびにサイズを取り直す
+    const ro = new ResizeObserver(() => map.invalidateSize())
+    ro.observe(map.getContainer())
     return () => {
       map.off('resize', apply)
+      ro.disconnect()
     }
   }, [map])
   return null

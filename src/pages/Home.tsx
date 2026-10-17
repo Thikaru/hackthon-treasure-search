@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState, type PointerEvent } from 'react'
 import { Link } from 'react-router-dom'
 import AreaMap, { type MapPin } from '../components/AreaMap'
 import { StatusChip } from '../components/Common'
@@ -35,6 +35,43 @@ export default function Home() {
     }))
   const selected = picked ? inArea.find((t) => t.id === picked && onMap(progressOf(me, t.id).state)) : undefined
   const current = currentGuidepost(me, content, areaId)
+
+  // シート：ハンドルで上げ下げでき、表示内容が変わるときは前の内容が下がってから次の内容が下から出てくる
+  const [open, setOpen] = useState(true)
+  const sheetKey = selected ? `pin:${selected.id}` : `gp:${current?.id ?? 'done'}`
+  const [shownKey, setShownKey] = useState(sheetKey)
+  const [entering, setEntering] = useState(false)
+  const animate = open && !window.matchMedia('(prefers-reduced-motion: reduce)').matches
+  const leaving = sheetKey !== shownKey && animate
+  useEffect(() => {
+    if (sheetKey === shownKey) return
+    // 前の内容が下がり切ってから差し替える（シートが下がっているときはすぐ差し替える）
+    const timer = window.setTimeout(
+      () => {
+        setShownKey(sheetKey)
+        setEntering(true)
+      },
+      animate ? 200 : 0,
+    )
+    return () => window.clearTimeout(timer)
+  }, [sheetKey, shownKey, animate])
+
+  const shownPin = shownKey.startsWith('pin:') ? treasures.find((t) => `pin:${t.id}` === shownKey) : undefined
+  const shownGuidepost = shownKey.startsWith('gp:') ? treasures.find((t) => `gp:${t.id}` === shownKey) : undefined
+
+  const dragStart = useRef<number | null>(null)
+  const onGripDown = (e: PointerEvent<HTMLButtonElement>) => {
+    dragStart.current = e.clientY
+    e.currentTarget.setPointerCapture(e.pointerId)
+  }
+  const onGripUp = (e: PointerEvent<HTMLButtonElement>) => {
+    if (dragStart.current === null) return
+    const dy = e.clientY - dragStart.current
+    dragStart.current = null
+    if (dy > 24) setOpen(false)
+    else if (dy < -24) setOpen(true)
+    else setOpen((o) => !o)
+  }
 
   return (
     <div className="screen home">
@@ -78,7 +115,15 @@ export default function Home() {
       </div>
 
       <div className="map-wrap">
-        <AreaMap areaId={areaId} areaName={area?.name ?? ''} pins={pins} onSelect={setPicked} />
+        <AreaMap
+          areaId={areaId}
+          areaName={area?.name ?? ''}
+          pins={pins}
+          onSelect={(id) => {
+            setPicked(id)
+            setOpen(true)
+          }}
+        />
         <div className="map-legend">
           <span>
             <i className="dot dot-found" />
@@ -92,27 +137,51 @@ export default function Home() {
         {area?.needs_car && <span className="map-badge">車での移動がおすすめ</span>}
       </div>
 
-      <section className="sheet" aria-live="polite">
-        <span className="sheet-handle" aria-hidden="true" />
-        <div className="home-actions">
-          <Link to="/scan" className="btn btn-primary grow">
-            <QrIcon />
-            QRを読み込む
-          </Link>
-          <Link to="/treasures" className="btn btn-outline">
-            <ChestIcon size={20} />
-            お宝
-          </Link>
+      <section className={'sheet' + (open ? '' : ' collapsed')} aria-live="polite">
+        <button
+          type="button"
+          className="sheet-grip"
+          aria-expanded={open}
+          aria-label={open ? 'パネルを下げる' : 'パネルを上げる'}
+          onPointerDown={onGripDown}
+          onPointerUp={onGripUp}
+          onPointerCancel={() => (dragStart.current = null)}
+          onClick={(e) => {
+            // キーボード操作（ポインター以外）のときだけここで開閉する
+            if (e.detail === 0) setOpen((o) => !o)
+          }}
+        >
+          <span className="sheet-handle" />
+        </button>
+        <div className="sheet-fold" inert={!open}>
+          <div className="sheet-fold-inner">
+            <div className="home-actions">
+              <Link to="/scan" className="btn btn-primary grow">
+                <QrIcon />
+                QRを読み込む
+              </Link>
+              <Link to="/treasures" className="btn btn-outline">
+                <ChestIcon size={20} />
+                お宝
+              </Link>
+            </div>
+            <div className="sheet-clip">
+              <div
+                key={shownKey}
+                className={'sheet-panel' + (leaving ? ' leaving' : entering ? ' entering' : '')}
+                onAnimationEnd={() => setEntering(false)}
+              >
+                {shownPin ? (
+                  <SheetFor t={shownPin} onClose={() => setPicked(null)} />
+                ) : shownGuidepost ? (
+                  <GuidepostRow t={shownGuidepost} />
+                ) : (
+                  <p className="sheet-text">このエリアの道標はすべてクリアしました！</p>
+                )}
+              </div>
+            </div>
+          </div>
         </div>
-        {selected ? (
-          <SheetFor t={selected} onClose={() => setPicked(null)} />
-        ) : (
-          current ? (
-            <GuidepostRow t={current} />
-          ) : (
-            <p className="sheet-text">このエリアの道標はすべてクリアしました！</p>
-          )
-        )}
       </section>
     </div>
   )
