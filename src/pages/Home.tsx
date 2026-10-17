@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import AreaMap, { type MapPin } from '../components/AreaMap'
 import { StatusChip } from '../components/Common'
-import { HelpIcon } from '../components/Icons'
+import { ChestIcon, HelpIcon } from '../components/Icons'
 import { acquiredCount, progressOf, useGame, type Treasure } from '../lib/game'
 import { GuidepostRow } from './Guideposts'
 
@@ -94,6 +94,16 @@ export default function Home() {
 
       <section className="sheet" aria-live="polite">
         <span className="sheet-handle" aria-hidden="true" />
+        <div className="home-actions">
+          <Link to="/scan" className="btn btn-primary grow">
+            <QrIcon />
+            QRを読み込む
+          </Link>
+          <Link to="/treasures" className="btn btn-outline">
+            <ChestIcon size={20} />
+            お宝
+          </Link>
+        </div>
         {selected ? (
           <SheetFor t={selected} onClose={() => setPicked(null)} />
         ) : (
@@ -114,6 +124,14 @@ export default function Home() {
         )}
       </section>
     </div>
+  )
+}
+
+function QrIcon() {
+  return (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M4 8V5a1 1 0 0 1 1-1h3M16 4h3a1 1 0 0 1 1 1v3M20 16v3a1 1 0 0 1-1 1h-3M8 20H5a1 1 0 0 1-1-1v-3M4 12h16" />
+    </svg>
   )
 }
 

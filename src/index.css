@@ -976,3 +976,5 @@ input.narrow { max-width: 360px; height: 46px; font-size: 14px; }
   from { opacity: 0; transform: translateY(8px); }
   to { opacity: 1; transform: none; }
 }
+.home-actions { display: flex; gap: 8px; }
+.home-actions .btn { min-height: 46px; }
