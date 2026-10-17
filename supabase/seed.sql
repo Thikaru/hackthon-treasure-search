@@ -2,7 +2,7 @@
 -- schema.sql の後に実行してください。何度実行しても内容が上書きされるだけです。
 
 insert into public.settings(key, value) values
-  ('title', '浜辺の宝さがし'),
+  ('title', '渋川からの挑戦状'),
   ('subtitle', '宝探し × 謎解き'),
   ('clear_count', '6'),
   ('prize_name', 'オリジナル記念品（仮）'),

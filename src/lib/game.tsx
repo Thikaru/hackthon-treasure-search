@@ -83,7 +83,7 @@ interface GameCtx {
 const Ctx = createContext<GameCtx | null>(null)
 
 const DEFAULT_SETTINGS: Settings = {
-  title: '浜辺の宝さがし',
+  title: '渋川からの挑戦状',
   subtitle: '宝探し × 謎解き',
   clearCount: 6,
   prizeName: '',
