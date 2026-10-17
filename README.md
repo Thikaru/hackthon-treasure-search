@@ -60,4 +60,4 @@ npm run dev
 | 正解・場所ヒント・QR | `private.treasure_secrets`（QRは運営画面から再発行も可） |
 | 運営PIN | `private.config`（key = `staff_pin`） |
 
-観光名所A・Bの地図は仮のイラストです。
+王子ヶ岳・たまの湯の地図は仮のイラストです。

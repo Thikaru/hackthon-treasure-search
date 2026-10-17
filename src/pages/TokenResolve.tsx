@@ -40,7 +40,7 @@ export default function TokenResolve() {
       ) : (
         <>
           <span className="spinner" aria-hidden="true" />
-          <p className="muted">お宝を確認しています…</p>
+          <p className="muted">宝箱を確認しています…</p>
         </>
       )}
     </div>

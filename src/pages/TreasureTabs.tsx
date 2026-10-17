@@ -1,33 +1,10 @@
 import QRCode from 'qrcode'
 import { useEffect, useState } from 'react'
-import { Link, NavLink } from 'react-router-dom'
-import { StatusChip, stateLabel } from '../components/Common'
+import { Link } from 'react-router-dom'
+import { BackHeader, StatusChip, stateLabel } from '../components/Common'
 import { ChestIcon, LockIcon, PinIcon } from '../components/Icons'
-import TabBar from '../components/TabBar'
 import { acquiredCount, areaCounts, progressOf, useGame, type Treasure, type TreasureState } from '../lib/game'
 import { errorMessage } from '../lib/supabase'
-
-function TreasureHeader() {
-  const { me, content } = useGame()
-  return (
-    <>
-      <header className="between baseline">
-        <h1 className="h1">お宝</h1>
-        <span className="num-cobalt bold">
-          {acquiredCount(me)} / {content.treasures.length} 獲得
-        </span>
-      </header>
-      <nav className="segmented seg-lg" aria-label="お宝の表示切替">
-        <NavLink to="/treasures" className={({ isActive }) => (isActive ? 'on' : '')}>
-          コレクション
-        </NavLink>
-        <NavLink to="/certificate" className={({ isActive }) => (isActive ? 'on' : '')}>
-          クリア証明
-        </NavLink>
-      </nav>
-    </>
-  )
-}
 
 function linkFor(t: Treasure, st: TreasureState) {
   if (st === 'acquired') return `/got/${t.id}`
@@ -41,9 +18,9 @@ export function Collection() {
   const areas = content.areas.filter((a) => filter === 'all' || a.id === filter)
 
   return (
-    <div className="screen with-tabbar">
+    <div className="screen">
       <div className="page stack-14">
-        <TreasureHeader />
+        <BackHeader title="お宝" to="/home" />
         <div className="chips" role="group" aria-label="エリアで絞り込み">
           <button type="button" aria-pressed={filter === 'all'} className={filter === 'all' ? 'on' : ''} onClick={() => setFilter('all')}>
             すべて
@@ -88,7 +65,7 @@ export function Collection() {
                         <span className="t-text">
                           <span className="small muted">No.{t.no}</span>
                           <span className="t-name">{st === 'acquired' ? t.name : '？？？'}</span>
-                          <span className={`t-state t-state-${st}`}>{st === 'found' ? '発見・獲得の謎へ' : stateLabel(st)}</span>
+                          <span className={`t-state t-state-${st}`}>{st === 'found' ? '宝箱の謎へ' : stateLabel(st)}</span>
                         </span>
                       </Link>
                     )
@@ -98,7 +75,6 @@ export function Collection() {
           )
         })}
       </div>
-      <TabBar />
     </div>
   )
 }
@@ -142,9 +118,9 @@ export function Certificate() {
   }, [cleared, me.player, me.redeemed, slot, issueCertificate])
 
   return (
-    <div className="screen with-tabbar">
+    <div className="screen">
       <div className="page stack-14">
-        <TreasureHeader />
+        <BackHeader title="クリア証明" to="/home" />
         {cleared && me.player ? (
           <>
             <section className="cert">
@@ -209,7 +185,6 @@ export function Certificate() {
           </section>
         )}
       </div>
-      <TabBar />
     </div>
   )
 }

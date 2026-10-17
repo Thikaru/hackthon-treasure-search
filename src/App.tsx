@@ -10,6 +10,7 @@ import TreasuresAdmin from './admin/TreasuresAdmin'
 import { useGame } from './lib/game'
 import Acquired from './pages/Acquired'
 import Found from './pages/Found'
+import Guideposts from './pages/Guideposts'
 import Help from './pages/Help'
 import Home from './pages/Home'
 import LocatePuzzle from './pages/LocatePuzzle'
@@ -53,6 +54,7 @@ function PlayerRoutes() {
         <Route path="/help" element={<Help />} />
         <Route path="/t/:token" element={<TokenResolve />} />
         <Route path="/home" element={P(<Home />)} />
+        <Route path="/guideposts" element={P(<Guideposts />)} />
         <Route path="/puzzle/:id" element={P(<LocatePuzzle />)} />
         <Route path="/scan" element={P(<Scan />)} />
         <Route path="/found/:id" element={P(<Found />)} />

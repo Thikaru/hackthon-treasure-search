@@ -17,21 +17,16 @@ function base({ size = 24, ...rest }: P) {
   }
 }
 
-export const MapIcon = (p: P) => (
-  <svg {...base(p)}>
-    <path d="M9 4L3 6v14l6-2 6 2 6-2V4l-6 2-6-2z" />
-    <path d="M9 4v14M15 6v14" />
-  </svg>
-)
 export const ChestIcon = (p: P) => (
   <svg {...base(p)}>
     <rect x="3" y="9" width="18" height="11" rx="2" />
     <path d="M3 13h18M12 11v4M5 9V7a3 3 0 0 1 3-3h8a3 3 0 0 1 3 3v2" />
   </svg>
 )
-export const ScanIcon = (p: P) => (
+export const AwardIcon = (p: P) => (
   <svg {...base(p)}>
-    <path d="M4 8V5a1 1 0 0 1 1-1h3M16 4h3a1 1 0 0 1 1 1v3M20 16v3a1 1 0 0 1-1 1h-3M8 20H5a1 1 0 0 1-1-1v-3M4 12h16" />
+    <circle cx="12" cy="9" r="6" />
+    <path d="M8.5 13.9 7 22l5-3 5 3-1.5-8.1" />
   </svg>
 )
 export const BackIcon = (p: P) => (

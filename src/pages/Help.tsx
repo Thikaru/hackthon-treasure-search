@@ -19,13 +19,13 @@ export default function Help() {
           <h2 className="card-title">遊び方</h2>
           <ol className="steps">
             <li>
-              <b>場所の謎</b>を解くと、お宝のある場所が地図に出る
+              <b>宝の道標</b>を解くと、お宝の場所のヒント（画像・説明）が届く
             </li>
             <li>
-              現地でポールの<b>QRコード</b>を探して読み込む
+              現地でポールの<b>QRコード</b>を探して読み込む（場所が地図に表示される）
             </li>
             <li>
-              <b>獲得の謎</b>を解くと、お宝ゲット
+              <b>鍵のかかった宝箱の謎</b>を解くと、お宝ゲット（QRを読んだ後はどこからでも回答できる）
             </li>
             <li className="accent">
               {clearCount}個集めたら<b>クリア証明</b>を受付で見せて景品と交換

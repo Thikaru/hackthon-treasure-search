@@ -1,6 +1,7 @@
 import type { KeyboardEvent } from 'react'
 import type { AreaId } from '../lib/game'
 import type { TreasureState } from '../lib/game'
+import RealMap from './RealMap'
 
 export interface MapPin {
   id: string
@@ -58,59 +59,6 @@ function Pin({ pin, onSelect }: { pin: MapPin; onSelect: (id: string) => void })
   )
 }
 
-function SandBase() {
-  return (
-    <>
-      <rect x="0" y="0" width="390" height="470" fill="#CFDDBB" />
-      <g fill="#BCCFA5">
-        <ellipse cx="50" cy="60" rx="60" ry="34" />
-        <ellipse cx="280" cy="50" rx="90" ry="40" />
-        <ellipse cx="360" cy="110" rx="40" ry="22" />
-        <ellipse cx="60" cy="150" rx="40" ry="16" />
-      </g>
-      <polygon points="110,182 178,173 168,30 118,20" fill="#EFE8DA" />
-      <polygon points="0,180 390,140 390,385 0,205" fill="#EFE8DA" />
-      <polygon points="0,205 390,385 390,420 0,240" fill="#E8D2A6" />
-      <polygon points="0,240 390,420 390,470 0,470" fill="#8FB0DA" />
-      <polygon points="0,310 290,470 0,470" fill="#7FA2D2" />
-      <g stroke="#B5A88F" strokeWidth="5" strokeLinecap="round">
-        <line x1="30" y1="218" x2="16" y2="262" />
-        <line x1="378" y1="392" x2="364" y2="434" />
-      </g>
-      <g fill="#D9472B">
-        {[20, 70, 120, 170, 220, 270, 320].map((x) => (
-          <circle key={x} cx={x} cy={262 + x * 0.4615} r="2.5" />
-        ))}
-      </g>
-      <path d="M140 176 C 152 130, 128 92, 142 24" fill="none" stroke="#D3C6AE" strokeWidth="8" strokeLinecap="round" />
-      <path d="M140 176 C 152 130, 128 92, 142 24" fill="none" stroke="#FFFFFF" strokeWidth="5" strokeLinecap="round" />
-      <path d="M205 168 L218 250 L300 302 L350 292" fill="none" stroke="#D3C6AE" strokeWidth="8" strokeLinecap="round" strokeLinejoin="round" />
-      <path d="M205 168 L218 250 L300 302 L350 292" fill="none" stroke="#FFFFFF" strokeWidth="5" strokeLinecap="round" strokeLinejoin="round" />
-      <path d="M0 182 L390 142" stroke="#D9C38A" strokeWidth="15" />
-      <path d="M0 182 L390 142" stroke="#F6E7BD" strokeWidth="11" />
-      <rect x="160" y="155" width="30" height="18" rx="5" fill="#22406E" />
-      <text x="175" y="168" textAnchor="middle" fontSize="11" fontWeight="700" fill="#FFFFFF" fontFamily={FONT}>
-        430
-      </text>
-      <rect x="300" y="162" width="72" height="50" rx="4" fill="#E1E6EC" stroke="#C3CCD7" />
-      <text x="336" y="193" textAnchor="middle" fontSize="16" fontWeight="700" fill="#22406E" fontFamily={FONT}>
-        P
-      </text>
-      <rect x="150" y="196" width="40" height="26" rx="3" fill="#FFFFFF" stroke="#B9C7DA" transform="rotate(10 170 209)" />
-      <rect x="228" y="198" width="64" height="38" rx="4" fill="#FFFFFF" stroke="#22406E" strokeWidth="1.5" transform="rotate(28 260 217)" />
-      <rect x="198" y="248" width="124" height="22" rx="11" fill="#FFFFFF" stroke="#22406E" />
-      <text x="260" y="263" textAnchor="middle" fontSize="10.5" fontWeight="700" fill="#22406E" fontFamily={FONT}>
-        パークセンター（受付）
-      </text>
-      <g fill="#1F4FB8">
-        <rect x="210" y="324" width="13" height="4" rx="2" transform="rotate(25 216 326)" />
-        <rect x="228" y="332" width="13" height="4" rx="2" transform="rotate(25 234 334)" />
-        <rect x="246" y="340" width="13" height="4" rx="2" transform="rotate(25 252 342)" />
-      </g>
-    </>
-  )
-}
-
 // 観光名所は実際の地形がまだ無いため、差し替え前提の簡易マップ
 function SpotBase({ label }: { label: string }) {
   return (
@@ -133,6 +81,9 @@ function SpotBase({ label }: { label: string }) {
 
 export default function AreaMap({ areaId, areaName, pins, onSelect }: Props) {
   const label = areaName
+  if (areaId === 'sand') {
+    return <RealMap pins={pins} onSelect={onSelect} />
+  }
   return (
     <svg
       className="area-map"
@@ -141,7 +92,7 @@ export default function AreaMap({ areaId, areaName, pins, onSelect }: Props) {
       role="img"
       aria-label={`${label}のイラストマップ。場所が分かったお宝をピンで表示`}
     >
-      {areaId === 'sand' ? <SandBase /> : <SpotBase label={label} />}
+      <SpotBase label={label} />
       {pins.map((p) => (
         <Pin key={p.id} pin={p} onSelect={onSelect} />
       ))}

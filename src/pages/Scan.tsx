@@ -1,7 +1,7 @@
 import { useRef, useState, type FormEvent } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import QrScanner from '../components/QrScanner'
-import TabBar from '../components/TabBar'
+import { CloseIcon } from '../components/Icons'
 import { useGame } from '../lib/game'
 import { errorMessage } from '../lib/supabase'
 
@@ -49,8 +49,13 @@ export default function Scan() {
   }
 
   return (
-    <div className="screen with-tabbar scan-screen">
+    <div className="screen scan-screen">
       <div className="scan-top">
+        <div className="scan-top-bar">
+          <Link to="/home" className="icon-btn on-dark" aria-label="閉じる">
+            <CloseIcon />
+          </Link>
+        </div>
         <h1>お宝のQRを読み込む</h1>
         <QrScanner onResult={handleQr} />
         <p className="scan-tip">
@@ -87,7 +92,6 @@ export default function Scan() {
           {msg}
         </p>
       </section>
-      <TabBar />
     </div>
   )
 }
