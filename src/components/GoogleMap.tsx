@@ -175,8 +175,8 @@ function EmbedMap({ pins, onSelect, tod }: Props) {
   // 表示：画面の中心（ズーム0の座標）と、ズーム（操作中は小数）
   const [view, setView] = useState(() => ({ c: project(BEACH, 0), zf: 17 }))
   const [smooth, setSmooth] = useState(false)
-  const [tileZ, setTileZ] = useState(17)
-  const [pendingZ, setPendingZ] = useState<number | null>(null)
+  // 読み込み終わった細かさ（ズーム段）。一度読み込んだ地図は捨てずに持っておき、ズームでは表示を切り替えるだけにする
+  const [loaded, setLoaded] = useState<number[]>([])
   const pointers = useRef(new Map<number, Pt>())
   const gesture = useRef<{ anchor: Pt; dist: number; z0: number; start: Pt; moved: boolean } | null>(null)
   const suppressClick = useRef(false)
@@ -206,16 +206,13 @@ function EmbedMap({ pins, onSelect, tod }: Props) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [sized, minZoom])
 
-  /** 操作を終えたら、ズームを整数にそろえる（なめらかに）。読み込む細かさが変わるときだけ地図を読み直す */
+  /** 操作を終えたら、ズームを整数にそろえる（なめらかに）。地図は読み直さない */
   const settle = (v: { c: Pt; zf: number }) => {
     const z = Math.min(MAX_ZOOM, Math.max(minZoom, Math.round(v.zf)))
     const next = clampView({ c: v.c, zf: z })
     setSmooth(true)
     setView(next)
     window.setTimeout(() => setSmooth(false), 260)
-    const want = Math.min(MAX_TILE_ZOOM, z)
-    if (want !== tileZ) setPendingZ(want)
-    else setPendingZ(null)
   }
 
   const goTo = (center: LatLng, z: number) => settle({ c: project(center, 0), zf: z })
@@ -351,8 +348,12 @@ function EmbedMap({ pins, onSelect, tod }: Props) {
     const scale = 2 ** (view.zf - z)
     return { sh, style: { width: sh.w, height: sh.h, transform: `translate(${p.left}px, ${p.top}px) scale(${scale})` } as CSSProperties }
   }
-  const cur = layer(tileZ)
-  const next = pendingZ !== null ? layer(pendingZ) : null
+  // 範囲全体の地図を、いちばん引いた段から MAX_TILE_ZOOM まで全部（最初に一度だけ）読み込んでおく。
+  // 見せるのは今のズームに合う段。まだ読み込み中なら、読み込み済みでいちばん近い段を拡大・縮小して見せる
+  const levels: number[] = []
+  for (let z = minZoom; z <= MAX_TILE_ZOOM; z++) levels.push(z)
+  const want = Math.min(MAX_TILE_ZOOM, Math.max(minZoom, Math.round(view.zf)))
+  const visibleZ = loaded.includes(want) ? want : [...loaded].sort((a, b) => Math.abs(a - want) - Math.abs(b - want) || b - a)[0] ?? want
   const zInt = Math.round(view.zf)
 
   return (
@@ -370,27 +371,22 @@ function EmbedMap({ pins, onSelect, tod }: Props) {
         }
       }}
     >
-      <div className={'gmap-sheet' + (smooth ? ' smooth' : '')} style={cur.style}>
-        <iframe key={cur.sh.src} src={cur.sh.src} title="渋川海岸の Google マップ" referrerPolicy="no-referrer-when-downgrade" tabIndex={-1} />
-      </div>
-      {next && (
-        <div className={'gmap-sheet gmap-pending' + (smooth ? ' smooth' : '')} style={next.style}>
-          <iframe
-            key={next.sh.src}
-            src={next.sh.src}
-            title="渋川海岸の Google マップ（読み込み中）"
-            referrerPolicy="no-referrer-when-downgrade"
-            tabIndex={-1}
-            onLoad={() => {
-              // 新しい細かさの地図が描かれるまで少し待ってから入れ替える
-              window.setTimeout(() => {
-                setTileZ(next.sh.z)
-                setPendingZ(null)
-              }, 300)
-            }}
-          />
-        </div>
-      )}
+      {size.w > 0 &&
+        levels.map((z) => {
+          const l = layer(z)
+          return (
+            <div key={z} className={'gmap-sheet' + (smooth ? ' smooth' : '') + (z === visibleZ ? '' : ' gmap-hidden')} style={l.style}>
+              <iframe
+                src={l.sh.src}
+                title={z === visibleZ ? '渋川海岸の Google マップ' : ''}
+                aria-hidden={z !== visibleZ}
+                referrerPolicy="no-referrer-when-downgrade"
+                tabIndex={-1}
+                onLoad={() => window.setTimeout(() => setLoaded((ls) => (ls.includes(z) ? ls : [...ls, z])), 300)}
+              />
+            </div>
+          )
+        })}
       <div className={`gmap-light gmap-${tod}`} aria-hidden="true" />
       {size.w > 0 &&
         pins.map((pin) => {
