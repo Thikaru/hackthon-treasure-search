@@ -156,13 +156,76 @@ function minZoomFor(w: number, h: number) {
 }
 
 /** 画面の中心（ズーム0の座標）を、ズーム zf の画面が渋川の範囲からはみ出さない位置に収める */
-function clampCenter0(c: Pt, zf: number, w: number, h: number): Pt {
+function clampToBounds0(c: Pt, zf: number, w: number, h: number): Pt {
   const k = 2 ** zf
   const hw = w / 2 / k
   const hh = h / 2 / k
   const x = B0.x1 - B0.x0 <= 2 * hw ? (B0.x0 + B0.x1) / 2 : Math.min(B0.x1 - hw, Math.max(B0.x0 + hw, c.x))
   const y = B0.y1 - B0.y0 <= 2 * hh ? (B0.y0 + B0.y1) / 2 : Math.min(B0.y1 - hh, Math.max(B0.y0 + hh, c.y))
   return { x, y }
+}
+
+// 砂浜の真ん中の線（ズーム0の座標）
+const BEACH0 = BEACH_LINE.map((p) => project(p, 0))
+
+// 線の各点までの道のり（ズーム0の座標）
+const BEACH_S = BEACH0.reduce<number[]>((acc, p, i) => (i === 0 ? [0] : [...acc, acc[i - 1] + Math.hypot(p.x - BEACH0[i - 1].x, p.y - BEACH0[i - 1].y)]), [])
+const BEACH_LEN = BEACH_S[BEACH_S.length - 1]
+
+/** 点 p を砂浜の線に当てはめる：線の上の道のり s と、その区間の向き（単位ベクトル u と、線に直角な n） */
+function onBeach(p: Pt) {
+  let best = { s: 0, u: { x: 1, y: 0 }, n: { x: 0, y: 1 }, d: Infinity }
+  for (let i = 0; i < BEACH0.length - 1; i++) {
+    const a = BEACH0[i]
+    const b = BEACH0[i + 1]
+    const L = Math.hypot(b.x - a.x, b.y - a.y)
+    const u = { x: (b.x - a.x) / L, y: (b.y - a.y) / L }
+    const t = Math.max(0, Math.min(L, (p.x - a.x) * u.x + (p.y - a.y) * u.y))
+    const d = Math.hypot(p.x - (a.x + u.x * t), p.y - (a.y + u.y * t))
+    if (d < best.d) best = { s: BEACH_S[i] + t, u, n: { x: -u.y, y: u.x }, d }
+  }
+  return best
+}
+
+/** 砂浜の線の上で、北西の端から道のり s の点 */
+function beachAt(s: number): Pt {
+  for (let i = 0; i < BEACH0.length - 1; i++) {
+    if (s <= BEACH_S[i + 1] || i === BEACH0.length - 2) {
+      const f = (s - BEACH_S[i]) / (BEACH_S[i + 1] - BEACH_S[i])
+      return { x: BEACH0[i].x + (BEACH0[i + 1].x - BEACH0[i].x) * f, y: BEACH0[i].y + (BEACH0[i + 1].y - BEACH0[i].y) * f }
+    }
+  }
+  return BEACH0[0]
+}
+
+// 下のパネルが画面の下を覆うので、地図が見えている部分の真ん中（上から 40%）を「見ている所」とする
+const FOCUS_Y = 0.4
+// 「見ている所」が砂浜の線から横に離れてよい距離（画面の短い辺に対する割合）
+const BEACH_SLACK = 0.1
+// 浜の端から、どこまで手前で止めるか（画面の短い辺に対する割合）。端でも浜が画面の半分ほどを通るように
+const BEACH_INSET = 0.3
+
+/**
+ * 表示できる位置を、渋川の海岸の近くに限る。
+ * 「見ている所」を砂浜の線から一定の距離（画面の短い辺の 10%）以内、かつ浜の端から少し手前までに限るので、
+ * 範囲の端まで動かしても、海岸が画面の真ん中あたりを通り、画面の半分くらいは海岸まわりが見えている。
+ */
+function clampCenter0(c: Pt, zf: number, w: number, h: number): Pt {
+  const k = 2 ** zf
+  const fy = ((FOCUS_Y - 0.5) * h) / k
+  const focus = { x: c.x, y: c.y + fy }
+  const m = Math.min(w, h) / k
+  const b = onBeach(focus)
+  // 浜に沿った向き：端から BEACH_INSET より先へは行かない（浜が短くて収まらないときは真ん中）
+  const inset = m * BEACH_INSET
+  const s = BEACH_LEN <= inset * 2 ? BEACH_LEN / 2 : Math.min(BEACH_LEN - inset, Math.max(inset, b.s))
+  const q = beachAt(s)
+  // 浜に直角な向き：BEACH_SLACK まで
+  const off = (focus.x - q.x) * b.n.x + (focus.y - q.y) * b.n.y
+  const lim = m * BEACH_SLACK
+  const o = Math.max(-lim, Math.min(lim, off))
+  const f = { x: q.x + b.n.x * o, y: q.y + b.n.y * o }
+  return clampToBounds0({ x: f.x, y: f.y - fy }, zf, w, h)
 }
 
 /** ズーム z で、渋川の範囲全体（＋少し余白）を1枚に収めた埋め込み地図 */
