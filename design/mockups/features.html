@@ -474,6 +474,42 @@ body.export .wrap { max-width: none; } body.export .hero, body.export .notes { d
 .cg-clock { font: 900 16px var(--display); font-style: normal; font-variant-numeric: tabular-nums; margin-top: 4px; display: flex; align-items: center; gap: 6px; }
 .cg-clock s { width: 8px; height: 8px; border-radius: 50%; background: #d9472b; }
 .cg-note { font: 700 11px var(--body); margin-top: 8px; text-shadow: 0 1px 4px rgba(0,0,0,.5); }
+
+.qrbig { margin: 14px auto 0; width: max-content; display: flex; flex-direction: column; align-items: center; gap: 8px; }
+.qrbig .live { display: flex; align-items: center; gap: 6px; font: 900 18px var(--display); font-variant-numeric: tabular-nums; color: #fff; text-shadow: 0 1px 6px rgba(0,0,0,.4); }
+.qrbig .live s { width: 9px; height: 9px; border-radius: 50%; background: #ff5a3a; }
+.adm { position: absolute; top: 56px; left: 16px; right: 16px; color: #1e2a3a; font-family: var(--body); }
+.adm-h { font: 900 18px var(--display); color: #22406e; margin-bottom: 10px; }
+.adm-cam { position: relative; height: 210px; border-radius: 16px; background: linear-gradient(135deg, #2a3446, #121821); display: grid; place-items: center; overflow: hidden; }
+.adm-cam span { position: absolute; bottom: 10px; font: 800 12px var(--body); color: #fff; background: #2a8a4a; padding: 4px 10px; border-radius: 10px; }
+.adm-frame { width: 120px; height: 120px; border: 4px solid #ffd36b; border-radius: 12px; background: repeating-linear-gradient(45deg, #fff 0 6px, #ddd 6px 12px); opacity: .85; }
+.adm-card { margin-top: 12px; background: #fff; border: 2px solid #1f4fb8; border-radius: 16px; padding: 14px; display: flex; flex-direction: column; gap: 12px; }
+.adm-row { display: flex; justify-content: space-between; align-items: baseline; } .adm-row b { font-size: 18px; } .adm-row small { color: #56637a; font-weight: 700; }
+.adm-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; } .adm-grid div { background: #f2f6fb; border-radius: 10px; padding: 8px; } .adm-grid small { display: block; font-size: 10px; color: #56637a; font-weight: 700; } .adm-grid b { font-size: 17px; } .adm-grid .ok { color: #d9472b; }
+.adm-card .btn-primary { color: #fff; background: linear-gradient(180deg, #3f7fd9, #1f4fb8); }
+.adm-note { margin-top: 10px; font-size: 11px; color: #56637a; line-height: 1.6; }
+.award { position: relative; overflow: hidden; margin-top: 10px; padding: 18px 16px 16px; border-radius: 10px; color: #3a2a12; background: radial-gradient(120% 70% at 50% 0%, rgba(255,255,255,.75), transparent 60%), linear-gradient(180deg, #fbf3df, #f0e0bc); box-shadow: 0 20px 40px rgba(0,0,0,.4); }
+.award::before { content: ''; position: absolute; inset: 7px; border: 1.5px solid #c49a4a; border-radius: 6px; box-shadow: inset 0 0 0 4px #fbf3df, inset 0 0 0 5px #c49a4a; pointer-events: none; }
+.aw-k { display: block; font: 700 10px var(--body); letter-spacing: .3em; color: #8a6a3a; }
+.aw-t { display: block; font-family: var(--paperfont); font-weight: 800; font-size: 30px; letter-spacing: .3em; }
+.award em, .pc-l em { display: block; font-family: var(--paperfont); font-weight: 800; font-style: normal; font-size: 16px; margin-top: 2px; }
+.award p { font-family: var(--paperfont); font-weight: 600; font-size: 11.5px; line-height: 1.75; margin-top: 6px; }
+.award .cg-row { margin-top: 8px; filter: none; }
+.aw-time { margin: 8px auto 0; width: max-content; display: flex; flex-direction: column; align-items: center; padding: 4px 18px 6px; border-radius: 12px; background: rgba(196,154,74,.16); }
+.aw-time small { font: 700 9.5px var(--body); letter-spacing: .25em; color: #8a6a3a; }
+.aw-time b { font: 900 30px var(--display); font-variant-numeric: tabular-nums; line-height: 1.1; }
+.aw-time span { font: 700 10px var(--body); color: #8a6a3a; }
+.aw-stamp { position: absolute; right: 16px; top: 16px; transform: rotate(12deg); border: 3px solid #c8341e; color: #c8341e; border-radius: 8px; padding: 2px 8px; font: 900 15px var(--display); letter-spacing: .1em; opacity: .85; }
+.pc-top { position: absolute; top: 56px; left: 0; right: 0; text-align: center; color: #fff; z-index: 3; }
+.pc-card { position: absolute; left: 14px; right: 14px; bottom: 150px; z-index: 3; display: flex; gap: 10px; align-items: stretch; padding: 12px; border-radius: 12px; color: #3a2a12; background: linear-gradient(180deg, rgba(251,243,223,.95), rgba(240,224,188,.95)); box-shadow: 0 0 0 1.5px #c49a4a, 0 14px 30px rgba(0,0,0,.4); }
+.pc-card.low { bottom: 40px; }
+.pc-l { flex: 1; min-width: 0; } .pc-l .cg-row { justify-content: flex-start; margin-top: 4px; gap: 2px; filter: none; }
+.pc-r { display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 0 8px; border-left: 1.5px dashed #c49a4a; }
+.pc-r small { font: 700 9px var(--body); letter-spacing: .2em; color: #8a6a3a; } .pc-r b { font: 900 26px var(--display); font-variant-numeric: tabular-nums; } .pc-r span { font: 700 10px var(--body); color: #8a6a3a; }
+.toast { position: absolute; left: 50%; bottom: 10px; transform: translateX(-50%); z-index: 6; white-space: nowrap; padding: 8px 14px; border-radius: 999px; background: rgba(0,0,0,.55); color: #fff; font: 700 12px var(--body); text-align: center; }
+.toast small { display: block; font-size: 9.5px; opacity: .7; }
+.tapmark { position: absolute; left: 50%; top: 45%; width: 70px; height: 70px; margin: -35px; border-radius: 50%; border: 3px solid rgba(255,255,255,.85); box-shadow: 0 0 0 12px rgba(255,255,255,.2); z-index: 6; }
+.fadein { opacity: .75; }
 </style>
 </head>
 <body>
@@ -1064,6 +1100,68 @@ FS.congrats = (t) => `
     </div>
     <div class="cert-actions"><button class="btn btn-book">${ico.book}メモリアルブックを開く</button><button class="btn btn-glass glass" style="height:46px">${ico.cam}記念写真を撮る</button></div>`
 
+// ---------- ⑧ 達成状（受付で読み込んだあと）と記念写真・スクショ用表示 ----------
+const TROPHY = ['compass', 'key', 'stone', 'bottle', 'scale', 'map']
+const trophyRow = (p, size = 34) => `<div class="cg-row">${TROPHY.map((k, i) => `<span>${treasureIcon(p + i, k, size)}</span>`).join('')}</div>`
+FS.flowQR = (t) => `
+    <div class="bg blur"></div><div class="scrim heavy"></div><div class="burst" style="top:230px"></div>${sparkles(20, 13)}
+    ${statusbar(t, false)}
+    <div class="cg">
+      <p class="cg-k">ALL CLEAR</p>
+      <h1 class="cg-h" style="font-size:29px;white-space:nowrap">全部のお宝を見つけた！</h1>
+      <div class="cg-time"><small>クリアタイム</small><b>2:41:08</b></div>
+      <div class="qrbig"><div class="qr-box" style="padding:10px">${fakeQR(11, 176)}</div><span class="live"><s></s>${t.clock}:42</span></div>
+      <p class="cg-note" style="font-size:13px">受付（パークセンター）でスタッフにこのQRを見せてください<br/>読み取られると「達成状」が届きます</p>
+    </div>`
+FS.flowAdmin = (t) => `
+    <div style="position:absolute;inset:0;background:#f2f6fb"></div>
+    ${statusbar(t, true)}
+    <div class="adm">
+      <div class="adm-h">運営・景品受取</div>
+      <div class="adm-cam"><div class="adm-frame"></div><span>読み取りました</span></div>
+      <div class="adm-card">
+        <div class="adm-row"><b>うみねこ さん</b><small>参加者 No.0128</small></div>
+        <div class="adm-grid"><div><small>お宝</small><b>6 / 8</b></div><div><small>クリアタイム</small><b>2:41:08</b></div><div><small>受取</small><b class="ok">まだ</b></div></div>
+        <button class="btn btn-primary">受取済みにする（達成状を送る）</button>
+      </div>
+      <p class="adm-note">※ 運営画面（いまの「景品受取」）に、クリアタイムと「達成状を送る」を足した形</p>
+    </div>`
+const certButtons = `<div class="cert-actions" style="gap:8px"><button class="btn btn-primary">${ico.cam}記念写真を撮る</button><div style="display:flex;gap:8px"><button class="btn btn-book" style="height:46px;font-size:13.5px">${ico.book}ブックを開く</button><button class="btn btn-glass glass" style="height:46px;font-size:13.5px">${ico.save}スクショ用</button></div></div>`
+FS.flowCert = (t) => `
+    <div class="bg blur"></div><div class="scrim heavy"></div><div class="beams" style="top:300px"></div>${sparkles(24, 3)}
+    ${statusbar(t, false)}
+    <div class="cg" style="top:56px">
+      <p class="cg-k">CONGRATULATIONS</p>
+      <h1 class="cg-h">おめでとう！</h1>
+      <div class="award">
+        <div class="shine"></div>
+        <span class="aw-k">渋川からの挑戦状</span>
+        <b class="aw-t">達 成 状</b>
+        <em>うみねこ 殿</em>
+        <p>あなたは渋川の浜にかくれたお宝を見つけ出し<br/>みごと挑戦をやりとげたことをここに証します</p>
+        ${trophyRow('fc')}
+        <div class="aw-time"><small>クリアタイム</small><b>2:41:08</b><span>2026.11.3　10:18 → 12:59</span></div>
+        <span class="aw-stamp">受取済</span>
+      </div>
+    </div>
+    ${certButtons}`
+const photoCert = (t, mode) => `
+    <div class="cam" style="background:#000"><div class="feed" style="${PHOTOS[1]};inset:0"></div></div>
+    <div style="position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.45) 0%,rgba(0,0,0,0) 30%,rgba(0,0,0,0) 48%,rgba(0,0,0,.6) 100%)"></div>
+    ${mode === 'shot' ? '' : statusbar(t, false)}
+    <div class="pc-top"><p class="cg-k">CONGRATULATIONS</p><h1 class="cg-h" style="font-size:38px">おめでとう！</h1></div>
+    <div class="pc-card ${mode === 'shot' ? 'low' : ''}">
+      <div class="pc-l"><span class="aw-k">渋川からの挑戦状</span><b class="aw-t" style="font-size:22px">達 成 状</b><em>うみねこ 殿</em>${trophyRow('pc' + mode, 24)}</div>
+      <div class="pc-r"><small>クリアタイム</small><b>2:41:08</b><span>2026.11.3</span></div>
+    </div>
+    ${mode === 'normal' ? `<div class="cert-actions" style="gap:8px"><div style="display:flex;gap:8px"><button class="btn btn-glass glass" style="height:46px;font-size:13.5px;color:#fff">${ico.cam}撮り直す</button><button class="btn btn-glass glass" style="height:46px;font-size:13.5px;color:#fff">${ico.book}ブックへ</button></div><button class="btn btn-primary">${ico.save}ボタンを隠してスクショ</button></div>` : ''}
+    ${mode === 'shot' ? `<div class="toast">画面をタップするとボタンが戻ります<small>（2秒で消えます）</small></div>` : ''}
+    ${mode === 'back' ? `<div class="tapmark"></div><div class="cert-actions fadein" style="gap:8px"><div style="display:flex;gap:8px"><button class="btn btn-glass glass" style="height:46px;font-size:13.5px;color:#fff">${ico.cam}撮り直す</button><button class="btn btn-glass glass" style="height:46px;font-size:13.5px;color:#fff">${ico.book}ブックへ</button></div><button class="btn btn-primary">${ico.save}ボタンを隠してスクショ</button></div>` : ''}`
+FS.flowPhoto = (t) => photoCert(t, 'normal')
+FS.flowShot = (t) => photoCert(t, 'shot')
+FS.flowBack = (t) => photoCert(t, 'back')
+FS.flowCertShot = (t) => FS.flowCert(t).replace(certButtons, `<div class="toast">画面をタップするとボタンが戻ります<small>（2秒で消えます）</small></div>`)
+
 const DAY = THEMES[0], NIGHT = THEMES[2]
 const sec = (title, items, t) => `<section class="section"><div class="section-head"><h2>${title}</h2><span>${t.name}</span></div><div class="rail">${items.map(([k, name, desc]) => `<figure class="shot" style="margin:0"><div class="phone"><div class="screen t-${t.key}">${FS[k](t)}</div></div><figcaption><b>${name}</b>${desc}</figcaption></figure>`).join('')}</div></section>`
 const NEW = [
@@ -1080,6 +1178,7 @@ if (only) document.body.classList.add('export')
 const blocks = NEW.map(([title, items]) => sec(title, items, DAY))
 const fig = (k, name, t) => `<figure class="shot" style="margin:0"><div class="phone"><div class="screen t-${t.key}">${FS[k](t)}</div></div><figcaption><b>${name}</b></figcaption></figure>`
 blocks.push(`<section class="section"><div class="section-head"><h2>⑦ クリアの瞬間（夕方・夜）</h2></div><div class="rail">${fig('congrats', 'クリア画面（夕方）', THEMES[1])}${fig('congrats', 'クリア画面（夜）', NIGHT)}</div></section>`)
+blocks.push(sec('⑧ 達成状の流れ：全問クリア → 受付で読み込み → 達成状 → 記念写真', [['flowQR', '1. 全部のお宝を見つけた', '受取用のQRだけを大きく。受付でスタッフに見せる'], ['flowAdmin', '2. 運営が読み込む（運営側）', '「受取済みにする」で、参加者の画面に達成状が届く'], ['flowCert', '3. 達成状（QRはもう出さない）', 'おめでとう・達成状の文言・集めたお宝・クリアタイム・受取済の印。下にボタン'], ['flowCertShot', '3’. スクショ用に表示', 'ボタンを隠す。タップでボタンが戻る'], ['certcam', '4. 記念写真を撮る', '「達成」の札を入れて撮れる'], ['flowPhoto', '5. 写真入りの達成状', '撮った写真の上に、おめでとう・達成状・お宝・クリアタイム'], ['flowShot', '6. ボタンを隠した状態', 'このままスクショ。案内は2秒で消える'], ['flowBack', '7. 画面をタップ', 'ボタンがふわっと戻る']], DAY))
 const OLD = GROUPS.map(([title, items]) => sec(title, items, DAY))
 const all = [...blocks, ...OLD]
 document.getElementById('sections').innerHTML = only ? all[+only] : all.join('')
