@@ -191,11 +191,40 @@ export function GameProvider({ children }: { children: ReactNode }) {
   return DEMO ? <DemoProvider kind={DEMO}>{children}</DemoProvider> : <LiveProvider>{children}</LiveProvider>
 }
 
+// ---- テスト用の合言葉（unity ブランチだけ） ----
+// unity ブランチはテスト版なので、どの謎も「aaa」で正解にできる。
+// サーバー（Supabase）は本番版と共用のため、正解データには手を入れず、この端末の中だけで進んだことにする
+// （localStorage に保存。サーバー側の記録・クリア証明の発行には反映されない）。
+const TEST_PASS = 'aaa'
+const TEST_KEY = 'ts-test-progress'
+const isTestPass = (answer: string) => answer.normalize('NFKC').trim().toLowerCase() === TEST_PASS
+const RANK: Record<TreasureState, number> = { locked: 0, located: 1, found: 2, acquired: 3 }
+
+function readTestProgress(): Record<string, TreasureState> {
+  try {
+    return JSON.parse(localStorage.getItem(TEST_KEY) ?? '{}')
+  } catch {
+    return {}
+  }
+}
+
+function withTestProgress(me: MyState, test: Record<string, TreasureState>): MyState {
+  const ids = Object.keys(test)
+  if (!me.player || ids.length === 0) return me
+  const progress = { ...me.progress }
+  for (const id of ids) {
+    const cur = progress[id] ?? { treasure_id: id, state: 'locked' as TreasureState, locate_hints: 0, acquire_hints: 0 }
+    if (RANK[test[id]] > RANK[cur.state]) progress[id] = { ...cur, state: test[id] }
+  }
+  return { ...me, progress }
+}
+
 function LiveProvider({ children }: { children: ReactNode }) {
   const [content, setContent] = useState<Content | null>(null)
   const [me, setMe] = useState<MyState>(EMPTY)
   const [error, setError] = useState<string | null>(null)
   const [attempt, setAttempt] = useState(0)
+  const [testProgress, setTestProgress] = useState(readTestProgress)
 
   useEffect(() => {
     let alive = true
@@ -226,6 +255,18 @@ function LiveProvider({ children }: { children: ReactNode }) {
         await refresh()
       },
       async submitAnswer(treasureId, kind, answer) {
+        if (isTestPass(answer)) {
+          setTestProgress((t) => {
+            const next = { ...t, [treasureId]: kind === 'locate' ? ('located' as const) : ('acquired' as const) }
+            try {
+              localStorage.setItem(TEST_KEY, JSON.stringify(next))
+            } catch {
+              // 保存できなくても、この画面の間は進める
+            }
+            return next
+          })
+          return true
+        }
         const { data, error: e } = await supabase.rpc('submit_answer', { p_treasure: treasureId, p_kind: kind, p_answer: answer })
         if (e) throw e
         const ok = !!(data as { ok: boolean }).ok
@@ -259,6 +300,12 @@ function LiveProvider({ children }: { children: ReactNode }) {
       async leave() {
         await supabase.auth.signOut()
         setMe(EMPTY)
+        setTestProgress({})
+        try {
+          localStorage.removeItem(TEST_KEY)
+        } catch {
+          // 消せなくても次の参加者のサーバー記録には影響しない
+        }
       },
     }),
     [refresh],
@@ -286,7 +333,7 @@ function LiveProvider({ children }: { children: ReactNode }) {
       </div>
     )
   }
-  return <Ctx.Provider value={{ content, me, ...api }}>{children}</Ctx.Provider>
+  return <Ctx.Provider value={{ content, me: withTestProgress(me, testProgress), ...api }}>{children}</Ctx.Provider>
 }
 
 export function useGame(): GameCtx {
