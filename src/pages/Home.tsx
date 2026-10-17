@@ -3,7 +3,6 @@ import { Link } from 'react-router-dom'
 import AreaMap, { type MapPin } from '../components/AreaMap'
 import { StatusChip } from '../components/Common'
 import { HelpIcon } from '../components/Icons'
-import TabBar from '../components/TabBar'
 import { acquiredCount, progressOf, useGame, type Treasure } from '../lib/game'
 
 export default function Home() {
@@ -38,7 +37,7 @@ export default function Home() {
   const lockedInArea = inArea.filter((t) => progressOf(me, t.id).state === 'locked')
 
   return (
-    <div className="screen with-tabbar home">
+    <div className="screen home">
       <header className="home-header">
         <h1>{me.player?.nickname} さん</h1>
         <Link to="/help" className="icon-btn" aria-label="遊び方・ヘルプ">
@@ -124,7 +123,6 @@ export default function Home() {
           </>
         )}
       </section>
-      <TabBar />
     </div>
   )
 }

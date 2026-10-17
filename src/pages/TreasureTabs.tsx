@@ -1,9 +1,8 @@
 import QRCode from 'qrcode'
 import { useEffect, useState } from 'react'
 import { Link, NavLink } from 'react-router-dom'
-import { StatusChip, stateLabel } from '../components/Common'
+import { BackHeader, StatusChip, stateLabel } from '../components/Common'
 import { ChestIcon, LockIcon, PinIcon } from '../components/Icons'
-import TabBar from '../components/TabBar'
 import { acquiredCount, areaCounts, progressOf, useGame, type Treasure, type TreasureState } from '../lib/game'
 import { errorMessage } from '../lib/supabase'
 
@@ -11,12 +10,15 @@ function TreasureHeader() {
   const { me, content } = useGame()
   return (
     <>
-      <header className="between baseline">
-        <h1 className="h1">お宝</h1>
-        <span className="num-cobalt bold">
-          {acquiredCount(me)} / {content.treasures.length} 獲得
-        </span>
-      </header>
+      <BackHeader
+        title="お宝"
+        to="/home"
+        right={
+          <span className="num-cobalt bold">
+            {acquiredCount(me)} / {content.treasures.length} 獲得
+          </span>
+        }
+      />
       <nav className="segmented seg-lg" aria-label="お宝の表示切替">
         <NavLink to="/treasures" className={({ isActive }) => (isActive ? 'on' : '')}>
           コレクション
@@ -41,7 +43,7 @@ export function Collection() {
   const areas = content.areas.filter((a) => filter === 'all' || a.id === filter)
 
   return (
-    <div className="screen with-tabbar">
+    <div className="screen">
       <div className="page stack-14">
         <TreasureHeader />
         <div className="chips" role="group" aria-label="エリアで絞り込み">
@@ -98,7 +100,6 @@ export function Collection() {
           )
         })}
       </div>
-      <TabBar />
     </div>
   )
 }
@@ -142,7 +143,7 @@ export function Certificate() {
   }, [cleared, me.player, me.redeemed, slot, issueCertificate])
 
   return (
-    <div className="screen with-tabbar">
+    <div className="screen">
       <div className="page stack-14">
         <TreasureHeader />
         {cleared && me.player ? (
@@ -209,7 +210,6 @@ export function Certificate() {
           </section>
         )}
       </div>
-      <TabBar />
     </div>
   )
 }
