@@ -54,7 +54,8 @@ function lettering(chars, o) {
     const t = `translate(${it.cx} ${it.cy}) rotate(${it.r}) scale(${it.sc})`
     if (typeof it.c === 'object') {
       const strokeW = { shadow: size * 0.13 + outW, out: size * 0.13 + outW, white: size * 0.13 + whiteW, fill: size * 0.13 }[layer]
-      return `<g transform="${t}" stroke-width="${strokeW}">${GLYPHS[it.c.g](size)}</g>`
+      // 絵の字は線で描くので、中の色の層では線の色を塗りの色にする
+      return `<g transform="${t}" stroke-width="${strokeW}"${layer === 'fill' ? ` stroke="url(#${id}g)"` : ''}>${GLYPHS[it.c.g](size)}</g>`
     }
     return `<text transform="${t}" text-anchor="middle" dominant-baseline="central" font-family="${o.font ?? "'Zen Maru Gothic'"}" font-weight="900" font-size="${size}">${it.c}</text>`
   }
@@ -278,7 +279,23 @@ function mapDiorama(x, y) {
 // =====================================================================
 // 案A：昼・海と開いた宝箱（参考のチラシに近い構図）
 // =====================================================================
-function posterA(mapKind = 'chest') {
+// 案A のタイトル。tv=0 は元のまま、1〜3 は読みやすくした微調整
+function titleA(tv) {
+  const base1 = { x: 140, y: 360, size: 168, gap: 0.92, rot: 6, fill: ['#ffffff', '#bfe6ff'], outline: '#16336b', outW: 34, whiteW: 18, rough: 4 }
+  const base2 = { x: 210, y: 590, size: 290, gap: 0.98, rot: 5, fill: ['#ffe680', '#f29a1f'], outline: '#6e2a0c', outW: 46, whiteW: 24, rough: 5 }
+  const t1 = ['渋', '川', 'か', 'ら', { g: 'wave' }], t2 = ['挑', '戦', '状']
+  // 1：線のゆらぎを弱め、字の間を少し空け、光の点線を消す（形はほぼそのまま）
+  const v1a = { ...base1, rough: 2, gap: 0.97, x: 128, shine: false }, v1b = { ...base2, rough: 2.5, gap: 1.02, x: 196, shine: false }
+  // 2：1 に加えて、字の中の色を濃くして白い縁との差をはっきり（渋川からの＝空色、挑戦状＝濃いオレンジ）
+  const v2a = { ...v1a, fill: ['#e8f6ff', '#7cc2f5'], edge: '#16336b' }, v2b = { ...v1b, fill: ['#ffd84a', '#ee7a12'], edge: '#6e2a0c' }
+  // 3：1 に加えて、傾きを小さくして字の並びをそろえ、縁取りを少し細くして字の形を見やすく
+  const v3a = { ...v1a, rot: 2.5, scale: 0.02, dy: 4, outW: 28, whiteW: 14 }, v3b = { ...v1b, rot: 2.5, scale: 0.02, dy: 6, outW: 40, whiteW: 20 }
+  const pick = [[base1, base2], [v1a, v1b], [v2a, v2b], [v3a, v3b]][tv]
+  seed = 11
+  return lettering(t1, pick[0]) + lettering(t2, pick[1])
+}
+
+function posterA(mapKind = 'chest', tv = 0) {
   seed = 11
   const W = 1240, H = 1754
   return `<svg class="poster" viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg">
@@ -327,8 +344,7 @@ function posterA(mapKind = 'chest') {
     ${lettering([{ g: 'keys' }], { x: 352, y: 40, size: 44, rot: 0, fill: ['#ffd36b', '#ffd36b'], outline: '#7a2e10', outW: 8, white: false, rough: 1, shine: false })}
     ${lettering(['宝', '探', 'し'], { x: 410, y: 40, size: 50, gap: 0.92, rot: 4, fill: ['#fff', '#fff3d0'], outline: '#7a2e10', outW: 8, white: false, rough: 1.5, shine: false })}
   </g>
-  ${lettering(['渋', '川', 'か', 'ら', { g: 'wave' }], { x: 140, y: 360, size: 168, gap: 0.92, rot: 6, fill: ['#ffffff', '#bfe6ff'], outline: '#16336b', outW: 34, whiteW: 18, rough: 4 })}
-  ${lettering(['挑', '戦', '状'], { x: 210, y: 590, size: 290, gap: 0.98, rot: 5, fill: ['#ffe680', '#f29a1f'], outline: '#6e2a0c', outW: 46, whiteW: 24, rough: 5 })}
+  ${titleA(tv)}
   ${[[1080, 420, 2.2, '#fff'], [1150, 560, 1.4, '#ffe680'], [90, 520, 1.6, '#fff']].map(([x, y, s, c]) => sparkle(x, y, s, c)).join('')}
   <!-- 日付・参加無料 -->
   <rect x="40" y="1236" width="1160" height="200" rx="30" fill="rgba(255,255,255,.55)"/>
@@ -451,7 +467,7 @@ function posterC() {
   </svg>`
 }
 
-const posters = [() => posterA('scroll'), () => posterA('card'), () => posterA('diorama'), () => posterA('chest'), posterB, posterC]
+const posters = [() => posterA('scroll', 1), () => posterA('scroll', 2), () => posterA('scroll', 3), () => posterA('scroll'), () => posterA('card'), () => posterA('diorama'), () => posterA('chest'), posterB, posterC]
 const p = new URLSearchParams(location.search).get('p')
 if (p !== null) document.body.classList.add('one')
 document.getElementById('out').innerHTML = p !== null ? posters[+p]() : posters.map((f) => f()).join('')
