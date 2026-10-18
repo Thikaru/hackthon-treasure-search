@@ -19,7 +19,7 @@ export function Collection() {
   const { me, content } = useGame()
   const [filter, setFilter] = useState<string>('all')
   // 飾り棚に出すのは「渋川」「王子ヶ岳」だけ（たまの湯は出さない。ホームのタブと同じ）
-  const shown = content.areas.filter((a) => a.id !== 'spotB')
+  const shown = content.areas
   const areas = shown.filter((a) => filter === 'all' || a.id === filter)
   const got = acquiredCount(me)
   const clearCount = content.settings.clearCount

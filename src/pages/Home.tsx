@@ -10,14 +10,12 @@ import { useTimeOfDay } from '../lib/useTimeOfDay'
 import { GuidepostRow } from './Guideposts'
 
 // 地図に出すのは QR を読んだお宝（宝箱発見・獲得）だけ。場所はヒントの画像・説明で探す
-// ヘッダーのエリア切り替えに出すのは「渋川」「王子ヶ岳」だけ（たまの湯は出さない）
-const HIDDEN_TABS = new Set(['spotB'])
 const onMap = (st: string) => st === 'found' || st === 'acquired'
 
 export default function Home() {
   const { me, content } = useGame()
   const { treasures, settings } = content
-  const areas = content.areas.filter((a) => !HIDDEN_TABS.has(a.id))
+  const { areas } = content
   const photos = usePhotos()
   const [lightbox, setLightbox] = useState<number | null>(null)
   const [capture, setCapture] = useState<Treasure | null>(null)

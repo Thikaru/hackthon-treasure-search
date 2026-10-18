@@ -96,6 +96,16 @@ interface GameCtx {
 
 const Ctx = createContext<GameCtx | null>(null)
 
+// unity ブランチでは「たまの湯」をイベントから外す（地図のタブ・飾り棚・道標の一覧・クリアの数え方のすべて）。
+// データベースは本番版と共用なので、データは変えずにこの画面側で読み込むときに外す
+export const HIDDEN_AREAS = new Set(['spotB'])
+
+/** 外したエリアのお宝の進み具合も数えない（獲得済みでもクリアの数に入れない） */
+function onlyShown(me: MyState, content: Content): MyState {
+  const ids = new Set(content.treasures.map((t) => t.id))
+  return { ...me, progress: Object.fromEntries(Object.entries(me.progress).filter(([id]) => ids.has(id))) }
+}
+
 const DEFAULT_SETTINGS: Settings = {
   guidepostMode: 'sequential',
   title: '渋川からの挑戦状',
@@ -117,8 +127,8 @@ async function loadContent(): Promise<Content> {
   if (s.error) throw s.error
   const map = Object.fromEntries((s.data as { key: string; value: string }[]).map((r) => [r.key, r.value]))
   return {
-    areas: a.data as Area[],
-    treasures: t.data as Treasure[],
+    areas: (a.data as Area[]).filter((x) => !HIDDEN_AREAS.has(x.id)),
+    treasures: (t.data as Treasure[]).filter((x) => !HIDDEN_AREAS.has(x.area_id)),
     settings: {
       guidepostMode: map.guidepost_mode === 'all' ? 'all' : 'sequential',
       title: map.title ?? DEFAULT_SETTINGS.title,
@@ -163,13 +173,18 @@ async function ensureSession() {
 const DEMO = new URLSearchParams(window.location.hash.split('?')[1] ?? '').get('demo') ?? new URLSearchParams(window.location.search).get('demo')
 export const isDemo = () => DEMO !== null
 
+function demoShown(kind: string): Content {
+  const c = kind === 'seq' ? { ...demo.demoContent, settings: { ...demo.demoContent.settings, guidepostMode: 'sequential' as const } } : demo.demoContent
+  return { ...c, areas: c.areas.filter((a) => !HIDDEN_AREAS.has(a.id)), treasures: c.treasures.filter((t) => !HIDDEN_AREAS.has(t.area_id)) }
+}
+
 function DemoProvider({ kind, children }: { kind: string; children: ReactNode }) {
   const [me, setMe] = useState<MyState>(() => ({ player: demo.demoPlayer, progress: demo.demoProgress(kind), placeHints: demo.demoHints, redeemed: kind === 'redeemed' }))
   const set = (id: string, patch: Partial<TreasureProgress>) =>
     setMe((m) => ({ ...m, progress: { ...m.progress, [id]: { ...(m.progress[id] ?? { treasure_id: id, state: 'locked', locate_hints: 0, acquire_hints: 0 }), ...patch } } }))
   const value: GameCtx = {
-    content: kind === 'seq' ? { ...demo.demoContent, settings: { ...demo.demoContent.settings, guidepostMode: 'sequential' } } : demo.demoContent,
-    me,
+    content: demoShown(kind),
+    me: onlyShown(me, demoShown(kind)),
     refresh: async () => undefined,
     register: async () => undefined,
     async submitAnswer(id, k, answer) {
@@ -351,7 +366,7 @@ function LiveProvider({ children }: { children: ReactNode }) {
       </div>
     )
   }
-  return <Ctx.Provider value={{ content, me: withTestProgress(me, testProgress), ...api }}>{children}</Ctx.Provider>
+  return <Ctx.Provider value={{ content, me: onlyShown(withTestProgress(me, testProgress), content), ...api }}>{children}</Ctx.Provider>
 }
 
 export function useGame(): GameCtx {
