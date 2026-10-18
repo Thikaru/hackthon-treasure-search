@@ -298,7 +298,7 @@ function titleA(tv) {
     // 漢字（渋川）は大きく、ひらがな（からの）は小さく詰めて、下をそろえる
     const k = { ...v2a, size: 166, gap: 1.0, x: 124 }
     const kanaSize = 132
-    const kana = { ...v2a, size: kanaSize, gap: 0.9, x: k.x + k.size * k.gap * 2 - k.size * 0.5 + kanaSize * 0.5 - 6, y: k.y + (k.size - kanaSize) / 2, outW: 28, whiteW: 15 }
+    const kana = { ...v2a, size: kanaSize, gap: 0.9, x: k.x + k.size * k.gap * 2 - k.size * 0.5 + kanaSize * 0.5 - 6, y: k.y + (k.size - kanaSize) / 2 - 14, outW: 28, whiteW: 15 }
     return lettering(['渋', '川'], k) + lettering(['か', 'ら', 'の'], kana) + lettering(t2, pick[1])
   }
   return lettering(t1, pick[0]) + lettering(t2, pick[1])
