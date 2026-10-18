@@ -18,7 +18,9 @@ function linkFor(t: Treasure, st: TreasureState) {
 export function Collection() {
   const { me, content } = useGame()
   const [filter, setFilter] = useState<string>('all')
-  const areas = content.areas.filter((a) => filter === 'all' || a.id === filter)
+  // 飾り棚に出すのは「渋川」「王子ヶ岳」だけ（たまの湯は出さない。ホームのタブと同じ）
+  const shown = content.areas.filter((a) => a.id !== 'spotB')
+  const areas = shown.filter((a) => filter === 'all' || a.id === filter)
   const got = acquiredCount(me)
   const clearCount = content.settings.clearCount
 
@@ -30,7 +32,7 @@ export function Collection() {
           <button type="button" aria-pressed={filter === 'all'} className={filter === 'all' ? 'on' : ''} onClick={() => setFilter('all')}>
             すべて
           </button>
-          {content.areas.map((a) => (
+          {shown.map((a) => (
             <button key={a.id} type="button" aria-pressed={filter === a.id} className={filter === a.id ? 'on' : ''} onClick={() => setFilter(a.id)}>
               {a.short_name}
             </button>
