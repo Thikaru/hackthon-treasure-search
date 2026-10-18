@@ -26,4 +26,4 @@
 | クリア証明（まだクリアしていない） | https://aipapagames.com/shibukawa/#/certificate?demo=1 |
 | 全部見つけた（受取用QR） | https://aipapagames.com/shibukawa/#/certificate?demo=clear |
 | 達成状（受付で読み取られた後） | https://aipapagames.com/shibukawa/#/certificate?demo=redeemed |
-| 全部見つけた（合言葉aaaで進めた＝テスト用QR） | https://aipapagames.com/shibukawa/#/certificate?demo=clearlocal |
+| 全部見つけた（合言葉aaaで進めた） | https://aipapagames.com/shibukawa/#/certificate?demo=clearlocal |

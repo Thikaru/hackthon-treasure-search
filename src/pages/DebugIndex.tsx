@@ -38,7 +38,7 @@ export const DEBUG_PAGES: { group: string; items: [string, string][] }[] = [
       ['お宝の飾り棚', `/treasures?${D}=1`],
       ['クリア証明（まだクリアしていない）', `/certificate?${D}=1`],
       ['全部見つけた（受取用QR）', `/certificate?${D}=clear`],
-      ['全部見つけた（合言葉aaaで進めた＝テスト用QR）', `/certificate?${D}=clearlocal`],
+      ['全部見つけた（合言葉aaaで進めた）', `/certificate?${D}=clearlocal`],
       ['達成状（受付で読み取られた後）', `/certificate?${D}=redeemed`],
     ],
   },
