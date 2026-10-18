@@ -58,6 +58,8 @@ export interface TreasureProgress {
   state: TreasureState
   locate_hints: number
   acquire_hints: number
+  /** 獲得した時刻（サーバーの記録。クリアタイムの計算に使う） */
+  acquired_at?: string | null
 }
 
 export interface Content {
@@ -198,6 +200,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
 // （localStorage に保存。サーバー側の記録・クリア証明の発行には反映されない）。
 const TEST_PASS = 'aaa'
 const TEST_KEY = 'ts-test-progress'
+const TEST_TIME_KEY = 'ts-test-times'
 const isTestPass = (answer: string) => answer.normalize('NFKC').trim().toLowerCase() === TEST_PASS
 const RANK: Record<TreasureState, number> = { locked: 0, located: 1, found: 2, acquired: 3 }
 
@@ -209,13 +212,21 @@ function readTestProgress(): Record<string, TreasureState> {
   }
 }
 
+function testTimes(): Record<string, string> {
+  try {
+    return JSON.parse(localStorage.getItem(TEST_TIME_KEY) ?? '{}')
+  } catch {
+    return {}
+  }
+}
+
 function withTestProgress(me: MyState, test: Record<string, TreasureState>): MyState {
   const ids = Object.keys(test)
   if (!me.player || ids.length === 0) return me
   const progress = { ...me.progress }
   for (const id of ids) {
     const cur = progress[id] ?? { treasure_id: id, state: 'locked' as TreasureState, locate_hints: 0, acquire_hints: 0 }
-    if (RANK[test[id]] > RANK[cur.state]) progress[id] = { ...cur, state: test[id] }
+    if (RANK[test[id]] > RANK[cur.state]) progress[id] = { ...cur, state: test[id], acquired_at: cur.acquired_at ?? testTimes()[id] ?? null }
   }
   return { ...me, progress }
 }
@@ -261,6 +272,7 @@ function LiveProvider({ children }: { children: ReactNode }) {
             const next = { ...t, [treasureId]: kind === 'locate' ? ('located' as const) : ('acquired' as const) }
             try {
               localStorage.setItem(TEST_KEY, JSON.stringify(next))
+              if (kind === 'acquire') localStorage.setItem(TEST_TIME_KEY, JSON.stringify({ ...testTimes(), [treasureId]: new Date().toISOString() }))
             } catch {
               // 保存できなくても、この画面の間は進める
             }
@@ -305,6 +317,7 @@ function LiveProvider({ children }: { children: ReactNode }) {
         await clearPhotos()
         try {
           localStorage.removeItem(TEST_KEY)
+          localStorage.removeItem(TEST_TIME_KEY)
         } catch {
           // 消せなくても次の参加者のサーバー記録には影響しない
         }
@@ -399,4 +412,23 @@ export function takePendingToken(): string | null {
   } catch {
     return null
   }
+}
+
+/** クリアタイム：参加登録から、規定数めのお宝を獲得するまで（まだなら null） */
+export function clearTime(me: MyState, content: Content): { start: Date; end: Date; ms: number } | null {
+  if (!me.player) return null
+  const times = Object.values(me.progress)
+    .filter((p) => p.state === 'acquired' && p.acquired_at)
+    .map((p) => new Date(p.acquired_at!).getTime())
+    .sort((a, b) => a - b)
+  const n = content.settings.clearCount
+  if (times.length < n) return null
+  const start = new Date(me.player.created_at)
+  const end = new Date(times[n - 1])
+  return { start, end, ms: Math.max(0, end.getTime() - start.getTime()) }
+}
+
+export const formatDuration = (ms: number) => {
+  const s = Math.floor(ms / 1000)
+  return `${Math.floor(s / 3600)}:${String(Math.floor((s % 3600) / 60)).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`
 }

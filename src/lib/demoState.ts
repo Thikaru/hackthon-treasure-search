@@ -34,7 +34,10 @@ export const demoContent: Content = {
   settings: { guidepostMode: 'all', title: '渋川からの挑戦状', subtitle: '宝探し × 謎解き', clearCount: 6, prizeName: 'オリジナル記念品（仮）', receptionPlace: 'パークセンター（受付）', contact: '' },
 }
 
-export const demoPlayer: Player = { player_no: 128, nickname: 'うみねこ', transfer_code: 'DEMO-12345', status: 'active', created_at: new Date().toISOString() }
+// デモ：10:18 に参加登録 → 獲得の時刻（分）。6個めの獲得でクリアタイム 2:41:08
+const DEMO_START = new Date(new Date().setHours(10, 18, 0, 0)).getTime()
+const ACQ_MIN: Record<string, number> = { t03: 73, t02: 95, t01: 113, t04: 147, t05: 160, t06: 161.1333, t07: 175, t08: 190 }
+export const demoPlayer: Player = { player_no: 128, nickname: 'うみねこ', transfer_code: 'DEMO-12345', status: 'active', created_at: new Date(DEMO_START).toISOString() }
 
 export function demoProgress(kind: string): Record<string, TreasureProgress> {
   const states: Record<string, TreasureState> =
@@ -44,7 +47,7 @@ export function demoProgress(kind: string): Record<string, TreasureProgress> {
       ? { t01: 'acquired', t02: 'acquired', t03: 'acquired', t04: 'acquired', t05: 'acquired', t06: 'acquired', t07: 'found' }
       : { t01: 'acquired', t02: 'found', t03: 'locked', t04: 'located', t05: 'acquired', t06: 'acquired', t07: 'found' }
   return Object.fromEntries(
-    Object.entries(states).map(([id, state]) => [id, { treasure_id: id, state, locate_hints: id === 't03' ? 1 : 0, acquire_hints: 0 } as TreasureProgress]),
+    Object.entries(states).map(([id, state]) => [id, { treasure_id: id, state, locate_hints: id === 't03' ? 1 : 0, acquire_hints: 0, acquired_at: state === 'acquired' ? new Date(DEMO_START + ACQ_MIN[id] * 60000).toISOString() : null } as TreasureProgress]),
   )
 }
 

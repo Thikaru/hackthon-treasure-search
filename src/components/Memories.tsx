@@ -17,7 +17,7 @@ export function CameraIcon({ size = 20 }: { size?: number }) {
  * 写真を撮る流れ：カメラ（スマホ標準）で撮る → ポラロイドで確認 → 「思い出に残す」で保存。
  * open が true になるとすぐカメラを開く。やめたら onClose。
  */
-export function PhotoCapture({ treasure, open, onClose }: { treasure: Treasure; open: boolean; onClose: () => void }) {
+export function PhotoCapture({ treasure, open, onClose, note }: { treasure: Pick<Treasure, 'id' | 'no' | 'name'>; open: boolean; onClose: () => void; note?: string }) {
   const input = useRef<HTMLInputElement>(null)
   const [file, setFile] = useState<File | null>(null)
   const [preview, setPreview] = useState<string | null>(null)
@@ -69,12 +69,13 @@ export function PhotoCapture({ treasure, open, onClose }: { treasure: Treasure; 
             <div className="cap">
               {treasure.name}
               <small>
-                No.{treasure.no}・{timeLabel(Date.now())}
+                {treasure.no ? `No.${treasure.no}・` : ''}
+                {timeLabel(Date.now())}
               </small>
             </div>
           </div>
           <div className="memo-panel glass glass-strong">
-            <p className="small center">地図の「{treasure.name}」の場所に貼られます（写真はこの端末の中だけに保存されます）</p>
+            <p className="small center">{note ?? `地図の「${treasure.name}」の場所に貼られます`}（写真はこの端末の中だけに保存されます）</p>
             <button
               type="button"
               className="btn btn-primary"
