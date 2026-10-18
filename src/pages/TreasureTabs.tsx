@@ -106,6 +106,15 @@ export function Certificate() {
   const got = acquiredCount(me)
   const { clearCount } = content.settings
   const cleared = got >= clearCount
+  const [testRedeemed, setTestRedeemedState] = useState(readTestRedeemed)
+  const setTestRedeemed = (v: boolean) => {
+    try {
+      localStorage.setItem(TEST_REDEEM_KEY, v ? '1' : '0')
+    } catch {
+      // 保存できなくても、この画面の間は進める
+    }
+    setTestRedeemedState(v)
+  }
 
   // クリア後、受付で読み取られる（受取済みになる）のを待つ。読み取られたら自動で達成状に切り替わる
   const waiting = cleared && !!me.player && !me.redeemed
@@ -137,16 +146,27 @@ export function Certificate() {
       </div>
     )
   }
-  return me.redeemed ? <Award /> : <ClearQR />
+  return me.redeemed || testRedeemed ? <Award /> : <ClearQR onTestRedeem={() => setTestRedeemed(true)} />
+}
+
+// テスト版だけ：受付で読み取られたことにする（この端末の中だけ）。合言葉「aaa」で進めた人はサーバーに記録がないため
+const TEST_REDEEM_KEY = 'ts-test-redeemed'
+function readTestRedeemed() {
+  try {
+    return localStorage.getItem(TEST_REDEEM_KEY) === '1'
+  } catch {
+    return false
+  }
 }
 
 /** 全部のお宝を見つけた：受付で見せる受取用QR（30秒ごとに新しくなる） */
-function ClearQR() {
+function ClearQR({ onTestRedeem }: { onTestRedeem: () => void }) {
   const { me, content, issueCertificate } = useGame()
   const now = useClock()
   const ct = clearTime(me, content)
   const [qr, setQr] = useState('')
   const [err, setErr] = useState('')
+  const [test, setTest] = useState(false)
   const slot = Math.floor(now.getTime() / REFRESH_MS)
 
   useEffect(() => {
@@ -158,11 +178,19 @@ function ClearQR() {
         setQr(url)
         setErr('')
       })
-      .catch((e) => alive && setErr(errorMessage(e)))
+      .catch((e) => {
+        if (!alive) return
+        // サーバーにクリアの記録がない（合言葉「aaa」で進めたテスト）ときは、テスト用のQRを出す（受付では読み取れない）
+        if (String(e?.message ?? e).includes('not_cleared')) {
+          setTest(true)
+          setErr('')
+          QRCode.toDataURL(`TKNZ2|TEST-${me.player?.player_no ?? 0}-${slot}`, { margin: 1, width: 360, color: { dark: '#2a1c08', light: '#FFFFFF' } }).then((u) => alive && setQr(u))
+        } else setErr(errorMessage(e))
+      })
     return () => {
       alive = false
     }
-  }, [slot, issueCertificate])
+  }, [slot, issueCertificate, me.player?.player_no])
 
   return (
     <div className="screen clear-screen">
@@ -186,6 +214,15 @@ function ClearQR() {
           </span>
         </div>
         {err && <p className="form-msg">{err}</p>}
+        {test && (
+          <div className="clr-test">
+            <b>テスト用のQRです</b>
+            <span>合言葉「aaa」で進めたため、サーバーにクリアの記録がありません。受付では読み取れません。</span>
+            <button type="button" className="btn btn-glass" onClick={onTestRedeem}>
+              （テスト）受付で読み取られたことにする
+            </button>
+          </div>
+        )}
         <p className="clr-note">
           {content.settings.receptionPlace}でスタッフにこのQRを見せてください。
           <br />

@@ -43,7 +43,7 @@ export function demoProgress(kind: string): Record<string, TreasureProgress> {
   const states: Record<string, TreasureState> =
     kind === 'pins'
       ? { t01: 'acquired', t02: 'found', t03: 'found', t04: 'acquired', t05: 'found', t06: 'acquired', t07: 'found', t08: 'found' }
-      : kind === 'clear' || kind === 'redeemed'
+      : kind === 'clear' || kind === 'redeemed' || kind === 'clearlocal'
       ? { t01: 'acquired', t02: 'acquired', t03: 'acquired', t04: 'acquired', t05: 'acquired', t06: 'acquired', t07: 'found' }
       : { t01: 'acquired', t02: 'found', t03: 'locked', t04: 'located', t05: 'acquired', t06: 'acquired', t07: 'found' }
   return Object.fromEntries(

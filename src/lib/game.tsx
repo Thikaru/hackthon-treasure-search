@@ -212,7 +212,11 @@ function DemoProvider({ kind, children }: { kind: string; children: ReactNode })
       set('t03', { state: 'found' })
       return { ok: true, treasure_id: 't03', state: 'found' }
     },
-    issueCertificate: async () => ({ token: 'demo-' + Date.now(), expires_at: '' }),
+    issueCertificate: async () => {
+      // ?demo=clearlocal：合言葉「aaa」で進めて、サーバーにクリアの記録がない状態の再現
+      if (kind === 'clearlocal') throw new Error('not_cleared')
+      return { token: 'demo-' + Date.now(), expires_at: '' }
+    },
     restore: async () => false,
     leave: async () => undefined,
   }
@@ -347,6 +351,7 @@ function LiveProvider({ children }: { children: ReactNode }) {
         try {
           localStorage.removeItem(TEST_KEY)
           localStorage.removeItem(TEST_TIME_KEY)
+          localStorage.removeItem('ts-test-redeemed')
         } catch {
           // 消せなくても次の参加者のサーバー記録には影響しない
         }
