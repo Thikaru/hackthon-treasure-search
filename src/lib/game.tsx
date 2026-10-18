@@ -158,7 +158,10 @@ async function ensureSession() {
 }
 
 /** 開発時のデモ（?demo=1 / ?demo=clear）。Supabase に触れずに全画面を確かめる */
-const DEMO = import.meta.env.DEV ? new URLSearchParams(window.location.hash.split('?')[1] ?? '').get('demo') ?? new URLSearchParams(window.location.search).get('demo') : null
+// unity ブランチはテスト版なので、公開版でも URL に ?demo=… を付けるとデモで開ける（デバッグ用。本番に入れるときは外す）。
+// 一度デモで開くと、再読み込みするまでデモのまま画面を行き来できる
+const DEMO = new URLSearchParams(window.location.hash.split('?')[1] ?? '').get('demo') ?? new URLSearchParams(window.location.search).get('demo')
+export const isDemo = () => DEMO !== null
 
 function DemoProvider({ kind, children }: { kind: string; children: ReactNode }) {
   const [me, setMe] = useState<MyState>(() => ({ player: demo.demoPlayer, progress: demo.demoProgress(kind), placeHints: demo.demoHints, redeemed: kind === 'redeemed' }))

@@ -12,6 +12,7 @@ import { useTimeOfDay } from './lib/useTimeOfDay'
 import Acquired from './pages/Acquired'
 import Found from './pages/Found'
 import Guideposts from './pages/Guideposts'
+import DebugIndex from './pages/DebugIndex'
 import Help from './pages/Help'
 import Home from './pages/Home'
 import LocatePuzzle from './pages/LocatePuzzle'
@@ -56,6 +57,7 @@ function PlayerRoutes() {
         <Route path="/" element={<Title />} />
         <Route path="/register" element={<Register />} />
         <Route path="/help" element={<Help />} />
+        <Route path="/debug" element={<DebugIndex />} />
         <Route path="/t/:token" element={<TokenResolve />} />
         <Route path="/home" element={P(<Home />)} />
         <Route path="/guideposts" element={P(<Guideposts />)} />
