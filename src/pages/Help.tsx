@@ -28,7 +28,7 @@ export default function Help() {
               <b>鍵のかかった宝箱の謎</b>を解くと、お宝ゲット（QRを読んだ後はどこからでも回答できる）
             </li>
             <li className="accent">
-              {clearCount}個集めたら<b>クリア証明</b>を受付で見せて景品と交換
+              渋川の{clearCount}個のお宝を全部集めたら<b>クリア証明</b>を受付で見せて景品と交換
             </li>
           </ol>
         </section>

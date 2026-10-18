@@ -100,6 +100,17 @@ const Ctx = createContext<GameCtx | null>(null)
 // データベースは本番版と共用なので、データは変えずにこの画面側で読み込むときに外す
 export const HIDDEN_AREAS = new Set(['spotB'])
 
+// いったん「渋川（砂浜エリア）の5問を全部獲得したらクリア」にする（王子ヶ岳のお宝は遊べるが、クリアの数には入れない）
+export const CLEAR_AREAS = new Set(['sand'])
+let countedIds = new Set<string>()
+
+/** クリアの数え方を画面側で上書きする：対象はクリア対象エリアのお宝だけ、必要数はその全部 */
+function withClearRule(content: Content): Content {
+  const counted = content.treasures.filter((t) => CLEAR_AREAS.has(t.area_id))
+  countedIds = new Set(counted.map((t) => t.id))
+  return { ...content, settings: { ...content.settings, clearCount: counted.length } }
+}
+
 /** 外したエリアのお宝の進み具合も数えない（獲得済みでもクリアの数に入れない） */
 function onlyShown(me: MyState, content: Content): MyState {
   const ids = new Set(content.treasures.map((t) => t.id))
@@ -175,7 +186,7 @@ export const isDemo = () => DEMO !== null
 
 function demoShown(kind: string): Content {
   const c = kind === 'seq' ? { ...demo.demoContent, settings: { ...demo.demoContent.settings, guidepostMode: 'sequential' as const } } : demo.demoContent
-  return { ...c, areas: c.areas.filter((a) => !HIDDEN_AREAS.has(a.id)), treasures: c.treasures.filter((t) => !HIDDEN_AREAS.has(t.area_id)) }
+  return withClearRule({ ...c, areas: c.areas.filter((a) => !HIDDEN_AREAS.has(a.id)), treasures: c.treasures.filter((t) => !HIDDEN_AREAS.has(t.area_id)) })
 }
 
 function DemoProvider({ kind, children }: { kind: string; children: ReactNode }) {
@@ -262,7 +273,7 @@ function LiveProvider({ children }: { children: ReactNode }) {
     Promise.all([loadContent(), loadMe()])
       .then(([c, m]) => {
         if (!alive) return
-        setContent(c)
+        setContent(withClearRule(c))
         setMe(m)
       })
       .catch((e) => alive && setError(String(e?.message ?? e)))
@@ -382,7 +393,7 @@ export function progressOf(me: MyState, id: string): TreasureProgress {
 }
 
 export function acquiredCount(me: MyState) {
-  return Object.values(me.progress).filter((p) => p.state === 'acquired').length
+  return Object.values(me.progress).filter((p) => p.state === 'acquired' && (countedIds.size === 0 || countedIds.has(p.treasure_id))).length
 }
 
 export function areaCounts(me: MyState, content: Content, areaId: AreaId) {
@@ -436,7 +447,7 @@ export function takePendingToken(): string | null {
 export function clearTime(me: MyState, content: Content): { start: Date; end: Date; ms: number } | null {
   if (!me.player) return null
   const times = Object.values(me.progress)
-    .filter((p) => p.state === 'acquired' && p.acquired_at)
+    .filter((p) => p.state === 'acquired' && p.acquired_at && (countedIds.size === 0 || countedIds.has(p.treasure_id)))
     .map((p) => new Date(p.acquired_at!).getTime())
     .sort((a, b) => a - b)
   const n = content.settings.clearCount
